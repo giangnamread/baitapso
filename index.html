@@ -51,7 +51,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'giangnam-nhom-online-v31-cloudsecure';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'giangnam-nhom-online-v32-cloudsecure';
         const firebaseConfig = {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
             authDomain: "giangnam146-5a353.firebaseapp.com",
@@ -173,7 +173,7 @@
                 </button>
                 <button onclick="openCreateGroupFirstModal()" class="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-user-plus"></i>
-                    <span>Tạo nhóm (Bước 1) & QR</span>
+                    <span>Tạo nhóm & QR</span>
                 </button>
                 <button onclick="openQRCodeModal()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-qrcode"></i>
@@ -270,7 +270,7 @@
             if (!db) return;
 
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v31_cloudsecure');
+                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v32_cloudsecure');
                 window.onSnapshot(docRef, (docSnap) => {
                     if (docSnap.exists()) {
                         masterData = docSnap.data();
@@ -294,7 +294,7 @@
                 return;
             }
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v31_cloudsecure');
+                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v32_cloudsecure');
                 const docSnap = await window.getDoc(docRef);
                 if (docSnap.exists()) {
                     masterData = docSnap.data();
@@ -319,7 +319,7 @@
                 return;
             }
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v31_cloudsecure');
+                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v32_cloudsecure');
                 await window.setDoc(docRef, masterData);
                 showToast("Đã lưu trữ dữ liệu an toàn trên đám mây!");
                 renderWorkspace();
@@ -329,105 +329,30 @@
             }
         }
 
-        async function speakIntroSpeech() {
-            const introText = "Phần mềm được thầy giáo Nguyễn Giang Nam phát triển nhằm giúp học sinh có tính tư duy logic và hợp tác nhóm hiệu quả. Thầy chúc các em hoạt động tốt!";
-            
-            try {
-                const payload = {
-                    contents: [{
-                        parts: [{ text: `Say clearly in Vietnamese with a warm, encouraging teacher tone: ${introText}` }]
-                    }],
-                    generationConfig: {
-                        responseModalities: ["AUDIO"],
-                        speechConfig: {
-                            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } }
-                        }
-                    },
-                    model: "gemini-2.5-flash-preview-tts"
-                };
-
-                const apiKey = "";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
-                
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                const part = result?.candidates?.[0]?.content?.parts?.[0];
-                const audioData = part?.inlineData?.data;
-                const mimeType = part?.inlineData?.mimeType;
-
-                if (audioData && mimeType && mimeType.startsWith("audio/")) {
-                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
-                    const sampleRate = sampleRateMatch ? parseInt(sampleRateMatch[1], 10) : 24000;
-                    
-                    const binaryString = atob(audioData);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
-                    }
-
-                    const pcm16 = new Int16Array(bytes.buffer);
-                    const wavBlob = pcmToWav(pcm16, sampleRate);
-                    const audioUrl = URL.createObjectURL(wavBlob);
-                    const audio = new Audio(audioUrl);
-                    audio.play().catch(err => fallbackSpeechSynthesis(introText));
-                } else {
-                    fallbackSpeechSynthesis(introText);
-                }
-            } catch (e) {
-                fallbackSpeechSynthesis(introText);
-            }
-        }
-
-        function fallbackSpeechSynthesis(text) {
+        // 100% Vietnamese Speech Synthesis Auto-Play (vi-VN)
+        function speakIntroSpeech() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
+                const introText = "Phần mềm được thầy giáo Nguyễn Giang Nam phát triển nhằm giúp học sinh có tính tư duy logic và hợp tác nhóm hiệu quả. Thầy chúc các em hoạt động tốt!";
+                const utterance = new SpeechSynthesisUtterance(introText);
+                utterance.rate = 0.95;
+                utterance.pitch = 1.0;
+
+                const voices = window.speechSynthesis.getVoices();
+                let vietnameseVoice = voices.find(v => v.lang === 'vi-VN' || v.lang.toLowerCase().includes('vi'));
+                if (vietnameseVoice) {
+                    utterance.voice = vietnameseVoice;
+                }
                 utterance.lang = 'vi-VN';
-                utterance.rate = 1.0;
+
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        function pcmToWav(pcm16, sampleRate) {
-            const numChannels = 1;
-            const bytesPerSample = 2;
-            const blockAlign = numChannels * bytesPerSample;
-            const byteRate = sampleRate * blockAlign;
-            const dataSize = pcm16.length * bytesPerSample;
-            const buffer = new ArrayBuffer(44 + dataSize);
-            const view = new DataView(buffer);
-
-            writeString(view, 0, 'RIFF');
-            view.setUint32(4, 36 + dataSize, true);
-            writeString(view, 8, 'WAVE');
-            writeString(view, 12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);
-            view.setUint16(22, numChannels, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, byteRate, true);
-            view.setUint16(32, blockAlign, true);
-            view.setUint16(34, 16, true);
-            writeString(view, 36, 'data');
-            view.setUint32(40, dataSize, true);
-
-            let offset = 44;
-            for (let i = 0; i < pcm16.length; i++, offset += 2) {
-                view.setInt16(offset, pcm16[i], true);
-            }
-            return new Blob([buffer], { type: 'audio/wav' });
-        }
-
-        function writeString(view, offset, string) {
-            for (let i = 0; i < string.length; i++) {
-                view.setUint8(offset + i, string.charCodeAt(i));
-            }
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.onvoiceschanged = () => {
+                window.speechSynthesis.getVoices();
+            };
         }
 
         function switchClass(className) {
@@ -446,8 +371,8 @@
             const html = `
                 <div class="space-y-4 py-2">
                     <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-                        <p class="font-bold mb-1"><i class="fa-solid fa-crown mr-1"></i> Bước 1 - Tạo nhóm trước & Thêm sẵn thành viên (Lớp ${currentClass}):</p>
-                        <p>Chỉ cần 1 thành viên đại diện nhập thông tin tổ và <b>thêm sẵn danh sách thành viên cùng chức vụ ngay bên dưới</b>. Sau khi tạo, hệ thống sẽ cấp mã QR riêng cho nhóm!</p>
+                        <p class="font-bold mb-1"><i class="fa-solid fa-crown mr-1"></i> Tạo nhóm trước & Thêm sẵn thành viên (Lớp ${currentClass}):</p>
+                        <p>Đại diện nhóm nhập thông tin tổ và <b>thêm sẵn danh sách thành viên cùng chức vụ ngay bên dưới</b>. Sau khi tạo, hệ thống sẽ cấp mã QR riêng cho nhóm!</p>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
@@ -590,7 +515,7 @@
             const groupList = Object.keys(data.groups);
 
             let groupOptionsHtml = groupList.length === 0 
-                ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm (Bước 1)" trước!</option>'
+                ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm & QR" trước!</option>'
                 : groupList.map(gName => `<option value="${gName}" ${window.appState.getGroup() === gName ? 'selected' : ''}>${gName} (${data.groups[gName].code})</option>`).join('');
 
             const html = `
@@ -638,7 +563,7 @@
             const selectGroupEl = document.getElementById('studentLoginGroupSelect');
             if (selectGroupEl) {
                 selectGroupEl.innerHTML = groupList.length === 0 
-                    ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm (Bước 1)" trước!</option>'
+                    ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm & QR" trước!</option>'
                     : groupList.map(gName => `<option value="${gName}">${gName} (${data.groups[gName].code})</option>`).join('');
             }
         }
@@ -685,13 +610,6 @@
             const devId = window.appState.getDeviceId();
             if (!data.groups[grp].participants) data.groups[grp].participants = {};
             
-            for (let [existingName, pInfo] of Object.entries(data.groups[grp].participants)) {
-                if (pInfo.deviceId === devId && existingName !== name) {
-                    showToast(`Thiết bị này đã được sử dụng bởi học sinh "${existingName}". Mỗi học sinh phải dùng thiết bị riêng!`, "error");
-                    return;
-                }
-            }
-
             let defaultRole = "Thành viên";
             if (!data.groups[grp].participants[name]) {
                 const partKeys = Object.keys(data.groups[grp].participants);
@@ -740,10 +658,10 @@
                     <div class="bg-indigo-50 p-3.5 rounded-2xl border border-indigo-100 space-y-2">
                         <p class="font-bold text-indigo-900"><i class="fa-solid fa-bullseye text-indigo-600 mr-1.5"></i> Giới thiệu quy trình hoạt động nhóm:</p>
                         <p class="text-slate-700 leading-relaxed">
-                            1. <b>Tạo nhóm & Phân công:</b> Đại diện tạo nhóm trước, thêm sẵn thành viên và phân công chức vụ (Nhóm trưởng, Nhóm phó, Thư ký, Thành viên). Hệ thống tự tạo mã QR riêng cho nhóm.<br>
+                            1. <b>Tạo nhóm & Phân công:</b> Đại diện tạo nhóm trước, thêm sẵn thành viên và phân công chức vụ ngay từ đầu (Nhóm trưởng, Nhóm phó, Thư ký, Thành viên). Hệ thống tự tạo mã QR riêng cho nhóm.<br>
                             2. <b>Đăng nhập & Thảo luận:</b> Học sinh quét mã QR hoặc đăng nhập đúng mã lớp/nhóm để vào không gian làm việc chung, thảo luận trực tuyến và đóng góp file tài liệu (Word, Excel, PPT, Ảnh, Video...).<br>
                             3. <b>Biểu quyết & Nộp bài:</b> Thư ký tổng hợp và chốt nộp bài. Các thành viên bấm biểu quyết <b>Đồng ý</b> hoặc <b>Không đồng ý</b>.<br>
-                            4. <b>Chấm điểm trực tiếp:</b> Giáo viên kiểm tra tiến độ, xem xét bảng phân công thành viên và chấm điểm trực tiếp, đóng dấu điểm số lên hệ thống đám mây.
+                            4. <b>Chấm điểm trực tiếp:</b> Giáo viên kiểm tra tiến độ, xem xét bảng phân công thành viên và chấm điểm trực tiếp trên hệ thống đám mây.
                         </p>
                     </div>
 
@@ -773,7 +691,7 @@
                         <div class="text-indigo-600 text-2xl"><i class="fa-solid fa-lock"></i></div>
                         <div>
                             <h4 class="font-bold text-indigo-900 text-sm">Khu vực Quản trị Giáo Viên</h4>
-                            <p class="text-xs text-indigo-700">Nhập mật khẩu quản trị chung (Nam420462@) để mở bảng quản lý 4 lớp học, giao bài tập và chấm điểm.</p>
+                            <p class="text-xs text-indigo-700">Nhập mật khẩu quản trị chung (*******) để mở bảng quản lý 4 lớp học, giao bài tập và chấm điểm.</p>
                         </div>
                     </div>
                     <div>
