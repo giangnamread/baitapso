@@ -1,58 +1,466 @@
 <!DOCTYPE html>
-<html lang="vi" class="h-full">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bài Tập hoạt động nhóm - bài tập số</title>
-    <!-- Tailwind CSS -->
+    <title>Bài Tập hoạt động nhóm - bài tập số (Đồng bộ đám mây thời gian thực)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- QRCode.js library for QR generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <!-- Firebase App & Firestore SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-        
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.03); }
-        }
-        .animate-pulse-glow { animation: pulseGlow 2s infinite ease-in-out; }
-
-        @keyframes shimmerText {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        .shimmer-title {
-            background: linear-gradient(90deg, #38bdf8, #ffffff, #c084fc, #38bdf8);
-            background-size: 200% auto;
-            color: transparent;
-            -webkit-background-clip: text;
-            animation: shimmerText 4s linear infinite;
-        }
-
-        @keyframes neonBlink {
-            0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(56, 189, 248, 0.8), 0 0 20px rgba(56, 189, 248, 0.5); }
-            50% { opacity: 0.4; text-shadow: none; }
-        }
-        .neon-blink { animation: neonBlink 1.5s infinite ease-in-out; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; }
+        .glass-panel { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
     </style>
 </head>
-<body class="h-full bg-slate-50 text-slate-800 flex flex-col justify-between selection:bg-cyan-500 selection:text-white overflow-x-hidden">
+<body class="min-h-screen flex flex-col justify-between custom-scrollbar overflow-x-hidden">
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <!-- HEADER / NAVBAR -->
+    <header class="glass-panel sticky top-0 z-50 px-4 py-3 shadow-xl border-b border-slate-700/60">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/30">
+                        <i class="fa-solid fa-users-rectangle text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-base md:text-lg text-white tracking-wide">Bài Tập hoạt động nhóm</h1>
+                        <p class="text-xs text-slate-400">Phát triển bởi Thầy giáo Nguyễn Giang Nam • <span id="syncStatusBadge" class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Đang đồng bộ đám mây</span></p>
+                    </div>
+                </div>
+            </div>
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'giangnam-nhom-online-v39-cloudsync';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                <button onclick="manualSyncToCloud()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-medium shadow transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-cloud-arrow-up"></i><span>Lưu đám mây</span>
+                </button>
+                <div class="flex items-center space-x-1 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    <span class="text-xs text-slate-400 font-medium">Lớp:</span>
+                    <select id="classSelect" onchange="changeClass(this.value)" class="bg-transparent text-white font-bold text-xs focus:outline-none cursor-pointer">
+                        <option value="10E" class="bg-slate-900">Lớp 10E</option>
+                        <option value="12A" class="bg-slate-900">Lớp 12A</option>
+                        <option value="12B" class="bg-slate-900">Lớp 12B</option>
+                        <option value="12E" class="bg-slate-900">Lớp 12E</option>
+                    </select>
+                </div>
+                <div class="flex bg-slate-800 p-1 rounded-lg border border-slate-700">
+                    <button onclick="switchView('student')" id="btnStudentView" class="px-3 py-1.5 rounded-md text-xs font-semibold transition bg-blue-600 text-white shadow">
+                        <i class="fa-solid fa-graduation-cap mr-1"></i> Học Sinh
+                    </button>
+                    <button onclick="promptTeacherLogin()" id="btnTeacherView" class="px-3 py-1.5 rounded-md text-xs font-semibold transition text-slate-300 hover:text-white">
+                        <i class="fa-solid fa-user-shield mr-1"></i> Quản lý GV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-3 md:p-6 space-y-4">
+        
+        <!-- STUDENT VIEW AREA -->
+        <div id="studentView" class="space-y-4">
+            <div class="glass-panel p-4 rounded-xl border border-blue-500/30 bg-gradient-to-r from-blue-950/40 to-indigo-950/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Nhiệm vụ học tập</span>
+                        <h2 id="currentAssignmentTitle" class="text-sm md:text-base font-bold text-blue-300">Bài tập: Chưa có đề bài được giao</h2>
+                    </div>
+                    <p id="currentAssignmentDesc" class="text-xs text-slate-300 line-clamp-2">Giáo viên chưa cập nhật yêu cầu cho lớp này.</p>
+                </div>
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <button onclick="openStudentGuideModal()" class="flex-1 md:flex-none bg-slate-800 hover:bg-slate-700 text-blue-400 text-xs px-3.5 py-2 rounded-lg font-semibold border border-blue-500/30 transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-book-open"></i><span>Hướng dẫn</span>
+                    </button>
+                    <button onclick="openCreateGroupModal()" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-users-gear"></i><span>Tạo nhóm & QR</span>
+                    </button>
+                    <button onclick="openJoinGroupModal()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-qrcode"></i><span>Vào nhóm QR</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Group Workspace -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="glass-panel p-4 rounded-xl space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-700 gap-2">
+                            <div class="flex items-center space-x-3">
+                                <div class="bg-blue-500/20 text-blue-400 p-2.5 rounded-lg">
+                                    <i class="fa-solid fa-people-group text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 id="activeGroupName" class="font-bold text-sm md:text-base text-white">Chưa chọn nhóm</h3>
+                                    <p class="text-xs text-slate-400">HS: <span id="currentStudentName" class="text-blue-400 font-medium">Chưa đăng nhập</span> | Vai trò: <span id="currentStudentRole" class="text-emerald-400 font-medium">Thành viên</span></p>
+                                </div>
+                            </div>
+                            <button onclick="openChangeGroupModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-600 transition flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-right-left"></i><span>Đổi nhóm</span>
+                            </button>
+                        </div>
+
+                        <!-- Member Roster Table -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                                    <i class="fa-solid fa-id-card-clip text-blue-400"></i><span>Bảng Phân Công & Vai Trò:</span>
+                                </h4>
+                            </div>
+                            <div class="overflow-x-auto rounded-lg border border-slate-700">
+                                <table class="w-full text-left text-xs text-slate-300">
+                                    <thead class="bg-slate-800/80 text-slate-400 uppercase text-[10px]">
+                                        <tr>
+                                            <th class="p-2.5">Họ và tên</th>
+                                            <th class="p-2.5">Vai trò</th>
+                                            <th class="p-2.5 text-center">Biểu quyết</th>
+                                            <th class="p-2.5 text-right">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="groupMembersTableBody" class="divide-y divide-slate-800">
+                                        <tr><td colspan="4" class="p-4 text-center text-slate-500 italic">Chưa có học sinh nào trong nhóm.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/80 flex items-center justify-between text-xs">
+                                <span class="text-slate-300">Tổng số thành viên: <strong id="groupMemberCountBadge" class="text-emerald-400">0</strong></span>
+                                <span class="text-[11px] text-slate-400">Thư ký: <strong id="groupSecretaryName" class="text-amber-400">Chưa có</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Chat & File Uploads -->
+                        <div class="space-y-3 pt-2 border-t border-slate-700">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                                <i class="fa-solid fa-comments text-emerald-400"></i><span>Trao đổi nhóm & Nộp bài làm:</span>
+                            </h4>
+                            <div id="groupChatBox" class="bg-slate-900/80 rounded-lg p-3 h-36 overflow-y-auto custom-scrollbar space-y-2 border border-slate-800 text-xs">
+                                <div class="text-slate-500 italic text-center py-8">Chưa có nội dung trao đổi.</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="chatInputMessage" placeholder="Nhập ý kiến thảo luận hoặc nộp bài..." class="flex-grow bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500" onkeypress="if(event.key==='Enter') sendGroupChatMessage()">
+                                <label class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg text-xs cursor-pointer border border-slate-700 transition" title="Đính kèm file bài làm">
+                                    <i class="fa-solid fa-paperclip text-blue-400"></i>
+                                    <input type="file" id="groupFileAttachment" class="hidden" onchange="handleGroupFileUpload(event)">
+                                </label>
+                                <button onclick="sendGroupChatMessage()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow transition">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Submission -->
+                        <div class="pt-2 border-t border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div class="text-xs text-slate-300">
+                                <span class="block text-slate-400">Trạng thái nộp bài:</span>
+                                <strong id="groupSubmissionStatusBadge" class="text-amber-400">Chưa gửi bài</strong>
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto">
+                                <button onclick="toggleConsentVote()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 text-xs px-3.5 py-2 rounded-lg font-semibold transition">
+                                    <i class="fa-solid fa-check-to-slot mr-1"></i>Biểu quyết nộp bài
+                                </button>
+                                <button onclick="secretarySubmitAssignment()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition">
+                                    <i class="fa-solid fa-cloud-arrow-up mr-1"></i>Thư ký nộp bài GV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="space-y-4">
+                    <div class="glass-panel p-4 rounded-xl space-y-3">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                            <i class="fa-solid fa-file-lines text-amber-400"></i><span>Tài liệu từ GV:</span>
+                        </h4>
+                        <div id="studentTeacherAttachmentsArea" class="bg-slate-900/60 p-3 rounded-lg border border-slate-800 text-xs">
+                            <span class="text-slate-500 italic">Chưa có tài liệu.</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-4 rounded-xl space-y-3">
+                        <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                            <i class="fa-solid fa-award text-purple-400"></i><span>Điểm số & Nhận xét:</span>
+                        </h4>
+                        <div class="space-y-2 text-xs">
+                            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-slate-400 block">Điểm nhóm:</span>
+                                <div id="studentViewGradeGroup" class="font-bold text-emerald-400 text-sm">Chưa chấm</div>
+                            </div>
+                            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-slate-400 block">Điểm cá nhân TB:</span>
+                                <div id="studentViewGradePersonal" class="font-bold text-blue-400 text-sm">Chưa chấm</div>
+                            </div>
+                            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                                <span class="text-slate-400 block">Nhận xét:</span>
+                                <div id="studentViewTeacherFeedback" class="text-slate-300 italic">Chưa có nhận xét.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEACHER VIEW AREA -->
+        <div id="teacherView" class="space-y-4 hidden">
+            <div class="glass-panel p-4 rounded-xl border border-purple-500/30 bg-gradient-to-r from-purple-950/40 to-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">Quản trị Giáo viên</span>
+                        <h2 class="text-sm md:text-base font-bold text-purple-300">Bảng Quản Lý 4 Lớp & Kiểm Tra Thảo Luận, Bài Làm HS</h2>
+                    </div>
+                    <p class="text-xs text-slate-300">Dữ liệu được đồng bộ thời gian thực tự động từ học sinh.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="switchView('student')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3.5 py-2 rounded-lg font-semibold border border-slate-600 transition">
+                        <i class="fa-solid fa-arrow-left mr-1"></i>Quay lại HS
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="teacherClassesGrid"></div>
+
+            <div class="glass-panel p-4 rounded-xl space-y-4" id="teacherDetailPanel">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-700 gap-2">
+                    <div class="flex items-center space-x-2">
+                        <span id="teacherPanelClassBadge" class="bg-purple-600 text-white text-xs px-2.5 py-1 rounded font-bold">Lớp 10E</span>
+                        <h3 class="font-bold text-sm md:text-base text-white">Soạn bài tập & Giao nhiệm vụ</h3>
+                    </div>
+                    <button onclick="saveTeacherAssignment()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition">
+                        <i class="fa-solid fa-floppy-disk mr-1"></i>Lưu & Giao bài lên đám mây
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Chủ đề bài học:</label>
+                            <input type="text" id="teacherInputTopic" placeholder="VD: Chủ đề 2..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Yêu cầu chi tiết:</label>
+                            <textarea id="teacherInputRequirement" rows="4" placeholder="Nêu yêu cầu sản phẩm..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-white focus:outline-none custom-scrollbar"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Tài liệu đính kèm:</label>
+                            <label class="flex-grow bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 cursor-pointer flex items-center justify-between transition">
+                                <span id="teacherSelectedFileName" class="truncate">Chọn tệp...</span>
+                                <input type="file" id="teacherFileAttachmentInput" class="hidden" onchange="handleTeacherFileUpload(event)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Danh sách tổ & Trạng thái (<span id="teacherSelectedClassName">10E</span>):</h4>
+                        </div>
+                        <div id="teacherGroupsSummaryContainer" class="bg-slate-900/60 rounded-lg border border-slate-700 p-3 h-64 overflow-y-auto custom-scrollbar space-y-3 text-xs">
+                            <div class="text-slate-500 italic text-center py-12">Chưa có tổ nào.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inspection Panel -->
+                <div class="pt-4 border-t border-slate-700 space-y-3">
+                    <h4 class="text-xs font-bold text-purple-300 uppercase tracking-wider flex items-center space-x-1.5">
+                        <i class="fa-solid fa-glasses mr-1"></i><span>Kiểm tra chi tiết Thảo luận & Bài làm của Tổ nhóm:</span>
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Chọn tổ nhóm cần kiểm tra:</label>
+                            <select id="teacherSelectInspectGroup" onchange="renderTeacherGroupInspection()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none">
+                                <option value="">-- Chọn tổ nhóm để kiểm tra --</option>
+                            </select>
+                        </div>
+                        <div class="bg-slate-900/80 p-3 rounded-lg border border-slate-800 text-xs">
+                            <span class="text-slate-400 block mb-1 font-semibold">Thành viên & Bỏ phiếu:</span>
+                            <div id="teacherInspectMembersList" class="text-slate-300 max-h-24 overflow-y-auto custom-scrollbar">Chưa chọn nhóm.</div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Lịch sử thảo luận & Tệp bài làm đóng góp của học sinh:</label>
+                        <div id="teacherInspectChatHistory" class="bg-slate-900/90 rounded-lg p-3 h-36 overflow-y-auto custom-scrollbar space-y-2 border border-slate-800 text-xs">
+                            <div class="text-slate-500 italic text-center py-10">Chưa có nội dung thảo luận.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-700 space-y-3">
+                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Chấm điểm nhóm & Nhận xét:</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Chọn tổ chấm:</label>
+                            <select id="teacherSelectTargetGroup" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none">
+                                <option value="">-- Chọn tổ nhóm --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Điểm nhóm (Thang 10):</label>
+                            <input type="number" id="teacherInputGradeGroup" min="0" max="10" step="0.1" placeholder="9.5" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Điểm cá nhân TB:</label>
+                            <input type="number" id="teacherInputGradePersonal" min="0" max="10" step="0.1" placeholder="9.0" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Nhận xét của giáo viên:</label>
+                        <textarea id="teacherInputFeedback" rows="2" placeholder="Nhận xét chi tiết..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white custom-scrollbar"></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button onclick="saveTeacherGrades()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition">
+                            <i class="fa-solid fa-award mr-1"></i>Xuất bản điểm lên đám mây
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="glass-panel py-3 px-4 text-center text-xs text-slate-400 border-t border-slate-700/60">
+        Bài Tập hoạt động nhóm • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Firebase Cloud
+    </footer>
+
+    <!-- MODALS -->
+    <div id="teacherLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 space-y-4 border border-purple-500/30 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                <h3 class="font-bold text-base text-white">Xác Thực Giáo Viên Quản Lý</h3>
+                <button onclick="closeModal('teacherLoginModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="bg-purple-950/40 p-3 rounded-lg border border-purple-500/30 text-purple-200">
+                    Nhập mật khẩu quản trị chung (*******) để mở bảng quản lý.
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Mật khẩu quản trị:</label>
+                    <input type="password" id="teacherPasswordInput" placeholder="Nhập mật khẩu..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-700">
+                <button onclick="closeModal('teacherLoginModal')" class="bg-slate-800 text-slate-300 text-xs px-4 py-2 rounded-lg">Hủy</button>
+                <button onclick="verifyTeacherLogin()" class="bg-purple-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Đăng Nhập</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="createGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
+        <div class="glass-panel w-full max-w-lg rounded-2xl p-6 space-y-4 border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                <h3 class="font-bold text-base text-white">Tạo Nhóm Trước (<span id="modalCreateClassName">10E</span>)</h3>
+                <button onclick="closeModal('createGroupModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Tên tổ nhóm (VD: Tổ 1):</label>
+                    <input type="text" id="inputGroupName" placeholder="Nhập tên tổ..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Mã nhóm (VD: 10E-T1):</label>
+                    <input type="text" id="inputGroupCode" placeholder="Nhập mã nhóm..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                </div>
+                <div class="space-y-2 pt-2 border-t border-slate-700">
+                    <div class="flex items-center justify-between">
+                        <label class="font-semibold text-slate-300">Thành viên & Chức vụ:</label>
+                        <button onclick="addMemberRowToCreateForm()" class="bg-blue-600 text-white text-[11px] px-2.5 py-1 rounded">Thêm thành viên</button>
+                    </div>
+                    <div id="preCreateMembersContainer" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar p-1">
+                        <div class="flex items-center gap-2 member-row">
+                            <input type="text" placeholder="Họ tên..." class="flex-grow bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white student-name-input">
+                            <select class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white student-role-input">
+                                <option value="Nhóm trưởng">Nhóm trưởng</option>
+                                <option value="Nhóm phó">Nhóm phó</option>
+                                <option value="Thư ký">Thư ký</option>
+                                <option value="Thành viên" selected>Thành viên</option>
+                            </select>
+                            <button onclick="this.parentElement.remove()" class="text-rose-400"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div id="createdGroupQRContainer" class="hidden text-center space-y-2 pt-3 border-t border-slate-700">
+                    <p class="text-emerald-400 font-bold">Tạo nhóm thành công! Mã QR:</p>
+                    <div id="qrcodeRenderArea" class="inline-block bg-white p-3 rounded-xl shadow-lg"></div>
+                    <p id="createdGroupQRText" class="text-xs text-slate-300 font-mono"></p>
+                </div>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+                <button onclick="closeModal('createGroupModal')" class="bg-slate-800 text-slate-300 text-xs px-4 py-2 rounded-lg">Hủy</button>
+                <button onclick="submitCreateGroup()" class="bg-blue-600 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow">Tạo Nhóm & Xuất QR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="joinGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 space-y-4 border border-emerald-500/30 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                <h3 class="font-bold text-base text-white">Tham Gia Nhóm Bằng Mã</h3>
+                <button onclick="closeModal('joinGroupModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Họ và tên học sinh:</label>
+                    <input type="text" id="joinStudentNameInput" placeholder="Nhập họ tên..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Mã nhóm:</label>
+                    <input type="text" id="joinGroupCodeInput" placeholder="Nhập mã nhóm..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-700">
+                <button onclick="closeModal('joinGroupModal')" class="bg-slate-800 text-slate-300 text-xs px-4 py-2 rounded-lg">Hủy</button>
+                <button onclick="submitJoinGroup()" class="bg-emerald-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Tham Gia Ngay</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="changeGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 space-y-4 border border-blue-500/30 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                <h3 class="font-bold text-base text-white">Chọn / Chuyển Nhóm (<span id="modalChangeClassName">10E</span>)</h3>
+                <button onclick="closeModal('changeGroupModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div id="availableGroupsListContainer" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                    <div class="text-slate-500 italic text-center py-6">Chưa có tổ nhóm nào.</div>
+                </div>
+            </div>
+            <div class="flex justify-end pt-2 border-t border-slate-700">
+                <button onclick="closeModal('changeGroupModal')" class="bg-slate-800 text-slate-300 text-xs px-4 py-2 rounded-lg">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="studentGuideModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
+        <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 space-y-4 border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                <h3 class="font-bold text-base text-white">Hướng Dẫn Nhiệm Vụ & Hoạt Động Nhóm</h3>
+                <button onclick="closeModal('studentGuideModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
+                <div class="bg-blue-950/40 p-4 rounded-xl border border-blue-500/30 space-y-2">
+                    <h4 class="font-bold text-sm text-blue-300">Quy trình hoạt động nhóm:</h4>
+                    <ul class="list-disc list-inside space-y-1.5">
+                        <li><strong>Tạo nhóm trước:</strong> Đại diện tổ tạo nhóm và phân công chức vụ ngay. Hệ thống cấp mã QR.</li>
+                        <li><strong>Tham gia:</strong> Học sinh quét QR hoặc nhập mã nhóm để tham gia.</li>
+                        <li><strong>Thảo luận & Gửi bài:</strong> Thành viên thảo luận, đóng góp tài liệu bài làm và biểu quyết để thư ký nộp bài lên giáo viên.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="flex justify-end pt-2 border-t border-slate-700">
+                <button onclick="closeModal('studentGuideModal')" class="bg-blue-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Đã hiểu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC & REALTIME FIREBASE SYNC -->
+    <script>
+        const firebaseConfig = {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
             authDomain: "giangnam146-5a353.firebaseapp.com",
             projectId: "giangnam146-5a353",
@@ -62,1762 +470,678 @@
             measurementId: "G-VPGHE5M58L"
         };
 
-        let app, db, auth;
-        let currentUser = null;
-        let currentRole = 'student';
-        let currentClass = '10E';
-        let currentGroupId = '';
-        let currentStudentName = '';
-        let deviceSessionId = 'dev_' + Math.random().toString(36).substring(2, 9);
-
+        let db;
         try {
-            app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-
-            const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            if (token) {
-                signInWithCustomToken(auth, token).catch(() => signInAnonymously(auth));
-            } else {
-                signInAnonymously(auth);
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
             }
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    currentUser = user;
-                    initCloudListeners();
-                }
-            });
+            db = firebase.firestore();
         } catch (e) {
-            console.warn("Firebase initialization warning:", e);
+            console.error("Firebase init error:", e);
         }
 
-        window.appState = {
-            getDb: () => db,
-            getAuth: () => auth,
-            getAppId: () => appId,
-            getCurrentUser: () => currentUser,
-            getRole: () => currentRole,
-            setRole: (r) => { currentRole = r; },
-            getClass: () => currentClass,
-            setClass: (c) => { currentClass = c; },
-            getGroup: () => currentGroupId,
-            setGroup: (g) => { currentGroupId = g; },
-            getStudentName: () => currentStudentName,
-            setStudentName: (n) => { currentStudentName = n; },
-            getDeviceId: () => deviceSessionId
-        };
-    </script>
+        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v44";
 
-    <header class="bg-gradient-to-r from-blue-800 via-indigo-800 to-cyan-700 text-white shadow-xl border-b border-cyan-500/25 shrink-0 z-30 sticky top-0">
-        <div class="max-w-7xl mx-auto px-3 py-2.5 flex flex-wrap justify-between items-center gap-2">
-            <div class="flex items-center space-x-2">
-                <div class="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/25 shadow-inner animate-pulse-glow">
-                    <i class="fa-solid fa-users-rectangle text-lg text-cyan-300"></i>
-                </div>
-                <div>
-                    <h1 class="font-extrabold text-xs sm:text-base tracking-wide shimmer-title">Bài Tập hoạt động nhóm - bài tập số</h1>
-                    <p class="text-[10px] text-cyan-100 opacity-90">Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây 100%</p>
-                </div>
-            </div>
-
-            <div class="flex items-center space-x-2 flex-wrap gap-1.5">
-                <button onclick="syncCloudDataNow()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] px-2.5 py-1.5 rounded-xl transition shadow flex items-center space-x-1 border border-cyan-400/40" title="Đồng bộ đám mây">
-                    <i class="fa-solid fa-cloud animate-pulse"></i>
-                    <span class="hidden sm:inline">Đồng Bộ Đám Mây</span>
-                </button>
-
-                <div class="flex bg-blue-950/60 p-0.5 rounded-xl border border-blue-400/30 items-center shadow-inner">
-                    <span class="text-[10px] text-cyan-200 px-1.5 font-medium"><i class="fa-solid fa-school"></i> Lớp:</span>
-                    <select id="selectClassGlobal" onchange="switchClass(this.value)" class="bg-blue-900 text-cyan-300 text-[11px] font-bold px-2 py-1 rounded-lg border border-blue-400/50 focus:outline-none">
-                        <option value="10E">Lớp 10E</option>
-                        <option value="12A">Lớp 12A</option>
-                        <option value="12B">Lớp 12B</option>
-                        <option value="12E">Lớp 12E</option>
-                    </select>
-                </div>
-
-                <div class="flex bg-blue-950/60 p-0.5 rounded-xl border border-blue-400/30 shadow-inner">
-                    <button onclick="openTeacherAuthModal()" id="btnRoleTeacher" class="px-2 py-1 text-[11px] font-semibold rounded-lg transition-all text-slate-300 hover:text-white">
-                        <i class="fa-solid fa-chalkboard-user mr-1"></i> Quản lý GV
-                    </button>
-                    <button onclick="openStudentLoginModal()" id="btnRoleStudent" class="px-2 py-1 text-[11px] font-semibold rounded-lg transition-all text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow">
-                        <i class="fa-solid fa-user-graduate mr-1"></i> Học Sinh
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
-
-        <!-- Banner & Action Bar -->
-        <section class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-3 relative overflow-hidden shrink-0">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-400/10 to-indigo-500/10 rounded-full blur-2xl -z-0 pointer-events-none"></div>
-            <div class="flex-1 z-10 w-full">
-                <div class="flex items-center space-x-2 flex-wrap gap-2">
-                    <span id="badgeClassDisplay" class="bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm neon-blink">Lớp 10E</span>
-                    <span id="badgeRoleDisplay" class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Học sinh</span>
-                    <div class="flex items-center space-x-1 bg-indigo-50 text-indigo-700 text-[11px] font-bold px-3 py-1 rounded-full border border-indigo-200 shadow-sm animate-pulse cursor-pointer" onclick="speakIntroSpeech()">
-                        <i class="fa-solid fa-volume-high text-indigo-600 animate-bounce"></i>
-                        <span>Giọng đọc AI (Bấm nghe lại)</span>
-                    </div>
-                </div>
-                <h2 id="mainBannerTitle" class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-2">Bài tập: Chưa có đề bài được giao</h2>
-                <p class="text-xs text-slate-600 mt-0.5">Môn học: Chưa xác định • Hạn nộp: <span class="font-semibold text-rose-600">Chưa thiết lập</span></p>
-            </div>
-            <div class="flex items-center gap-2 w-full md:w-auto flex-wrap z-10">
-                <button onclick="openStudentTaskGuideModal()" class="flex-1 md:flex-none bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-medium px-3.5 py-2 rounded-2xl text-xs transition shadow-md flex items-center justify-center space-x-1.5">
-                    <i class="fa-solid fa-book-open-reader"></i>
-                    <span>Hướng dẫn HS</span>
-                </button>
-                <button onclick="openCreateGroupFirstModal()" class="flex-1 md:flex-none bg-indigo-600 text-white font-medium px-3.5 py-2 rounded-2xl text-xs transition shadow-md flex items-center justify-center space-x-1.5">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span>Tự tạo nhóm (Max 6)</span>
-                </button>
-                <button onclick="openQRCodeModal()" class="flex-1 md:flex-none bg-emerald-600 text-white font-medium px-3.5 py-2 rounded-2xl text-xs transition shadow-md flex items-center justify-center space-x-1.5">
-                    <i class="fa-solid fa-qrcode"></i>
-                    <span>Mã QR Lớp</span>
-                </button>
-                <button onclick="openTeacherAuthModal()" class="flex-1 md:flex-none bg-slate-900 text-white font-medium px-3.5 py-2 rounded-2xl text-xs transition shadow-md flex items-center justify-center space-x-1.5">
-                    <i class="fa-solid fa-key"></i>
-                    <span>Quản lý</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- Dynamic Workspace Container -->
-        <div id="appWorkspaceContainer" class="flex flex-col gap-4 pb-12">
-            <!-- Rendered dynamically by JS -->
-        </div>
-
-    </main>
-
-    <!-- Modal Container -->
-    <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
-        <div id="modalContentBox" class="bg-white rounded-3xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center pb-3 border-b border-slate-100 shrink-0">
-                <h3 id="modalTitle" class="text-sm sm:text-base font-bold text-slate-800">Tiêu đề Modal</h3>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <div id="modalBody" class="py-3 overflow-y-auto custom-scrollbar text-xs sm:text-sm text-slate-600 flex-1"></div>
-            <div id="modalFooter" class="pt-3 border-t border-slate-100 flex justify-end space-x-2 shrink-0">
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Đóng</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toastNotification" class="fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs border border-white/10">
-        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
-        <span id="toastMessage">Thành công!</span>
-    </div>
-
-    <script>
-        const blankClassData = {
-            task: {
-                title: "Chưa có đề bài được giao",
-                subject: "Chưa phân loại",
-                deadline: "Chưa xác định",
-                description: "Giáo viên chưa cập nhật nội dung bài tập cho lớp này.",
-                teacherFiles: []
-            },
-            groups: {},
-            discussions: [],
-            grades: {
-                groupScore: "Chưa chấm",
-                individualScore: "Chưa chấm",
-                feedback: "Chưa có nhận xét hoặc điểm số từ giáo viên."
-            }
-        };
-
-        const classPasswords = {
-            "10E": "10E2026",
-            "12A": "12A2026",
-            "12B": "12B2026",
-            "12E": "12E2026"
-        };
-
-        let masterData = {
+        let appState = {
+            currentClass: "10E",
+            activeGroupCode: "",
+            currentStudentName: "",
             classes: {
-                "10E": { password: "10E2026", data: JSON.parse(JSON.stringify(blankClassData)) },
-                "12A": { password: "12A2026", data: JSON.parse(JSON.stringify(blankClassData)) },
-                "12B": { password: "12B2026", data: JSON.parse(JSON.stringify(blankClassData)) },
-                "12E": { password: "12E2026", data: JSON.parse(JSON.stringify(blankClassData)) }
+                "10E": { password: "10E2026", topic: "", requirement: "", attachmentName: "", attachmentUrl: "", groups: {}, teacherFeedback: {}, grades: {} },
+                "12A": { password: "12A2026", topic: "", requirement: "", attachmentName: "", attachmentUrl: "", groups: {}, teacherFeedback: {}, grades: {} },
+                "12B": { password: "12B2026", topic: "", requirement: "", attachmentName: "", attachmentUrl: "", groups: {}, teacherFeedback: {}, grades: {} },
+                "12E": { password: "12E2026", topic: "", requirement: "", attachmentName: "", attachmentUrl: "", groups: {}, teacherFeedback: {}, grades: {} }
             }
         };
 
-        const STORAGE_KEY = 'giangnam_baitapso_secure_v39_cloudsync';
+        let isRemoteUpdate = false;
 
-        function loadFromLocalStorage() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    masterData = JSON.parse(saved);
-                }
-            } catch(e) {
-                console.log("Local storage load warning:", e);
+        function loadAppData() {
+            const saved = localStorage.getItem(APP_STORAGE_KEY);
+            if (saved) {
+                try { appState = JSON.parse(saved); } catch (e) { console.error(e); }
             }
+            renderUI();
         }
 
-        function saveToLocalStorage() {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(masterData));
-            } catch(e) {
-                console.log("Local storage save warning:", e);
-            }
+        function saveAppDataLocally() {
+            localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(appState));
         }
 
-        loadFromLocalStorage();
-
-        function getCurrentClassContainer() {
-            const cls = window.appState.getClass();
-            if (!masterData.classes[cls]) {
-                masterData.classes[cls] = { password: classPasswords[cls], data: JSON.parse(JSON.stringify(blankClassData)) };
-            }
-            masterData.classes[cls].password = classPasswords[cls];
-            return masterData.classes[cls];
-        }
-
-        function getCurrentData() {
-            return getCurrentClassContainer().data;
-        }
-
-        let isCloudSynced = false;
-
-        function initCloudListeners() {
-            const db = window.appState.getDb();
-            const appId = window.appState.getAppId();
+        // Real-time Cloud Sync mapped to artifacts -> giangnam146-5a353 -> public -> data
+        function initRealtimeSync() {
             if (!db) return;
+            db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("data")
+              .onSnapshot((doc) => {
+                  if (doc.exists) {
+                      const remoteData = doc.data();
+                      if (JSON.stringify(remoteData) !== JSON.stringify(appState)) {
+                          isRemoteUpdate = true;
+                          appState = remoteData;
+                          saveAppDataLocally();
+                          renderUI();
+                          if (!document.getElementById('teacherView').classList.contains('hidden')) {
+                              renderTeacherDashboard();
+                          }
+                          isRemoteUpdate = false;
+                      }
+                  }
+              }, (error) => {
+                  console.error("Firestore sync error:", error);
+                  document.getElementById('syncStatusBadge').innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Offline';
+              });
+        }
 
+        async function pushDataToCloud() {
+            if (!db || isRemoteUpdate) return;
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v39');
-                window.onSnapshot(docRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        masterData = docSnap.data();
-                        for (let cls in classPasswords) {
-                            if (!masterData.classes[cls]) {
-                                masterData.classes[cls] = { password: classPasswords[cls], data: JSON.parse(JSON.stringify(blankClassData)) };
-                            } else {
-                                masterData.classes[cls].password = classPasswords[cls];
-                            }
-                        }
-                        saveToLocalStorage();
-                        isCloudSynced = true;
-                        renderWorkspace();
-                    } else {
-                        window.setDoc(docRef, masterData).then(() => {
-                            isCloudSynced = true;
-                        }).catch(() => {});
-                    }
-                }, () => {
-                    isCloudSynced = false;
-                });
-            } catch (err) {
-                isCloudSynced = false;
+                await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("data").set(appState);
+            } catch (e) {
+                console.error("Push cloud error:", e);
             }
         }
 
-        async function syncCloudDataNow() {
-            const db = window.appState.getDb();
-            const appId = window.appState.getAppId();
-            if (!db) {
-                showToast("Đã đồng bộ cục bộ thành công", "success");
+        function manualSyncToCloud() {
+            saveAppDataLocally();
+            pushDataToCloud();
+            alert("💾 Đã lưu và đồng bộ toàn bộ dữ liệu lên đám mây thành công!");
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAppData();
+            initRealtimeSync();
+
+            setTimeout(() => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const text = "Chào mừng thầy cô và các em đến với hệ thống Bài tập hoạt động nhóm số. Phát triển bởi thầy giáo Nguyễn Giang Nam.";
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'vi-VN';
+                    utterance.rate = 1.0;
+                    window.speechSynthesis.speak(utterance);
+                }
+            }, 800);
+        });
+
+        function switchView(view) {
+            const studentView = document.getElementById('studentView');
+            const teacherView = document.getElementById('teacherView');
+            const btnStudent = document.getElementById('btnStudentView');
+            const btnTeacher = document.getElementById('btnTeacherView');
+
+            if (view === 'student') {
+                studentView.classList.remove('hidden');
+                teacherView.classList.add('hidden');
+                btnStudent.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition bg-blue-600 text-white shadow";
+                btnTeacher.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition text-slate-300 hover:text-white";
+                renderUI();
+            } else {
+                studentView.classList.add('hidden');
+                teacherView.classList.remove('hidden');
+                btnTeacher.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition bg-purple-600 text-white shadow";
+                btnStudent.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition text-slate-300 hover:text-white";
+                renderTeacherDashboard();
+            }
+        }
+
+        function changeClass(className) {
+            appState.currentClass = className;
+            const groups = appState.classes[className].groups;
+            const groupCodes = Object.keys(groups);
+            appState.activeGroupCode = groupCodes.length > 0 ? groupCodes[0] : "";
+            saveAppDataLocally();
+            pushDataToCloud();
+            renderUI();
+        }
+
+        function renderUI() {
+            const cls = appState.currentClass;
+            const classData = appState.classes[cls];
+            document.getElementById('classSelect').value = cls;
+            document.getElementById('currentAssignmentTitle').innerText = classData.topic ? `Bài tập: ${classData.topic}` : "Bài tập: Chưa có đề bài được giao";
+            document.getElementById('currentAssignmentDesc').innerText = classData.requirement || "Giáo viên chưa cập nhật yêu cầu.";
+
+            const attachArea = document.getElementById('studentTeacherAttachmentsArea');
+            if (classData.attachmentName) {
+                attachArea.innerHTML = `<a href="${classData.attachmentUrl || '#'}" target="_blank" class="text-blue-400 hover:underline flex items-center space-x-1.5"><i class="fa-solid fa-file-arrow-down"></i><span>${classData.attachmentName}</span></a>`;
+            } else {
+                attachArea.innerHTML = `<span class="text-slate-500 italic">Chưa có tài liệu.</span>`;
+            }
+
+            const activeGroupCode = appState.activeGroupCode;
+            const group = classData.groups[activeGroupCode];
+
+            if (group) {
+                document.getElementById('activeGroupName').innerText = `${group.name} (${cls} - Mã: ${group.code})`;
+                document.getElementById('currentStudentName').innerText = appState.currentStudentName || "Chưa đăng nhập";
+                
+                let role = "Thành viên";
+                if (group.members) {
+                    const m = group.members.find(x => x.name.toLowerCase() === appState.currentStudentName.toLowerCase());
+                    if (m) role = m.role;
+                }
+                document.getElementById('currentStudentRole').innerText = role;
+
+                renderGroupMembersTable(group);
+                renderGroupChat(group);
+                document.getElementById('groupSubmissionStatusBadge').innerText = group.submitted ? "Đã gửi bài chính thức" : "Chưa gửi bài";
+            } else {
+                document.getElementById('activeGroupName').innerText = `Chưa chọn nhóm (${cls})`;
+                document.getElementById('currentStudentName').innerText = appState.currentStudentName || "Chưa đăng nhập";
+                document.getElementById('currentStudentRole').innerText = "Thành viên";
+                document.getElementById('groupMembersTableBody').innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500 italic">Chưa có nhóm nào được chọn.</td></tr>`;
+                document.getElementById('groupMemberCountBadge').innerText = "0";
+                document.getElementById('groupSecretaryName').innerText = "Chưa có";
+                document.getElementById('groupChatBox').innerHTML = `<div class="text-slate-500 italic text-center py-8">Chưa có nội dung trao đổi.</div>`;
+            }
+
+            const gradeGroup = classData.grades[activeGroupCode]?.groupGrade || "Chưa chấm";
+            const gradePersonal = classData.grades[activeGroupCode]?.personalGrade || "Chưa chấm";
+            const feedback = classData.teacherFeedback[activeGroupCode] || "Chưa có nhận xét.";
+
+            document.getElementById('studentViewGradeGroup').innerText = gradeGroup;
+            document.getElementById('studentViewGradePersonal').innerText = gradePersonal;
+            document.getElementById('studentViewTeacherFeedback').innerText = feedback;
+        }
+
+        function renderGroupMembersTable(group) {
+            const tbody = document.getElementById('groupMembersTableBody');
+            if (!group.members || group.members.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500 italic">Chưa có thành viên.</td></tr>`;
+                document.getElementById('groupMemberCountBadge').innerText = "0";
+                document.getElementById('groupSecretaryName').innerText = "Chưa có";
                 return;
             }
-            try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v39');
-                const docSnap = await window.getDoc(docRef);
-                if (docSnap.exists()) {
-                    masterData = docSnap.data();
-                    for (let cls in classPasswords) {
-                        if (masterData.classes[cls]) masterData.classes[cls].password = classPasswords[cls];
-                    }
-                    saveToLocalStorage();
-                    isCloudSynced = true;
-                    renderWorkspace();
-                    showToast("Đã tải dữ liệu mới nhất từ đám mây thành công!");
-                } else {
-                    await window.setDoc(docRef, masterData);
-                    isCloudSynced = true;
-                    showToast("Đã khởi tạo và đồng bộ đám mây thành công!");
-                }
-            } catch (err) {
-                isCloudSynced = false;
-                renderWorkspace();
-                showToast("Đã đồng bộ cục bộ an toàn");
+            let html = '';
+            let secretaryName = "Chưa có";
+            group.members.forEach((m, idx) => {
+                if (m.role === 'Thư ký') secretaryName = m.name;
+                const isConsented = m.consented ? '<span class="text-emerald-400 font-semibold"><i class="fa-solid fa-check mr-1"></i>Đồng ý</span>' : '<span class="text-slate-500">Chưa bỏ phiếu</span>';
+                html += `
+                    <tr class="hover:bg-slate-800/40">
+                        <td class="p-2.5 font-medium text-white">${m.name}</td>
+                        <td class="p-2.5 text-blue-400 font-medium">${m.role}</td>
+                        <td class="p-2.5 text-center">${isConsented}</td>
+                        <td class="p-2.5 text-right">
+                            <button onclick="removeGroupMember('${group.code}', ${idx})" class="text-rose-400 hover:text-rose-300 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+            document.getElementById('groupMemberCountBadge').innerText = group.members.length;
+            document.getElementById('groupSecretaryName').innerText = secretaryName;
+        }
+
+        function renderGroupChat(group) {
+            const chatBox = document.getElementById('groupChatBox');
+            if (!group.chats || group.chats.length === 0) {
+                chatBox.innerHTML = `<div class="text-slate-500 italic text-center py-8">Chưa có nội dung trao đổi.</div>`;
+                return;
             }
+            let html = '';
+            group.chats.forEach(c => {
+                html += `
+                    <div class="bg-slate-900/90 p-2.5 rounded-lg border border-slate-800 space-y-1">
+                        <div class="flex items-center justify-between text-[10px] text-slate-400">
+                            <span class="font-bold text-blue-400">${c.sender} (${c.role})</span>
+                            <span>${c.time}</span>
+                        </div>
+                        <p class="text-slate-200 text-xs">${c.message}</p>
+                    </div>
+                `;
+            });
+            chatBox.innerHTML = html;
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        async function saveToCloud() {
-            saveToLocalStorage();
-            const db = window.appState.getDb();
-            const appId = window.appState.getAppId();
-            try {
-                if (db) {
-                    const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v39');
-                    await window.setDoc(docRef, masterData);
-                    isCloudSynced = true;
-                }
-            } catch (err) {
-                isCloudSynced = false;
+        function sendGroupChatMessage() {
+            const input = document.getElementById('chatInputMessage');
+            const msg = input.value.trim();
+            if (!msg) return;
+            const cls = appState.currentClass;
+            const group = appState.classes[cls].groups[appState.activeGroupCode];
+            if (!group) {
+                alert("Vui lòng chọn nhóm trước!");
+                return;
             }
-            renderWorkspace();
-        }
-
-        // 100% Vietnamese Speech Synthesis Auto-Play (vi-VN) on web load
-        function speakIntroSpeech() {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const introText = "Phần mềm được thầy giáo Nguyễn Giang Nam phát triển nhằm giúp học sinh có tính tư duy logic và hợp tác nhóm hiệu quả. Thầy chúc các em hoạt động tốt!";
-                const utterance = new SpeechSynthesisUtterance(introText);
-                utterance.rate = 0.95;
-                utterance.pitch = 1.0;
-                utterance.lang = 'vi-VN';
-
-                const voices = window.speechSynthesis.getVoices();
-                let vietnameseVoice = voices.find(v => v.lang === 'vi-VN' || v.lang.toLowerCase().includes('vi') || v.lang.toLowerCase().includes('viet'));
-                if (vietnameseVoice) {
-                    utterance.voice = vietnameseVoice;
-                }
-
-                window.speechSynthesis.speak(utterance);
+            if (!appState.currentStudentName) {
+                appState.currentStudentName = prompt("Nhập họ và tên học sinh:") || "Học sinh";
             }
+            let role = "Thành viên";
+            const m = group.members.find(x => x.name.toLowerCase() === appState.currentStudentName.toLowerCase());
+            if (m) role = m.role;
+
+            if (!group.chats) group.chats = [];
+            group.chats.push({
+                sender: appState.currentStudentName,
+                role: role,
+                message: msg,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+            input.value = "";
+            saveAppDataLocally();
+            pushDataToCloud();
+            renderUI();
         }
 
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.onvoiceschanged = () => {
-                window.speechSynthesis.getVoices();
-            };
+        function handleGroupFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const cls = appState.currentClass;
+            const group = appState.classes[cls].groups[appState.activeGroupCode];
+            if (!group) {
+                alert("Vui lòng chọn nhóm trước!");
+                return;
+            }
+            if (!appState.currentStudentName) {
+                appState.currentStudentName = prompt("Nhập họ và tên học sinh:") || "Học sinh";
+            }
+            if (!group.chats) group.chats = [];
+            group.chats.push({
+                sender: appState.currentStudentName,
+                role: "Đóng góp bài làm",
+                message: `📁 Đã nộp/đóng góp tệp bài làm: <strong>${file.name}</strong>`,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            });
+            saveAppDataLocally();
+            pushDataToCloud();
+            renderUI();
+            alert(`Đã tải lên tệp bài làm ${file.name} thành công!`);
         }
 
-        function switchClass(className) {
-            window.appState.setClass(className);
-            const selectEl = document.getElementById('selectClassGlobal');
-            if (selectEl) selectEl.value = className;
-            const badge = document.getElementById('badgeClassDisplay');
-            if (badge) badge.innerText = `Lớp ${className}`;
-            renderWorkspace();
-            showToast(`Đã chuyển sang không gian Lớp ${className}`);
+        function toggleConsentVote() {
+            const cls = appState.currentClass;
+            const group = appState.classes[cls].groups[appState.activeGroupCode];
+            if (!group) {
+                alert("Vui lòng chọn nhóm!");
+                return;
+            }
+            if (!appState.currentStudentName) {
+                appState.currentStudentName = prompt("Nhập họ tên để bỏ phiếu:") || "Học sinh";
+            }
+            let m = group.members.find(x => x.name.toLowerCase() === appState.currentStudentName.toLowerCase());
+            if (!m) {
+                group.members.push({ name: appState.currentStudentName, role: 'Thành viên', consented: true });
+            } else {
+                m.consented = !m.consented;
+            }
+            saveAppDataLocally();
+            pushDataToCloud();
+            renderUI();
+            alert("Đã ghi nhận biểu quyết!");
         }
 
-        // --- Workflow: Create Group & Pre-add Members directly in Form ---
-        function openCreateGroupFirstModal() {
-            const currentClass = window.appState.getClass();
-            const html = `
-                <div class="space-y-3 py-1">
-                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 text-[11px] text-indigo-800">
-                        <p class="font-bold mb-0.5"><i class="fa-solid fa-crown mr-1"></i> Bước 1 - Tạo nhóm trước (Lớp ${currentClass}):</p>
-                        <p>Chỉ cần <b>1 thành viên đại diện tạo nhóm trước</b>. Thêm sẵn thành viên & phân công chức vụ ngay trong form này để giảm thiểu thao tác!</p>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Tên tổ nhóm (VD: Tổ 1)</label>
-                            <input type="text" id="inpNewGroupNameFirst" placeholder="Nhập tên tổ..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold">
-                        </div>
-                        <div>
-                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Mã nhóm (VD: ${currentClass}-T1)</label>
-                            <input type="text" id="inpNewGroupCodeFirst" placeholder="Nhập mã nhóm..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold">
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
-                        <label class="block text-[11px] font-bold text-slate-700"><i class="fa-solid fa-users-gear text-indigo-600 mr-1"></i> Thêm sẵn thành viên và phân công chức vụ:</label>
-                        <div id="preAddedMembersContainer" class="space-y-2 max-h-36 overflow-y-auto custom-scrollbar pr-1">
-                            <div class="flex gap-2 items-center member-row">
-                                <input type="text" placeholder="Họ và tên HS" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs member-name-input">
-                                <select class="bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-bold text-indigo-600 member-role-select">
-                                    <option value="Nhóm trưởng">Nhóm trưởng</option>
-                                    <option value="Nhóm phó">Nhóm phó</option>
-                                    <option value="Thư ký">Thư ký</option>
-                                    <option value="Thành viên" selected>Thành viên</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button onclick="addMoreMemberRow()" type="button" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-semibold transition border border-indigo-200">
-                            <i class="fa-solid fa-plus mr-1"></i> Thêm thành viên khác
-                        </button>
-                    </div>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="confirmCreateGroupFirst()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Tạo Nhóm & Lưu Lên Đám Mây</button>
-            `;
-            openModal(`Tạo Nhóm Trước (Lớp ${currentClass})`, html, footer);
+        function secretarySubmitAssignment() {
+            const cls = appState.currentClass;
+            const group = appState.classes[cls].groups[appState.activeGroupCode];
+            if (!group) {
+                alert("Vui lòng chọn nhóm!");
+                return;
+            }
+            group.submitted = true;
+            saveAppDataLocally();
+            pushDataToCloud();
+            renderUI();
+            alert("🚀 Đã nộp bài chính thức về cho giáo viên qua đám mây!");
         }
 
-        function addMoreMemberRow() {
-            const container = document.getElementById('preAddedMembersContainer');
-            if (!container) return;
+        function openCreateGroupModal() {
+            document.getElementById('modalCreateClassName').innerText = `Lớp ${appState.currentClass}`;
+            document.getElementById('createdGroupQRContainer').classList.add('hidden');
+            document.getElementById('inputGroupName').value = "";
+            document.getElementById('inputGroupCode').value = `${appState.currentClass}-T${Math.floor(Math.random()*90+10)}`;
+            document.getElementById('createGroupModal').classList.remove('hidden');
+        }
+
+        function addMemberRowToCreateForm() {
+            const container = document.getElementById('preCreateMembersContainer');
             const div = document.createElement('div');
-            div.className = "flex gap-2 items-center member-row";
+            div.className = "flex items-center gap-2 member-row";
             div.innerHTML = `
-                <input type="text" placeholder="Họ và tên HS" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs member-name-input">
-                <select class="bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-bold text-indigo-600 member-role-select">
+                <input type="text" placeholder="Họ tên..." class="flex-grow bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white student-name-input">
+                <select class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white student-role-input">
                     <option value="Nhóm trưởng">Nhóm trưởng</option>
                     <option value="Nhóm phó">Nhóm phó</option>
                     <option value="Thư ký">Thư ký</option>
                     <option value="Thành viên" selected>Thành viên</option>
                 </select>
-                <button onclick="this.parentElement.remove()" type="button" class="text-rose-500 hover:text-rose-700 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
+                <button onclick="this.parentElement.remove()" class="text-rose-400"><i class="fa-solid fa-trash"></i></button>
             `;
             container.appendChild(div);
         }
 
-        async function confirmCreateGroupFirst() {
-            const name = document.getElementById('inpNewGroupNameFirst').value.trim();
-            const code = document.getElementById('inpNewGroupCodeFirst').value.trim();
-
+        function submitCreateGroup() {
+            const name = document.getElementById('inputGroupName').value.trim();
+            const code = document.getElementById('inputGroupCode').value.trim();
             if (!name || !code) {
-                showToast("Vui lòng điền đầy đủ tên tổ và mã nhóm!", "error");
+                alert("Vui lòng nhập đầy đủ tên và mã nhóm!");
                 return;
             }
 
-            const nameInputs = document.querySelectorAll('.member-name-input');
-            const roleSelects = document.querySelectorAll('.member-role-select');
-            let participants = {};
-            let countMembers = 0;
-
+            const nameInputs = document.querySelectorAll('.student-name-input');
+            const roleInputs = document.querySelectorAll('.student-role-input');
+            const members = [];
             for (let i = 0; i < nameInputs.length; i++) {
                 const sName = nameInputs[i].value.trim();
-                const sRole = roleSelects[i].value;
+                const sRole = roleInputs[i].value;
                 if (sName) {
-                    participants[sName] = {
-                        deviceId: 'dev_pre_' + Math.random().toString(36).substring(2, 7),
-                        role: sRole,
-                        lastActive: new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}),
-                        status: "Đã thêm sẵn"
-                    };
-                    countMembers++;
+                    members.push({ name: sName, role: sRole, consented: false });
                 }
             }
 
-            const data = getCurrentData();
-            data.groups[name] = {
-                membersCount: Math.max(countMembers, 4),
-                progress: 0,
-                status: "Chưa làm",
+            const cls = appState.currentClass;
+            if (!appState.classes[cls].groups) appState.classes[cls].groups = {};
+            
+            appState.classes[cls].groups[code] = {
+                name: name,
                 code: code,
-                submissions: {},
-                participants: participants,
-                consents: {},
-                submittedStatus: false
+                members: members,
+                chats: [],
+                submitted: false
             };
+            appState.activeGroupCode = code;
+            if (members.length > 0 && !appState.currentStudentName) {
+                appState.currentStudentName = members[0].name;
+            }
 
-            window.appState.setGroup(name);
-            await saveToCloud();
+            saveAppDataLocally();
+            pushDataToCloud();
 
-            const groupJoinUrl = window.location.href.split('#')[0] + `?class=${window.appState.getClass()}&group=${encodeURIComponent(name)}`;
-            const html = `
-                <div class="space-y-3 text-center py-1">
-                    <div class="bg-emerald-50 p-2.5 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
-                        <p class="font-bold">Đã tạo thành công nhóm <span class="text-emerald-700 uppercase font-extrabold">${name}</span> với <span class="font-bold">${countMembers}</span> thành viên lên đám mây!</p>
-                        <p>Giáo viên và các thành viên khác đã có thể thấy nhóm này ngay lập tức.</p>
-                    </div>
-                    <div id="groupCreatedQRCodeContainer" class="flex justify-center bg-slate-50 p-3 rounded-3xl border border-slate-200 inline-block mx-auto"></div>
-                    <p class="text-[10px] text-slate-500 font-mono select-all bg-slate-100 p-2 rounded-xl">Link: ${groupJoinUrl}</p>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal(); openStudentLoginModal();" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow">Đăng Nhập Vào Nhóm Ngay</button>
-            `;
-            openModal(`Mã QR Nhóm: ${name}`, html, footer);
-
-            setTimeout(() => {
-                const container = document.getElementById('groupCreatedQRCodeContainer');
-                if (container) {
-                    container.innerHTML = "";
-                    new QRCode(container, {
-                        text: groupJoinUrl,
-                        width: 150,
-                        height: 150,
-                        colorDark: "#1e293b",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                }
-            }, 50);
+            const qrContainer = document.getElementById('qrcodeRenderArea');
+            qrContainer.innerHTML = "";
+            try {
+                const qr = qrcode(0, 'L');
+                qr.addData(`GROUPJOIN:${cls}:${code}`);
+                qr.make();
+                qrContainer.innerHTML = qr.createImgTag(4);
+            } catch (e) {
+                qrContainer.innerText = `Mã: ${code}`;
+            }
+            document.getElementById('createdGroupQRText').innerText = `Mã nhóm: ${code} (Lớp ${cls})`;
+            document.getElementById('createdGroupQRContainer').classList.remove('hidden');
+            renderUI();
         }
 
-        // --- Student Login & Auto Group Join ---
-        function openStudentLoginModal() {
-            const data = getCurrentData();
-            const groupList = Object.keys(data.groups);
-
-            let groupOptionsHtml = groupList.length === 0 
-                ? '<option value="">Chưa có nhóm nào. Bấm "Tự tạo nhóm" trước!</option>'
-                : groupList.map(gName => `<option value="${gName}" ${window.appState.getGroup() === gName ? 'selected' : ''}>${gName} (${data.groups[gName].code})</option>`).join('');
-
-            const html = `
-                <div class="space-y-3 py-1">
-                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-                        <p class="font-bold mb-0.5"><i class="fa-solid fa-shield-halved mr-1"></i> Đăng nhập vào nhóm:</p>
-                        <p>Học sinh nhập tên, chọn lớp, mật khẩu lớp cố định và chọn đúng nhóm của mình.</p>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Chọn Lớp học</label>
-                        <select id="studentLoginClassSelect" onchange="previewClassGroupsInModal(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-semibold">
-                            <option value="10E" ${window.appState.getClass() === '10E' ? 'selected' : ''}>Lớp 10E (Mã: 10E2026)</option>
-                            <option value="12A" ${window.appState.getClass() === '12A' ? 'selected' : ''}>Lớp 12A (Mã: 12A2026)</option>
-                            <option value="12B" ${window.appState.getClass() === '12B' ? 'selected' : ''}>Lớp 12B (Mã: 12B2026)</option>
-                            <option value="12E" ${window.appState.getClass() === '12E' ? 'selected' : ''}>Lớp 12E (Mã: 12E2026)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Mật khẩu truy cập lớp</label>
-                        <input type="password" id="studentLoginPass" placeholder="Nhập mật khẩu lớp..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-mono">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Họ và tên Học sinh</label>
-                        <input type="text" id="studentLoginName" placeholder="VD: Nguyễn Văn A" value="${window.appState.getStudentName()}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-semibold">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Chọn Tổ / Nhóm</label>
-                        <select id="studentLoginGroupSelect" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-bold text-indigo-600">
-                            ${groupOptionsHtml}
-                        </select>
-                    </div>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="confirmStudentLogin()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Vào Nhóm Ngay</button>
-            `;
-            openModal("Đăng Nhập Học Sinh", html, footer);
+        function openJoinGroupModal() {
+            document.getElementById('joinStudentNameInput').value = appState.currentStudentName || "";
+            document.getElementById('joinGroupCodeInput').value = "";
+            document.getElementById('joinGroupModal').classList.remove('hidden');
         }
 
-        function previewClassGroupsInModal(cls) {
-            window.appState.setClass(cls);
-            const data = getCurrentData();
-            const groupList = Object.keys(data.groups);
-            const selectGroupEl = document.getElementById('studentLoginGroupSelect');
-            if (selectGroupEl) {
-                selectGroupEl.innerHTML = groupList.length === 0 
-                    ? '<option value="">Chưa có nhóm nào. Bấm "Tự tạo nhóm" trước!</option>'
-                    : groupList.map(gName => `<option value="${gName}">${gName} (${data.groups[gName].code})</option>`).join('');
-            }
-        }
-
-        async function confirmStudentLogin() {
-            const cls = document.getElementById('studentLoginClassSelect').value;
-            const pass = document.getElementById('studentLoginPass').value.trim();
-            const name = document.getElementById('studentLoginName').value.trim();
-            const grp = document.getElementById('studentLoginGroupSelect').value;
-            
-            const expectedPass = classPasswords[cls];
-            if (pass !== expectedPass) {
-                showToast("Mật khẩu truy cập lớp không chính xác! (Mã lớp: " + expectedPass + ")", "error");
-                return;
-            }
-            if (!name) {
-                showToast("Vui lòng nhập họ và tên của bạn!", "error");
-                return;
-            }
-            if (!grp) {
-                showToast("Vui lòng chọn tổ nhóm!", "error");
+        function submitJoinGroup() {
+            const sName = document.getElementById('joinStudentNameInput').value.trim();
+            const gCode = document.getElementById('joinGroupCodeInput').value.trim();
+            if (!sName || !gCode) {
+                alert("Vui lòng nhập đầy đủ tên và mã nhóm!");
                 return;
             }
 
-            window.appState.setClass(cls);
-            window.appState.setGroup(grp);
-            window.appState.setStudentName(name);
-            window.appState.setRole('student');
-
-            const data = getCurrentData();
-            if (!data.groups[grp]) {
-                data.groups[grp] = {
-                    membersCount: 4,
-                    progress: 0,
-                    status: "Chưa làm",
-                    code: `${cls}-${grp.replace(/\s+/g,'')}`,
-                    submissions: {},
-                    participants: {},
-                    consents: {},
-                    submittedStatus: false
-                };
+            const cls = appState.currentClass;
+            const groups = appState.classes[cls].groups;
+            if (!groups[gCode]) {
+                alert(`Không tìm thấy nhóm mã "${gCode}" trong lớp ${cls}!`);
+                return;
             }
 
-            const devId = window.appState.getDeviceId();
-            if (!data.groups[grp].participants) data.groups[grp].participants = {};
-            
-            let defaultRole = "Thành viên";
-            if (!data.groups[grp].participants[name]) {
-                const partKeys = Object.keys(data.groups[grp].participants);
-                if (partKeys.length === 0) defaultRole = "Nhóm trưởng";
-                else if (partKeys.length === 1) defaultRole = "Thư ký";
-                
-                data.groups[grp].participants[name] = {
-                    deviceId: devId,
-                    role: defaultRole,
-                    lastActive: new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}),
-                    status: "Đã đăng nhập"
-                };
+            appState.currentStudentName = sName;
+            appState.activeGroupCode = gCode;
+            const group = groups[gCode];
+            if (!group.members) group.members = [];
+            const existing = group.members.find(x => x.name.toLowerCase() === sName.toLowerCase());
+            if (!existing) {
+                group.members.push({ name: sName, role: 'Thành viên', consented: false });
+            }
+
+            saveAppDataLocally();
+            pushDataToCloud();
+            closeModal('joinGroupModal');
+            renderUI();
+            alert(`Tham gia nhóm "${group.name}" thành công!`);
+        }
+
+        function openChangeGroupModal() {
+            const cls = appState.currentClass;
+            document.getElementById('modalChangeClassName').innerText = cls;
+            const container = document.getElementById('availableGroupsListContainer');
+            const groups = appState.classes[cls].groups;
+            const codes = Object.keys(groups);
+
+            if (codes.length === 0) {
+                container.innerHTML = `<div class="text-slate-500 italic text-center py-6">Chưa có tổ nhóm nào.</div>`;
             } else {
-                data.groups[grp].participants[name].lastActive = new Date().toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
-            }
-
-            closeModal();
-            await saveToCloud();
-            showToast(`Chào mừng ${name} (${data.groups[grp].participants[name].role}) đã vào ${grp} - Lớp ${cls}!`);
-            speakIntroSpeech();
-        }
-
-        function openStudentTaskGuideModal() {
-            const currentClass = window.appState.getClass();
-            const currentGroup = window.appState.getGroup() || 'Chưa chọn nhóm';
-            const data = getCurrentData();
-            const task = data.task;
-            const teacherFiles = task.teacherFiles || [];
-
-            let teacherFilesHtml = teacherFiles.length === 0
-                ? `<p class="text-slate-400 italic text-xs">Chưa có tài liệu đính kèm từ giáo viên.</p>`
-                : teacherFiles.map((f) => `
-                    <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-indigo-200 text-xs shadow-sm mb-1.5">
-                        <span class="font-bold text-indigo-950 truncate"><i class="fa-solid fa-file-arrow-down text-indigo-600 mr-1.5"></i> ${f.name}</span>
-                        <a href="${f.link}" target="_blank" class="px-3 py-1 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition">Tải / Xem</a>
-                    </div>
-                `).join('');
-
-            const html = `
-                <div class="space-y-3 text-xs sm:text-sm text-slate-700 py-1">
-                    <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-3 rounded-2xl shadow">
-                        <h4 class="font-extrabold text-sm mb-0.5"><i class="fa-solid fa-circle-info mr-1.5"></i> HƯỚNG DẪN HOẠT ĐỘNG NHÓM SỐ</h4>
-                        <p class="text-[11px] text-cyan-100">Lớp: <b class="neon-blink">${currentClass}</b> • Nhóm: <b class="neon-blink">${currentGroup}</b></p>
-                    </div>
-
-                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 space-y-1.5">
-                        <p class="font-bold text-indigo-900"><i class="fa-solid fa-bullseye text-indigo-600 mr-1"></i> Quy trình hoạt động nhóm:</p>
-                        <p class="text-slate-700 leading-relaxed text-xs">
-                            1. <b>Tạo nhóm trước:</b> Đại diện tạo nhóm, thêm sẵn thành viên & phân công chức vụ ngay trong form và lưu thẳng lên đám mây.<br>
-                            2. <b>Đăng nhập:</b> Học sinh nhập mật khẩu cố định của lớp và vào nhóm của mình.<br>
-                            3. <b>Nộp bài & Biểu quyết:</b> Đóng góp tài liệu, thư ký chốt nộp bài. Các thành viên bấm biểu quyết <b>Đồng ý</b>.<br>
-                            4. <b>Chấm điểm:</b> Giáo viên kiểm tra danh sách thành viên, kiểm tra biểu quyết và chấm điểm trực tiếp trên hệ thống.
-                        </p>
-                    </div>
-
-                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1.5">
-                        <p class="font-bold text-slate-800"><i class="fa-solid fa-file-lines text-indigo-600 mr-1"></i> Đề bài hiện tại từ Giáo viên:</p>
-                        <p class="text-slate-800 font-semibold">• Chủ đề: ${task.title}</p>
-                        <p class="text-slate-600">• Môn học: ${task.subject} | Hạn nộp: <span class="text-rose-600 font-bold">${task.deadline}</span></p>
-                        <p class="text-slate-600">• Yêu cầu: ${task.description}</p>
-                        
-                        <div class="mt-2 pt-2 border-t border-slate-200 space-y-1">
-                            <p class="font-bold text-slate-800 text-xs"><i class="fa-solid fa-paperclip text-indigo-600 mr-1"></i> Tài liệu đính kèm từ giáo viên:</p>
-                            ${teacherFilesHtml}
+                let html = '';
+                codes.forEach(code => {
+                    const g = groups[code];
+                    html += `
+                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex items-center justify-between">
+                            <div>
+                                <h5 class="font-bold text-white text-xs">${g.name} (Mã: ${g.code})</h5>
+                                <p class="text-[11px] text-slate-400">Thành viên: ${g.members ? g.members.length : 0}</p>
+                            </div>
+                            <button onclick="selectGroup('${code}')" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded">Chọn</button>
                         </div>
-                    </div>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Đã hiểu & Bắt đầu làm bài</button>
-            `;
-            openModal("Hướng Dẫn Hoạt Động Nhóm Số", html, footer);
+                    `;
+                });
+                container.innerHTML = html;
+            }
+            document.getElementById('changeGroupModal').classList.remove('hidden');
         }
 
-        function openTeacherAuthModal() {
-            const html = `
-                <div class="space-y-3 py-1">
-                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 flex items-center space-x-3">
-                        <div class="text-indigo-600 text-xl"><i class="fa-solid fa-lock"></i></div>
-                        <div>
-                            <h4 class="font-bold text-indigo-900 text-xs sm:text-sm">Khu vực Quản trị Giáo Viên</h4>
-                            <p class="text-[11px] text-indigo-700">Nhập mật khẩu quản trị chung (*******) để mở bảng quản lý 4 lớp học, giao bài tập và chấm điểm.</p>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Mật khẩu quản trị giáo viên</label>
-                        <input type="password" id="inpTeacherAdminPass" placeholder="Nhập mật khẩu quản trị..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-mono">
-                    </div>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="verifyTeacherAdminLogin()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Đăng Nhập Quản Trị</button>
-            `;
-            openModal("Xác Thực Giáo Viên Quản Lý", html, footer);
+        function selectGroup(code) {
+            appState.activeGroupCode = code;
+            saveAppDataLocally();
+            closeModal('changeGroupModal');
+            renderUI();
         }
 
-        function verifyTeacherAdminLogin() {
-            const pass = document.getElementById('inpTeacherAdminPass').value.trim();
-            if (pass === "Nam420462@") {
-                window.appState.setRole('teacher');
-                
-                const btnT = document.getElementById('btnRoleTeacher');
-                const btnS = document.getElementById('btnRoleStudent');
-                if (btnT) btnT.className = "px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all text-white bg-indigo-600 shadow";
-                if (btnS) btnS.className = "px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all text-slate-300 hover:text-white";
-
-                const badgeRole = document.getElementById('badgeRoleDisplay');
-                if (badgeRole) badgeRole.innerText = `Giáo viên quản lý 4 lớp`;
-
-                closeModal();
-                renderWorkspace();
-                showToast("Đăng nhập quyền Giáo viên thành công!");
-            } else {
-                showToast("Mật khẩu quản trị không chính xác!", "error");
+        function removeGroupMember(groupCode, memberIdx) {
+            const cls = appState.currentClass;
+            const group = appState.classes[cls].groups[groupCode];
+            if (group && group.members) {
+                group.members.splice(memberIdx, 1);
+                saveAppDataLocally();
+                pushDataToCloud();
+                renderUI();
             }
         }
 
-        function renderWorkspace() {
-            const container = document.getElementById('appWorkspaceContainer');
-            if (!container) return;
-            const role = window.appState.getRole();
-            const data = getCurrentData();
+        function openStudentGuideModal() {
+            document.getElementById('studentGuideModal').classList.remove('hidden');
+        }
 
-            const bannerTitle = document.getElementById('mainBannerTitle');
-            if (bannerTitle) bannerTitle.innerText = `Bài tập: ${data.task.title}`;
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
 
-            if (role === 'teacher') {
-                container.innerHTML = renderTeacherDashboard();
+        function promptTeacherLogin() {
+            document.getElementById('teacherPasswordInput').value = "";
+            document.getElementById('teacherLoginModal').classList.remove('hidden');
+        }
+
+        function verifyTeacherLogin() {
+            const pwd = document.getElementById('teacherPasswordInput').value;
+            if (pwd === "Nam420462@") {
+                closeModal('teacherLoginModal');
+                switchView('teacher');
             } else {
-                container.innerHTML = renderStudentWorkspace();
+                alert("Mật khẩu không chính xác!");
             }
         }
 
         function renderTeacherDashboard() {
-            const classesList = Object.keys(masterData.classes);
-            const currentClass = window.appState.getClass();
-            const data = getCurrentData();
-            const groupEntries = Object.entries(data.groups);
-            const teacherFiles = data.task.teacherFiles || [];
-
-            return `
-                <div class="flex flex-col gap-4">
-                    <!-- Teacher 4 Classes Control Panel -->
-                    <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-white rounded-3xl p-4 sm:p-5 shadow-xl border border-indigo-500/25">
-                        <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
-                            <div>
-                                <h3 class="font-extrabold text-sm sm:text-base flex items-center space-x-2 text-cyan-300">
-                                    <i class="fa-solid fa-chalkboard-user"></i>
-                                    <span>Bảng Quản Lý 4 Lớp & Giao Bài (Đám Mây)</span>
-                                </h3>
-                                <p class="text-[11px] text-slate-300">Giáo viên có thể tải dữ liệu đám mây của các nhóm học sinh mới nhất bất cứ lúc nào.</p>
-                            </div>
-                            <div class="flex gap-2 flex-wrap">
-                                <button onclick="syncCloudDataNow()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition shadow flex items-center space-x-1">
-                                    <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Tải dữ liệu đám mây của các nhóm
-                                </button>
-                                <button onclick="switchRoleToStudent()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition border border-white/20">
-                                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Chế độ HS
-                                </button>
-                            </div>
+            const grid = document.getElementById('teacherClassesGrid');
+            let html = '';
+            ['10E', '12A', '12B', '12E'].forEach(cls => {
+                const cData = appState.classes[cls];
+                const isSelected = cls === appState.currentClass ? "border-purple-500 bg-purple-950/20" : "border-slate-700";
+                html += `
+                    <div class="glass-panel p-4 rounded-xl border ${isSelected} space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-white text-sm">Lớp ${cls}</h4>
+                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Mã: *******</span>
                         </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
-                            ${classesList.map(cls => {
-                                const pass = classPasswords[cls];
-                                const isSelected = cls === currentClass;
-                                const clsTask = masterData.classes[cls].data.task.title;
-                                const clsGroupCount = Object.keys(masterData.classes[cls].data.groups).length;
-                                return `
-                                    <div class="bg-white/10 p-3.5 rounded-2xl border ${isSelected ? 'border-cyan-400 bg-white/15 shadow-lg' : 'border-white/10'} flex flex-col justify-between space-y-2.5 backdrop-blur-sm">
-                                        <div>
-                                            <div class="flex justify-between items-center">
-                                                <h4 class="font-extrabold text-white text-sm sm:text-base neon-blink">Lớp ${cls}</h4>
-                                                ${isSelected ? '<span class="bg-cyan-400 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow">Đang chọn</span>' : ''}
-                                            </div>
-                                            <p class="text-[11px] text-cyan-200 mt-0.5 truncate">Bài: ${clsTask}</p>
-                                            <p class="text-[10px] text-emerald-300 mt-0.5"><i class="fa-solid fa-users"></i> ${clsGroupCount} tổ nhóm hoạt động</p>
-                                            <div class="mt-2.5 bg-slate-950/60 p-2 rounded-xl border border-white/10">
-                                                <span class="text-[10px] text-slate-300 block mb-0.5">Mã vào lớp (Cố định):</span>
-                                                <div class="flex justify-between items-center">
-                                                    <span id="passSpan_${cls}" class="font-mono font-bold text-amber-300 text-xs tracking-wider">*******</span>
-                                                    <button onclick="togglePasswordView('${cls}', '${pass}')" class="p-1 text-xs bg-slate-700 hover:bg-slate-600 rounded-lg text-white transition" title="Ẩn/Hiện mật khẩu">
-                                                        <i class="fa-solid fa-eye" id="eyeIcon_${cls}"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="space-y-1.5">
-                                            <button onclick="switchClassFromTeacher('${cls}')" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition shadow">
-                                                Xem Kho & Tổ Lớp ${cls}
-                                            </button>
-                                            <button onclick="openAssignTaskModal('${cls}')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition shadow">
-                                                <i class="fa-solid fa-file-pen mr-1"></i> Giao bài & Đính kèm TL
-                                            </button>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Selected Class Detailed Management -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                        <div class="lg:col-span-2 flex flex-col gap-4">
-                            <!-- Quick Task Editor -->
-                            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h3 class="font-bold text-slate-800 flex items-center space-x-2 text-xs sm:text-sm">
-                                        <i class="fa-solid fa-file-pen text-indigo-600"></i>
-                                        <span>Cập nhật Bài tập & Tài liệu đính kèm (Lớp ${currentClass})</span>
-                                    </h3>
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-2.5">
-                                    <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Tiêu đề bài tập</label>
-                                        <input type="text" id="teacherTaskTitle" value="${data.task.title === 'Chưa có đề bài được giao' ? '' : data.task.title}" placeholder="VD: Tư duy logic..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Môn học</label>
-                                        <input type="text" id="teacherTaskSubject" value="${data.task.subject === 'Chưa phân loại' ? '' : data.task.subject}" placeholder="VD: Tin học" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Hạn nộp</label>
-                                        <input type="text" id="teacherTaskDeadline" value="${data.task.deadline === 'Chưa xác định' ? '' : data.task.deadline}" placeholder="VD: 25/10/2026" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
-                                    </div>
-                                </div>
-                                <div class="mb-2.5">
-                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Yêu cầu chi tiết sản phẩm</label>
-                                    <textarea id="teacherTaskDesc" rows="2" placeholder="Nhập yêu cầu sản phẩm..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">${data.task.description === 'Giáo viên chưa cập nhật nội dung bài tập cho lớp này.' ? '' : data.task.description}</textarea>
-                                </div>
-
-                                <div class="mb-3 bg-indigo-50 p-3 rounded-2xl border border-indigo-100">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <label class="block text-xs font-bold text-indigo-900"><i class="fa-solid fa-paperclip mr-1"></i> Tài liệu giao bài (Word, Excel, PDF...):</label>
-                                        <button onclick="openTeacherUploadFileModal()" class="px-2.5 py-1 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 transition shadow-sm flex items-center space-x-1">
-                                            <i class="fa-solid fa-upload"></i>
-                                            <span>Thêm tài liệu</span>
-                                        </button>
-                                    </div>
-                                    <div class="space-y-1.5" id="teacherFilesListContainer">
-                                        ${teacherFiles.length === 0 ? '<p class="text-xs text-slate-400 italic">Chưa có tài liệu đính kèm.</p>' : teacherFiles.map((f, idx) => `
-                                            <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-indigo-200 text-xs shadow-sm">
-                                                <span class="font-semibold text-slate-800 truncate"><i class="fa-solid fa-file-arrow-down text-indigo-600 mr-1.5"></i> ${f.name}</span>
-                                                <div class="flex space-x-2">
-                                                    <a href="${f.link}" target="_blank" class="text-blue-600 hover:underline font-bold">Xem / Tải</a>
-                                                    <button onclick="removeTeacherFile(${idx})" class="text-rose-600 hover:text-rose-800"><i class="fa-solid fa-trash"></i></button>
-                                                </div>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-
-                                <button onclick="saveTeacherTaskInfo()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow">
-                                    <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu & Đồng bộ bài tập Lớp ${currentClass} lên Đám Mây
-                                </button>
-                            </div>
-
-                            <!-- Groups & Participation Tracker Table -->
-                            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
-                                <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
-                                    <h3 class="font-bold text-slate-800 flex items-center space-x-2 text-xs sm:text-sm">
-                                        <i class="fa-solid fa-chart-pie text-blue-600"></i>
-                                        <span>Danh sách tổ & Thống kê học sinh (Lớp ${currentClass})</span>
-                                    </h3>
-                                    <div class="flex gap-2">
-                                        <button onclick="syncCloudDataNow()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center space-x-1 shadow-sm">
-                                            <i class="fa-solid fa-cloud-arrow-down"></i>
-                                            <span>Tải dữ liệu nhóm từ Đám Mây</span>
-                                        </button>
-                                        <button onclick="openAddGroupModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center space-x-1">
-                                            <i class="fa-solid fa-plus-circle"></i>
-                                            <span>Thêm tổ</span>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="overflow-x-auto">
-                                    <table class="w-full text-left border-collapse text-xs">
-                                        <thead>
-                                            <tr class="border-b border-slate-100 text-slate-400 font-semibold text-xs">
-                                                <th class="py-2.5 px-2">Tổ nhóm</th>
-                                                <th class="py-2.5 px-2">Thành viên & Phân công</th>
-                                                <th class="py-2.5 px-2">Trạng thái Nộp</th>
-                                                <th class="py-2.5 px-2 text-right">Thao tác & Chấm điểm</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-slate-100">
-                                            ${groupEntries.length === 0 ? `
-                                                <tr><td colspan="4" class="py-6 text-center text-slate-400 text-xs italic">Chưa có tổ nào trong lớp này. (Học sinh hoặc GV có thể bấm "Tự tạo nhóm" hoặc "Tải dữ liệu đám mây").</td></tr>
-                                            ` : groupEntries.map(([groupName, g]) => {
-                                                const participantsCount = Object.keys(g.participants || {}).length;
-                                                const consentsObj = g.consents || {};
-                                                const agreeCount = Object.values(consentsObj).filter(v => v === 'Đồng ý').length;
-                                                return `
-                                                    <tr class="hover:bg-slate-50/80 transition">
-                                                        <td class="py-3 px-2 font-semibold text-slate-800">
-                                                            <span class="inline-flex items-center px-2 py-1 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-extrabold neon-blink">
-                                                                <i class="fa-solid fa-users mr-1 text-indigo-500"></i> ${groupName}
-                                                            </span>
-                                                        </td>
-                                                        <td class="py-3 px-2">
-                                                            <span class="font-bold text-indigo-600">${participantsCount} đã vào</span>
-                                                            <p class="text-[10px] text-slate-400 truncate">${Object.keys(g.participants || {}).join(', ') || 'Chưa có'}</p>
-                                                        </td>
-                                                        <td class="py-3 px-2">
-                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${g.submittedStatus ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                                                                ${g.submittedStatus ? 'Đã nộp' : 'Đang làm'}
-                                                            </span>
-                                                            <p class="text-[10px] text-slate-500 mt-0.5">Đồng thuận: ${agreeCount}/${participantsCount}</p>
-                                                        </td>
-                                                        <td class="py-3 px-2 text-right space-x-1">
-                                                            <button onclick="openTeacherInspectModal('${groupName}')" class="px-2.5 py-1.5 rounded-xl text-xs font-medium transition bg-emerald-50 hover:bg-emerald-100 text-emerald-700 inline-flex items-center">
-                                                                <i class="fa-solid fa-marker mr-1"></i> Chấm bài
-                                                            </button>
-                                                            <button onclick="deleteGroupAsTeacher('${groupName}')" class="px-2 py-1.5 rounded-xl text-xs font-medium transition bg-rose-50 hover:bg-rose-100 text-rose-600 inline-flex items-center" title="Xóa nhóm này">
-                                                                <i class="fa-solid fa-trash"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                `;
-                                            }).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Grading & Evaluation Panel -->
-                        <div class="flex flex-col gap-4">
-                            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
-                                <h3 class="font-bold text-slate-800 text-xs sm:text-sm mb-3 flex items-center space-x-2">
-                                    <i class="fa-solid fa-award text-amber-500"></i>
-                                    <span>Chấm Điểm & Nhận Xét (Lớp ${currentClass})</span>
-                                </h3>
-                                <div class="grid grid-cols-2 gap-2.5 mb-3">
-                                    <div class="bg-amber-50 p-3 rounded-2xl border border-amber-100 text-center">
-                                        <span class="text-[11px] text-amber-700 font-medium">Điểm Nhóm</span>
-                                        <div class="text-lg sm:text-xl font-extrabold text-amber-600 mt-0.5">${data.grades.groupScore}</div>
-                                    </div>
-                                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 text-center">
-                                        <span class="text-[11px] text-indigo-700 font-medium">Điểm Cá Nhân</span>
-                                        <div class="text-lg sm:text-xl font-extrabold text-indigo-600 mt-0.5">${data.grades.individualScore}</div>
-                                    </div>
-                                </div>
-                                <div class="space-y-2.5">
-                                    <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Điểm nhóm</label>
-                                        <input type="text" id="inputGrGroupScore" value="${data.grades.groupScore}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Điểm cá nhân trung bình</label>
-                                        <input type="text" id="inputGrIndScore" value="${data.grades.individualScore}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Nhận xét của giáo viên</label>
-                                        <textarea id="inputGrFeedback" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">${data.grades.feedback}</textarea>
-                                    </div>
-                                    <button onclick="saveTeacherGradesAndFeedback()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
-                                        <i class="fa-solid fa-circle-check mr-1"></i> Xuất bản điểm lên đám mây
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        async function saveTeacherTaskInfo() {
-            const title = document.getElementById('teacherTaskTitle').value.trim();
-            const subject = document.getElementById('teacherTaskSubject').value.trim();
-            const deadline = document.getElementById('teacherTaskDeadline').value.trim();
-            const desc = document.getElementById('teacherTaskDesc').value.trim();
-
-            const data = getCurrentData();
-            if (title) data.task.title = title;
-            if (subject) data.task.subject = subject;
-            if (deadline) data.task.deadline = deadline;
-            if (desc) data.task.description = desc;
-
-            await saveToCloud();
-            showToast("Đã lưu & đồng bộ bài tập lên đám mây thành công!");
-        }
-
-        async function saveTeacherGradesAndFeedback() {
-            const gScore = document.getElementById('inputGrGroupScore').value.trim();
-            const iScore = document.getElementById('inputGrIndScore').value.trim();
-            const feedback = document.getElementById('inputGrFeedback').value.trim();
-
-            const data = getCurrentData();
-            data.grades.groupScore = gScore || "9.0";
-            data.grades.individualScore = iScore || "9.0";
-            data.grades.feedback = feedback || "Bài làm tốt.";
-
-            await saveToCloud();
-            showToast("Đã xuất bản điểm lên đám mây thành công!");
-        }
-
-        async function deleteGroupAsTeacher(groupName) {
-            if (confirm(`Thầy/Cô có chắc chắn muốn xóa nhóm ${groupName} không?`)) {
-                const data = getCurrentData();
-                if (data.groups[groupName]) {
-                    delete data.groups[groupName];
-                    await saveToCloud();
-                    showToast(`Đã xóa nhóm ${groupName} thành công!`);
-                }
-            }
-        }
-
-        function openTeacherUploadFileModal() {
-            const html = `
-                <div class="space-y-3 py-1">
-                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-                        <p class="font-bold mb-0.5">Đính kèm tài liệu giao bài (Word, Excel, PDF...):</p>
-                        <p>Nhập tên file và đường dẫn trực tuyến để học sinh tải về.</p>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Tên tài liệu</label>
-                        <input type="text" id="inpTeacherFileName" placeholder="VD: Huong_dan.docx" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Đường dẫn file (URL / Google Drive)</label>
-                        <input type="text" id="inpTeacherFileLink" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
-                    </div>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="confirmTeacherUploadFile()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-xs transition shadow">Đính Kèm</button>
-            `;
-            openModal("Giáo Viên Đính Kèm Tài Liệu", html, footer);
-        }
-
-        async function confirmTeacherUploadFile() {
-            const name = document.getElementById('inpTeacherFileName').value.trim();
-            const link = document.getElementById('inpTeacherFileLink').value.trim();
-            if (!name) {
-                showToast("Vui lòng nhập tên tài liệu!", "error");
-                return;
-            }
-            const data = getCurrentData();
-            if (!data.task.teacherFiles) data.task.teacherFiles = [];
-            data.task.teacherFiles.push({ name: name, link: link || "#" });
-            closeModal();
-            await saveToCloud();
-            showToast(`Đã đính kèm "${name}" thành công!`);
-        }
-
-        async function removeTeacherFile(index) {
-            const data = getCurrentData();
-            if (data.task.teacherFiles && data.task.teacherFiles[index]) {
-                data.task.teacherFiles.splice(index, 1);
-                await saveToCloud();
-                showToast("Đã xóa tài liệu đính kèm");
-            }
-        }
-
-        function openAssignTaskModal(targetClass) {
-            const clsData = masterData.classes[targetClass].data.task;
-            const teacherFiles = clsData.teacherFiles || [];
-
-            let filesPreviewHtml = teacherFiles.length === 0 
-                ? '<p class="text-slate-400 italic text-[11px]">Chưa có file tài liệu.</p>'
-                : teacherFiles.map((f, i) => `<span class="inline-flex items-center bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg text-xs font-semibold mr-1 mb-1 border border-indigo-200"><i class="fa-solid fa-file-word text-blue-600 mr-1"></i> ${f.name}</span>`).join('');
-
-            const html = `
-                <div class="space-y-3 py-1">
-                    <div class="bg-indigo-50 p-2.5 rounded-2xl text-xs text-indigo-800">
-                        <p class="font-bold">Đang giao bài tập riêng cho: <span class="text-indigo-600 uppercase font-extrabold">Lớp ${targetClass}</span></p>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Tiêu đề bài tập</label>
-                        <input type="text" id="assignTaskTitle" value="${clsData.title === 'Chưa có đề bài được giao' ? '' : clsData.title}" placeholder="VD: Ứng dụng AI..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Môn học</label>
-                        <input type="text" id="assignTaskSubject" value="${clsData.subject === 'Chưa phân loại' ? '' : clsData.subject}" placeholder="VD: Tin học" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Hạn nộp</label>
-                        <input type="text" id="assignTaskDeadline" value="${clsData.deadline === 'Chưa xác định' ? '' : clsData.deadline}" placeholder="VD: 25/10/2026" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Yêu cầu sản phẩm</label>
-                        <textarea id="assignTaskDesc" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">${clsData.description === 'Giáo viên chưa cập nhật nội dung bài tập cho lớp này.' ? '' : clsData.description}</textarea>
-                    </div>
-                    
-                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
-                        <label class="block text-[11px] font-bold text-slate-700"><i class="fa-solid fa-paperclip mr-1 text-indigo-600"></i> Đính kèm file tài liệu (Word, Excel...):</label>
-                        <div id="assignModalFilesContainer" class="flex flex-wrap gap-1 mb-1.5">${filesPreviewHtml}</div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input type="text" id="inpAssignFileName" placeholder="Tên file (VD: bai_tap.docx)" class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs">
-                            <div class="flex space-x-1">
-                                <input type="text" id="inpAssignFileLink" placeholder="Đường dẫn file (URL)" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs">
-                                <button onclick="addFileToAssignment('${targetClass}')" type="button" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-sm">+</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="saveAssignedTaskForClass('${targetClass}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Giao Bài Cho Lớp ${targetClass}</button>
-            `;
-            openModal(`Giao Bài Cho Lớp ${targetClass}`, html, footer);
-        }
-
-        function addFileToAssignment(cls) {
-            const name = document.getElementById('inpAssignFileName').value.trim();
-            const link = document.getElementById('inpAssignFileLink').value.trim();
-            if (!name) {
-                showToast("Vui lòng nhập tên file tài liệu!", "error");
-                return;
-            }
-            const clsTask = masterData.classes[cls].data.task;
-            if (!clsTask.teacherFiles) clsTask.teacherFiles = [];
-            clsTask.teacherFiles.push({ name: name, link: link || "#" });
-            
-            document.getElementById('inpAssignFileName').value = "";
-            document.getElementById('inpAssignFileLink').value = "";
-            openAssignTaskModal(cls);
-            showToast(`Đã thêm ${name}!`);
-        }
-
-        async function saveAssignedTaskForClass(cls) {
-            const title = document.getElementById('assignTaskTitle').value.trim();
-            const subject = document.getElementById('assignTaskSubject').value.trim();
-            const deadline = document.getElementById('assignTaskDeadline').value.trim();
-            const desc = document.getElementById('assignTaskDesc').value.trim();
-
-            if (!title) {
-                showToast("Vui lòng nhập tiêu đề bài tập!", "error");
-                return;
-            }
-
-            masterData.classes[cls].data.task.title = title;
-            masterData.classes[cls].data.task.subject = subject || "Chưa phân loại";
-            masterData.classes[cls].data.task.deadline = deadline || "Chưa xác định";
-            masterData.classes[cls].data.task.description = desc || "Không có mô tả chi tiết.";
-
-            closeModal();
-            await saveToCloud();
-            showToast(`Đã giao bài thành công cho Lớp ${cls}!`);
-        }
-
-        function renderStudentWorkspace() {
-            const data = getCurrentData();
-            const currentClass = window.appState.getClass();
-            const currentGroup = window.appState.getGroup();
-            
-            if (!data.groups[currentGroup]) {
-                const groupKeys = Object.keys(data.groups);
-                if (groupKeys.length > 0) {
-                    window.appState.setGroup(groupKeys[0]);
-                }
-            }
-
-            const activeGroupKey = window.appState.getGroup();
-            const groupInfo = data.groups[activeGroupKey] || { membersCount: 4, progress: 0, status: "Chưa làm", code: `${currentClass}-T1`, submissions: {}, participants: {}, consents: {}, submittedStatus: false };
-            const teacherFiles = data.task.teacherFiles || [];
-            const task = data.task;
-            const participantsObj = groupInfo.participants || {};
-            const studentName = window.appState.getStudentName();
-            const myInfo = participantsObj[studentName] || { role: "Thành viên" };
-            const memberCount = Object.keys(participantsObj).length;
-
-            let teacherFilesStudentHtml = teacherFiles.length === 0
-                ? `<p class="text-slate-400 italic text-xs">Chưa có tài liệu đính kèm từ giáo viên.</p>`
-                : teacherFiles.map(f => `
-                    <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-indigo-200 text-xs shadow-sm mb-1.5">
-                        <span class="font-bold text-indigo-950 truncate"><i class="fa-solid fa-file-arrow-down text-indigo-600 mr-1.5"></i> ${f.name}</span>
-                        <a href="${f.link}" target="_blank" class="px-3 py-1 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition">Tải / Xem</a>
-                    </div>
-                `).join('');
-
-            let membersTableRowsHtml = Object.entries(participantsObj).length === 0
-                ? `<tr><td colspan="3" class="py-4 text-center text-slate-400 italic text-xs">Chưa có học sinh nào trong nhóm.</td></tr>`
-                : Object.entries(participantsObj).map(([pName, pInfo]) => {
-                    const consentVal = groupInfo.consents?.[pName] || 'Chưa bỏ phiếu';
-                    const isMe = pName === studentName;
-                    return `
-                        <tr class="hover:bg-slate-50 transition">
-                            <td class="py-2.5 px-2 font-semibold text-slate-800">
-                                ${pName} ${isMe ? '<span class="text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded-md font-bold">Bạn</span>' : ''}
-                            </td>
-                            <td class="py-2.5 px-2">
-                                <select onchange="updateMemberRoleInsideGroup('${pName}', this.value)" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-indigo-600">
-                                    <option value="Nhóm trưởng" ${pInfo.role === 'Nhóm trưởng' ? 'selected' : ''}>Nhóm trưởng</option>
-                                    <option value="Nhóm phó" ${pInfo.role === 'Nhóm phó' ? 'selected' : ''}>Nhóm phó</option>
-                                    <option value="Thư ký" ${pInfo.role === 'Thư ký' ? 'selected' : ''}>Thư ký</option>
-                                    <option value="Thành viên" ${pInfo.role === 'Thành viên' ? 'selected' : ''}>Thành viên</option>
-                                </select>
-                            </td>
-                            <td class="py-2.5 px-2 text-right">
-                                <span class="text-[11px] font-bold ${consentVal === 'Đồng ý' ? 'text-emerald-600' : 'text-amber-600'}">${consentVal}</span>
-                            </td>
-                        </tr>
-                    `;
-                }).join('');
-
-            return `
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div class="flex flex-col gap-4">
-                        <!-- Group Info Card & Roster Table Sent to Teacher -->
-                        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="flex items-center space-x-2.5 text-left">
-                                    <div class="bg-indigo-100 text-indigo-700 p-2.5 rounded-2xl animate-pulse">
-                                        <i class="fa-solid fa-users text-lg"></i>
-                                    </div>
-                                    <div>
-                                        <h3 class="font-extrabold text-slate-900 text-xs sm:text-sm neon-blink text-indigo-700">${activeGroupKey || 'Chưa chọn nhóm'} (${currentClass})</h3>
-                                        <p class="text-[11px] text-slate-500">HS: <span class="font-bold text-blue-600">${studentName || 'Chưa đăng nhập'}</span></p>
-                                        <p class="text-[10px] text-indigo-600 font-bold">Vai trò: ${myInfo.role}</p>
-                                    </div>
-                                </div>
-                                <button onclick="openStudentLoginModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-xl transition">
-                                    <i class="fa-solid fa-right-left"></i> Đổi
-                                </button>
-                            </div>
-                            
-                            <!-- Bảng phân công danh sách học sinh -->
-                            <div class="space-y-2 mt-2 bg-indigo-50/60 p-3 rounded-2xl border border-indigo-100">
-                                <div class="flex justify-between items-center text-xs font-bold text-indigo-900">
-                                    <span><i class="fa-solid fa-clipboard-user mr-1"></i> Bảng Phân Công & Vai Trò:</span>
-                                    <button onclick="syncCloudDataNow()" class="text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded-full hover:bg-emerald-500"><i class="fa-solid fa-cloud"></i> Lưu & Đồng bộ</button>
-                                </div>
-                                <div class="overflow-x-auto my-1.5 bg-white rounded-xl border border-indigo-200">
-                                    <table class="w-full text-left border-collapse text-xs">
-                                        <thead>
-                                            <tr class="border-b border-indigo-100 text-slate-400 font-semibold text-[10px] bg-slate-50">
-                                                <th class="py-2 px-2">Họ và tên</th>
-                                                <th class="py-2 px-2">Vai trò</th>
-                                                <th class="py-2 px-2 text-right">Biểu quyết</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-slate-100">
-                                            ${membersTableRowsHtml}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="pt-1 text-center">
-                                    <span class="text-[11px] font-extrabold text-indigo-800 bg-white px-3 py-1.5 rounded-full shadow-sm border border-indigo-200 block">
-                                        📋 Báo cáo: Dưới danh sách này có <b class="text-indigo-600 text-xs">${memberCount}</b> thành viên của nhóm.
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div class="mt-3 space-y-2">
-                                <button onclick="saveToCloud(); showToast('Đã lưu dữ liệu nhóm lên đám mây thành công!');" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-2xl text-xs transition shadow-sm flex items-center justify-center space-x-1.5">
-                                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                                    <span>Lưu dữ liệu nhóm lên đám mây</span>
-                                </button>
-                                <button onclick="openStudentTaskGuideModal()" class="w-full bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-medium py-2 rounded-2xl text-xs transition border border-cyan-200 flex items-center justify-center space-x-1.5">
-                                    <i class="fa-solid fa-book-open-reader"></i>
-                                    <span>Xem hướng dẫn nhóm</span>
-                                </button>
-                                ${myInfo.role === 'Thư ký' || myInfo.role === 'Nhóm trưởng' ? `
-                                    <button onclick="openSecretarySubmitModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-2xl text-xs transition shadow-sm flex items-center justify-center space-x-2">
-                                        <i class="fa-solid fa-paper-plane"></i>
-                                        <span>Thư ký chốt & Nộp bài</span>
-                                    </button>
-                                ` : `
-                                    <button onclick="openConsentVoteModal()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 rounded-2xl text-xs transition shadow-sm flex items-center justify-center space-x-2">
-                                        <i class="fa-solid fa-square-check"></i>
-                                        <span>Bỏ phiếu Đồng ý / Không đồng ý nộp bài</span>
-                                    </button>
-                                `}
-                            </div>
-                        </div>
-
-                        <!-- Grades Box -->
-                        <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200">
-                            <h4 class="font-bold text-slate-800 text-xs mb-2 flex items-center space-x-2">
-                                <i class="fa-solid fa-award text-amber-500"></i>
-                               <span>Điểm số & Nhận xét từ Giáo viên</span>
-                            </h4>
-                            <div class="space-y-2 text-xs">
-                                <div class="flex justify-between bg-amber-50 p-2 rounded-xl border border-amber-100 font-semibold">
-                                    <span class="text-amber-800">Điểm nhóm:</span>
-                                    <span class="text-amber-600 font-extrabold text-sm">${data.grades.groupScore}</span>
-                                </div>
-                                <div class="flex justify-between bg-indigo-50 p-2 rounded-xl border border-indigo-100 font-semibold">
-                                    <span class="text-indigo-800">Điểm cá nhân:</span>
-                                    <span class="text-indigo-600 font-extrabold text-sm">${data.grades.individualScore}</span>
-                                </div>
-                                <p class="text-slate-600 italic bg-slate-50 p-2 rounded-xl">"${data.grades.feedback}"</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column: Task Details, Submissions & Chat -->
-                    <div class="lg:col-span-2 flex flex-col gap-4">
-                        <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-white rounded-3xl p-4 sm:p-5 shadow-xl border border-indigo-500/30">
-                            <div class="flex justify-between items-start mb-2.5">
-                                <div>
-                                    <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">Đề bài từ Giáo viên • Lớp ${currentClass}</span>
-                                    <h3 class="text-base sm:text-lg font-extrabold text-white mt-1.5">${task.title}</h3>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-[11px] text-rose-300 font-bold block"><i class="fa-regular fa-clock mr-1"></i> Hạn: ${task.deadline}</span>
-                                    <span class="text-[10px] text-cyan-200">Môn: ${task.subject}</span>
-                                </div>
-                            </div>
-                            <div class="bg-white/10 p-3 rounded-2xl border border-white/10 text-xs text-cyan-50 space-y-1.5">
-                                <p class="font-semibold"><i class="fa-solid fa-file-lines text-cyan-300 mr-1"></i> Yêu cầu sản phẩm:</p>
-                                <p class="text-slate-200 leading-relaxed">${task.description}</p>
-                            </div>
-                            <div class="mt-3 pt-2.5 border-t border-white/10">
-                                <p class="text-[11px] font-bold text-cyan-200 mb-1.5"><i class="fa-solid fa-paperclip mr-1"></i> Tài liệu đính kèm từ giáo viên (Tải về để làm):</p>
-                                <div class="space-y-1">${teacherFilesStudentHtml}</div>
-                            </div>
-                        </div>
-
-                        <!-- Submissions Grid -->
-                        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
-                            <h4 class="font-bold text-slate-800 text-xs sm:text-sm mb-3 flex items-center space-x-2">
-                                <i class="fa-solid fa-folder-open text-blue-600"></i>
-                                <span>Kho nộp bài chung của nhóm (Mọi thành viên đều có thể đóng góp tài liệu)</span>
-                            </h4>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                                ${renderSubmissionCard('Word (.docx)', 'fa-file-word', 'text-blue-600', groupInfo.submissions?.word, 'word')}
-                                ${renderSubmissionCard('Excel (.xlsx)', 'fa-file-excel', 'text-emerald-600', groupInfo.submissions?.excel, 'excel')}
-                                ${renderSubmissionCard('PowerPoint (.pptx)', 'fa-file-powerpoint', 'text-amber-600', groupInfo.submissions?.ppt, 'ppt')}
-                                ${renderSubmissionCard('Hình ảnh (.png)', 'fa-file-image', 'text-indigo-600', groupInfo.submissions?.png, 'png')}
-                                ${renderSubmissionCard('Video', 'fa-file-video', 'text-rose-600', groupInfo.submissions?.video, 'video')}
-                                ${renderSubmissionCard('Audio', 'fa-file-audio', 'text-purple-600', groupInfo.submissions?.audio, 'audio')}
-                            </div>
-                        </div>
-
-                        <!-- Chat Box -->
-                        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col h-[320px]">
-                            <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                                <div class="flex items-center space-x-2 text-xs font-bold text-slate-800">
-                                    <i class="fa-solid fa-comments text-blue-600"></i>
-                                    <span>Thảo luận nhóm (${activeGroupKey || 'Tổ'} - Lớp ${currentClass})</span>
-                                </div>
-                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Đám mây</span>
-                            </div>
-
-                            <div id="chatMessagesBox" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 py-3">
-                                ${data.discussions.length === 0 ? `
-                                    <p class="text-slate-400 text-xs italic text-center py-10">Chưa có tin nhắn thảo luận nào.</p>
-                                ` : data.discussions.map(msg => `
-                                    <div class="flex flex-col space-y-0.5 bg-slate-50 p-2.5 rounded-2xl border border-slate-100 shadow-sm">
-                                        <div class="flex justify-between items-center text-[11px]">
-                                            <span class="font-bold text-slate-800">${msg.sender}</span>
-                                            <span class="text-slate-400">${msg.time}</span>
-                                        </div>
-                                        <p class="text-xs text-slate-600">${msg.text}</p>
-                                    </div>
-                                `).join('')}
-                            </div>
-
-                            <div class="pt-2.5 border-t border-slate-100 flex items-center space-x-2">
-                                <input type="text" id="chatInputText" placeholder="Nhập tin nhắn thảo luận..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3 py-2 text-xs focus:outline-none" onkeypress="if(event.key==='Enter') sendChatMessage()">
-                                <button onclick="sendChatMessage()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-2xl text-xs transition shadow-sm">
-                                    <i class="fa-solid fa-paper-plane"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderSubmissionCard(title, iconClass, colorClass, subData, fileKey) {
-            const hasSub = subData && subData.name;
-            return `
-                <div class="p-2.5 bg-slate-50 rounded-2xl border ${hasSub ? 'border-emerald-200 bg-emerald-50/40 shadow-sm' : 'border-slate-200'} flex flex-col justify-between space-y-2">
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid ${iconClass} ${colorClass} text-lg"></i>
-                        <div class="overflow-hidden">
-                            <h5 class="text-xs font-bold text-slate-800 truncate">${title}</h5>
-                            <p class="text-[10px] text-slate-500 truncate">${hasSub ? `${subData.name} (${subData.submittedBy})` : 'Chưa nộp'}</p>
-                        </div>
-                    </div>
-                    <button onclick="openSingleFileUploadModal('${fileKey}', '${title}')" class="w-full py-1.5 bg-white hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold border border-slate-200 transition shadow-sm">
-                        ${hasSub ? '<i class="fa-solid fa-pen text-amber-500 mr-1"></i> Bổ sung' : '<i class="fa-solid fa-upload text-blue-500 mr-1"></i> Đóng góp'}
-                    </button>
-                </div>
-            `;
-        }
-
-        async function updateMemberRoleInsideGroup(pName, newRole) {
-            const currentGroup = window.appState.getGroup();
-            const data = getCurrentData();
-            if (data.groups[currentGroup]?.participants[pName]) {
-                data.groups[currentGroup].participants[pName].role = newRole;
-                await saveToCloud();
-                showToast(`Đã cập nhật vai trò của ${pName} thành ${newRole}`);
-            }
-        }
-
-        function openConsentVoteModal() {
-            const currentGroup = window.appState.getGroup();
-            const studentName = window.appState.getStudentName();
-            const data = getCurrentData();
-            const currentVote = data.groups[currentGroup]?.consents?.[studentName] || 'Chưa bỏ phiếu';
-
-            const html = `
-                <div class="space-y-3 text-center py-1">
-                    <p class="text-xs sm:text-sm text-slate-700">Thư ký đã tổng hợp bài làm. Bạn có đồng ý chốt nộp bài này cho giáo viên không?</p>
-                    <div class="flex justify-center space-x-2.5">
-                        <button onclick="submitConsentVote('Đồng ý')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow ${currentVote === 'Đồng ý' ? 'ring-4 ring-emerald-300' : ''}">
-                            <i class="fa-solid fa-check mr-1"></i> Đồng ý nộp
-                        </button>
-                        <button onclick="submitConsentVote('Không đồng ý')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs transition shadow ${currentVote === 'Không đồng ý' ? 'ring-4 ring-rose-300' : ''}">
-                            <i class="fa-solid fa-xmark mr-1"></i> Chưa đồng ý
+                        <p class="text-xs text-slate-300 truncate">Bài: ${cData.topic || "Chưa có đề bài"}</p>
+                        <button onclick="selectTeacherClass('${cls}')" class="w-full bg-slate-800 hover:bg-slate-700 text-purple-400 text-xs py-2 rounded-lg font-semibold border border-purple-500/30 transition">
+                            Quản lý & Kiểm tra bài
                         </button>
                     </div>
-                    <p class="text-xs text-slate-500">Trạng thái hiện tại của bạn: <b class="text-indigo-600">${currentVote}</b></p>
-                </div>
-            `;
-            openModal("Biểu Quyết Nộp Bài", html);
-        }
-
-        async function submitConsentVote(vote) {
-            const currentGroup = window.appState.getGroup();
-            const studentName = window.appState.getStudentName();
-            const data = getCurrentData();
-            if (!data.groups[currentGroup].consents) {
-                data.groups[currentGroup].consents = {};
-            }
-            data.groups[currentGroup].consents[studentName] = vote;
-            closeModal();
-            await saveToCloud();
-            showToast(`Đã ghi nhận ý kiến: "${vote}" của bạn!`);
-        }
-
-        function openSecretarySubmitModal() {
-            const currentGroup = window.appState.getGroup();
-            const data = getCurrentData();
-            const groupInfo = data.groups[currentGroup];
-            const consents = groupInfo.consents || {};
-            const participants = groupInfo.participants || {};
-            const memberCount = Object.keys(participants).length;
-
-            let consentDetailsHtml = Object.entries(participants).map(([pName, pInfo]) => {
-                const v = consents[pName] || 'Chưa bỏ phiếu';
-                return `<li class="text-xs">• <b>${pName}</b> (${pInfo.role}): <span class="${v === 'Đồng ý' ? 'text-emerald-600 font-bold' : 'text-amber-600'}">${v}</span></li>`;
-            }).join('');
-
-            const html = `
-                <div class="space-y-3 text-xs sm:text-sm">
-                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100">
-                        <p class="font-bold text-indigo-900">Thư ký/Trưởng nhóm chốt nộp bài:</p>
-                        <p class="text-indigo-700">Dưới danh sách này có <b>${memberCount}</b> thành viên của nhóm. Kiểm tra biểu quyết trước khi nộp.</p>
-                    </div>
-                    <ul class="space-y-1 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
-                        ${consentDetailsHtml || '<p class="text-slate-400 italic">Chưa có thông tin biểu quyết.</p>'}
-                    </ul>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="confirmSecretaryFinalSubmit()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow">Xác Nhận Nộp Bài Chính Thức</button>
-            `;
-            openModal("Thư Ký Chốt & Nộp Bài", html, footer);
-        }
-
-        async function confirmSecretaryFinalSubmit() {
-            const currentGroup = window.appState.getGroup();
-            const data = getCurrentData();
-            data.groups[currentGroup].submittedStatus = true;
-            data.groups[currentGroup].status = "Đã nộp bài";
-            data.groups[currentGroup].progress = 100;
-            closeModal();
-            await saveToCloud();
-            showToast("Thư ký đã nộp bài thành công cho giáo viên!");
-        }
-
-        function openSingleFileUploadModal(fileKey, fileTitle) {
-            const currentGroup = window.appState.getGroup();
-            const studentName = window.appState.getStudentName();
-            if (!currentGroup) {
-                showToast("Vui lòng đăng nhập và chọn nhóm trước!", "error");
-                return;
-            }
-            if (!studentName) {
-                showToast("Vui lòng khai báo họ tên học sinh trước!", "error");
-                openStudentLoginModal();
-                return;
-            }
-
-            const html = `
-                <div class="space-y-3 py-1">
-                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-                        <p class="font-bold">Đóng góp file cho mục: ${fileTitle} (${currentGroup})</p>
-                        <p>Học sinh: <b>${studentName}</b></p>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Tên file</label>
-                        <input type="text" id="inpUploadFileName" placeholder="VD: Bao_cao.docx" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Đường dẫn file (URL / Google Drive)</label>
-                        <input type="text" id="inpUploadFileLink" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
-                    </div>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="saveStudentFileSubmission('${fileKey}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow">Xác Nhận Đóng Góp</button>
-            `;
-            openModal(`Đóng Góp File: ${fileTitle}`, html, footer);
-        }
-
-        async function saveStudentFileSubmission(fileKey) {
-            const fileName = document.getElementById('inpUploadFileName').value.trim();
-            const fileLink = document.getElementById('inpUploadFileLink').value.trim();
-            if (!fileName) {
-                showToast("Vui lòng nhập tên file!", "error");
-                return;
-            }
-
-            const currentGroup = window.appState.getGroup();
-            const studentName = window.appState.getStudentName();
-            const data = getCurrentData();
-            if (!data.groups[currentGroup].submissions) {
-                data.groups[currentGroup].submissions = {};
-            }
-
-            data.groups[currentGroup].submissions[fileKey] = {
-                name: fileName,
-                link: fileLink || "#",
-                submittedBy: studentName,
-                date: new Date().toLocaleDateString('vi-VN')
-            };
-
-            closeModal();
-            await saveToCloud();
-            showToast(`Đã đóng góp file thành công bởi ${studentName}!`);
-        }
-
-        function openTeacherInspectModal(groupName) {
-            const data = getCurrentData();
-            const g = data.groups[groupName];
-            const subs = g.submissions || {};
-            const participants = g.participants || {};
-            const consents = g.consents || {};
-            const memberCount = Object.keys(participants).length;
-
-            let subsHtml = Object.keys(subs).length === 0 
-                ? `<p class="text-slate-400 italic text-xs py-1">Tổ này chưa nộp file nào.</p>`
-                : Object.entries(subs).map(([k, s]) => `
-                    <div class="p-2 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
-                        <div>
-                            <span class="font-bold uppercase text-indigo-700">[${k}]</span> <span class="font-semibold text-slate-800">${s.name}</span>
-                            <span class="text-slate-500 block text-[10px]">Đóng góp: ${s.submittedBy} • ${s.date}</span>
-                        </div>
-                        <a href="${s.link}" target="_blank" class="px-2.5 py-1 bg-blue-600 text-white rounded-lg font-semibold">Xem</a>
-                    </div>
-                `).join('');
-
-            let partsHtml = Object.keys(participants).length === 0
-                ? `<p class="text-rose-600 italic text-xs">Chưa có học sinh nào trong nhóm!</p>`
-                : Object.entries(participants).map(([pName, pInfo]) => {
-                    const vote = consents[pName] || 'Chưa bỏ phiếu';
-                    return `
-                        <div class="p-2 bg-emerald-50 rounded-xl border border-emerald-200 text-xs flex justify-between items-center">
-                            <div>
-                                <span class="font-bold text-emerald-900">${pName} (${pInfo.role})</span>
-                                <span class="text-[10px] text-emerald-700 block">Hoạt động lúc ${pInfo.lastActive}</span>
-                            </div>
-                            <span class="text-[11px] font-bold ${vote === 'Đồng ý' ? 'text-emerald-700' : 'text-amber-700'}">Biểu quyết: ${vote}</span>
-                        </div>
-                    `;
-                }).join('');
-
-            const html = `
-                <div class="space-y-3 text-xs sm:text-sm py-1">
-                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100">
-                        <h4 class="font-bold text-indigo-900 text-xs sm:text-sm">Kiểm tra chi tiết ${groupName} (Mã: ${g.code})</h4>
-                        <p class="text-[11px] text-indigo-700">Trạng thái: <b>${g.submittedStatus ? 'Đã nộp' : 'Chưa nộp'}</b> | Dưới danh sách có <b>${memberCount}</b> thành viên.</p>
-                    </div>
-
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700">Thành viên & Vai trò & Biểu quyết:</label>
-                        ${partsHtml}
-                    </div>
-
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700">Tài liệu đã đóng góp:</label>
-                        ${subsHtml}
-                    </div>
-
-                    <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200 space-y-2">
-                        <h5 class="font-bold text-amber-900 flex items-center"><i class="fa-solid fa-stamp mr-1 text-amber-600"></i> Chấm điểm trực tiếp:</h5>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-[10px] font-bold text-amber-900">Điểm nhóm</label>
-                                <input type="text" id="inspectGroupScore" value="${data.grades.groupScore}" class="w-full bg-white border border-amber-300 rounded-xl px-2 py-1.5 text-xs font-bold">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-amber-900">Điểm cá nhân</label>
-                                <input type="text" id="inspectIndScore" value="${data.grades.individualScore}" class="w-full bg-white border border-amber-300 rounded-xl px-2 py-1.5 text-xs font-bold">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] font-bold text-amber-900">Nhận xét của giáo viên</label>
-                            <textarea id="inspectFeedback" rows="2" class="w-full bg-white border border-amber-300 rounded-xl px-2 py-1.5 text-xs">${data.grades.feedback}</textarea>
-                        </div>
-                        <button onclick="stampGradeToGroup('${groupName}')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow">
-                            <i class="fa-solid fa-circle-check mr-1"></i> Lưu & Đóng dấu điểm nhóm
-                        </button>
-                    </div>
-                </div>
-            `;
-            const footer = `
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Đóng</button>
-            `;
-            openModal(`Kiểm tra & Chấm Bài - ${groupName}`, html, footer);
-        }
-
-        async function stampGradeToGroup(groupName) {
-            const gScore = document.getElementById('inspectGroupScore').value.trim();
-            const iScore = document.getElementById('inspectIndScore').value.trim();
-            const feedback = document.getElementById('inspectFeedback').value.trim();
-
-            const data = getCurrentData();
-            data.grades.groupScore = gScore || "9.5";
-            data.grades.individualScore = iScore || "9.5";
-            data.grades.feedback = feedback || "Bài làm xuất sắc.";
-
-            closeModal();
-            await saveToCloud();
-            showToast(`Đã đóng dấu chấm điểm cho ${groupName} thành công!`);
-        }
-
-        const modal = document.getElementById('customModal');
-        const modalContentBox = document.getElementById('modalContentBox');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalBody = document.getElementById('modalBody');
-        const modalFooter = document.getElementById('modalFooter');
-
-        function openModal(title, htmlContent, footerHtml = '') {
-            if (!modal) return;
-            modalTitle.innerText = title;
-            modalBody.innerHTML = htmlContent;
-            modalFooter.innerHTML = footerHtml || `<button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Đóng</button>`;
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modalContentBox.classList.remove('scale-95', 'opacity-0');
-                modalContentBox.classList.add('scale-100', 'opacity-100');
-            }, 10);
-        }
-
-        function closeModal() {
-            if (!modal) return;
-            modalContentBox.classList.remove('scale-100', 'opacity-100');
-            modalContentBox.classList.add('scale-95', 'opacity-0');
-            setTimeout(() => { modal.classList.add('hidden'); }, 200);
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toastNotification');
-            const msgEl = document.getElementById('toastMessage');
-            const iconEl = document.getElementById('toastIcon');
-            if (!toast || !msgEl || !iconEl) return;
-            msgEl.innerText = message;
-            if (type === 'error') {
-                iconEl.className = "fa-solid fa-circle-exclamation text-rose-400 text-base";
-            } else {
-                iconEl.className = "fa-solid fa-circle-check text-emerald-400 text-base";
-            }
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
-
-        function togglePasswordView(cls, realPass) {
-            const span = document.getElementById(`passSpan_${cls}`);
-            const icon = document.getElementById(`eyeIcon_${cls}`);
-            if (!span || !icon) return;
-            if (span.innerText.includes('*')) {
-                span.innerText = realPass;
-                icon.className = "fa-solid fa-eye-slash";
-            } else {
-                span.innerText = "*******";
-                icon.className = "fa-solid fa-eye";
-            }
-        }
-
-        function switchClassFromTeacher(cls) {
-            window.appState.setClass(cls);
-            const selectEl = document.getElementById('selectClassGlobal');
-            if (selectEl) selectEl.value = cls;
-            const badge = document.getElementById('badgeClassDisplay');
-            if (badge) badge.innerText = `Lớp ${cls}`;
-            renderWorkspace();
-            showToast(`Đã chuyển sang Lớp ${cls}`);
-        }
-
-        function switchRoleToStudent() {
-            window.appState.setRole('student');
-            const btnT = document.getElementById('btnRoleTeacher');
-            const btnS = document.getElementById('btnRoleStudent');
-            if (btnT) btnT.className = "px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all text-slate-300 hover:text-white";
-            if (btnS) btnS.className = "px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all text-white bg-indigo-600 shadow";
-            const badgeRole = document.getElementById('badgeRoleDisplay');
-            if (badgeRole) badgeRole.innerText = `Học sinh`;
-            renderWorkspace();
-            showToast("Đã chuyển về giao diện Học sinh");
-        }
-
-        function openAddGroupModal() {
-            openCreateGroupFirstModal();
-        }
-
-        function openQRCodeModal() {
-            const currentUrl = window.location.href;
-            const cls = window.appState.getClass();
-            const html = `
-                <div class="space-y-3 text-center py-1">
-                    <p class="text-xs text-slate-600">Quét mã QR để truy cập trực tuyến <b>Lớp ${cls}</b>:</p>
-                    <div id="modalQRCodeContainer" class="flex justify-center bg-slate-50 p-3 rounded-3xl border border-slate-200 inline-block mx-auto"></div>
-                </div>
-            `;
-            openModal(`Mã QR Lớp ${cls}`, html);
-            
-            setTimeout(() => {
-                const container = document.getElementById('modalQRCodeContainer');
-                if (container) {
-                    container.innerHTML = "";
-                    new QRCode(container, {
-                        text: currentUrl,
-                        width: 150,
-                        height: 150,
-                        colorDark: "#1e293b",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.H
-                    });
-                }
-            }, 50);
-        }
-
-        async function sendChatMessage() {
-            const input = document.getElementById('chatInputText');
-            if (!input) return;
-            const text = input.value.trim();
-            if (!text) return;
-            const now = new Date();
-            const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-            const studentName = window.appState.getStudentName() || 'Học sinh';
-            const data = getCurrentData();
-            data.discussions.push({
-                sender: window.appState.getRole() === 'teacher' ? "Thầy Nguyễn Giang Nam (GV)" : `${studentName} (${window.appState.getGroup() || 'Tổ'})`,
-                time: timeStr,
-                text: text
+                `;
             });
-            input.value = "";
-            await saveToCloud();
+            grid.innerHTML = html;
+            loadTeacherPanelData(appState.currentClass);
         }
 
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const urlClass = urlParams.get('class');
-            const urlGroup = urlParams.get('group');
-            if (urlClass && urlGroup) {
-                window.appState.setClass(urlClass);
-                window.appState.setGroup(urlGroup);
-                const selectEl = document.getElementById('selectClassGlobal');
-                if (selectEl) selectEl.value = urlClass;
+        function selectTeacherClass(cls) {
+            appState.currentClass = cls;
+            renderTeacherDashboard();
+        }
+
+        function loadTeacherPanelData(cls) {
+            const cData = appState.classes[cls];
+            document.getElementById('teacherPanelClassBadge').innerText = `Lớp ${cls}`;
+            document.getElementById('teacherSelectedClassName').innerText = `Lớp ${cls}`;
+            document.getElementById('teacherInputTopic').value = cData.topic || "";
+            document.getElementById('teacherInputRequirement').value = cData.requirement || "";
+            document.getElementById('teacherSelectedFileName').innerText = cData.attachmentName || "Chọn tệp...";
+
+            const container = document.getElementById('teacherGroupsSummaryContainer');
+            const groups = cData.groups;
+            const codes = Object.keys(groups);
+            const selectGroupDropdown = document.getElementById('teacherSelectTargetGroup');
+            const inspectDropdown = document.getElementById('teacherSelectInspectGroup');
+            let dropdownHtml = '<option value="">-- Chọn tổ nhóm --</option>';
+            let inspectHtml = '<option value="">-- Chọn tổ nhóm để kiểm tra --</option>';
+
+            if (codes.length === 0) {
+                container.innerHTML = `<div class="text-slate-500 italic text-center py-12">Chưa có tổ nào trong lớp.</div>`;
+            } else {
+                let html = '';
+                codes.forEach(code => {
+                    const g = groups[code];
+                    dropdownHtml += `<option value="${code}">${g.name} (Mã: ${g.code})</option>`;
+                    inspectHtml += `<option value="${code}">${g.name} (Mã: ${g.code})</option>`;
+                    const subStatus = g.submitted ? '<span class="text-emerald-400 font-bold">Đã nộp bài</span>' : '<span class="text-amber-400">Chưa nộp</span>';
+                    html += `
+                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-white text-xs">${g.name} (Mã: ${g.code})</span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-[11px]">${subStatus}</span>
+                                    <button onclick="teacherDeleteGroup('${cls}', '${code}')" class="text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <p class="text-[11px] text-slate-300">Thành viên: ${g.members ? g.members.length : 0} HS | Thảo luận: ${g.chats ? g.chats.length : 0}</p>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+            selectGroupDropdown.innerHTML = dropdownHtml;
+            inspectDropdown.innerHTML = inspectHtml;
+            renderTeacherGroupInspection();
+        }
+
+        function renderTeacherGroupInspection() {
+            const cls = appState.currentClass;
+            const groupCode = document.getElementById('teacherSelectInspectGroup').value;
+            const membersListDiv = document.getElementById('teacherInspectMembersList');
+            const chatHistoryDiv = document.getElementById('teacherInspectChatHistory');
+
+            if (!groupCode) {
+                membersListDiv.innerHTML = "Chưa chọn nhóm.";
+                chatHistoryDiv.innerHTML = `<div class="text-slate-500 italic text-center py-10">Vui lòng chọn tổ nhóm để xem chi tiết thảo luận và bài làm.</div>`;
+                return;
             }
 
-            renderWorkspace();
-            setTimeout(() => { speakIntroSpeech(); }, 500);
-        };
+            const group = appState.classes[cls].groups[groupCode];
+            if (!group) return;
+
+            if (!group.members || group.members.length === 0) {
+                membersListDiv.innerHTML = "Không có thành viên.";
+            } else {
+                let mHtml = '<ul class="space-y-1">';
+                group.members.forEach(m => {
+                    const voteTxt = m.consented ? '<span class="text-emerald-400 font-bold">Đồng ý nộp</span>' : '<span class="text-slate-400">Chưa đồng ý</span>';
+                    mHtml += `<li>• <strong>${m.name}</strong> (${m.role}) - ${voteTxt}</li>`;
+                });
+                mHtml += '</ul>';
+                membersListDiv.innerHTML = mHtml;
+            }
+
+            if (!group.chats || group.chats.length === 0) {
+                chatHistoryDiv.innerHTML = `<div class="text-slate-500 italic text-center py-10">Nhóm này chưa có nội dung thảo luận hoặc bài làm nào được gửi.</div>`;
+            } else {
+                let cHtml = '';
+                group.chats.forEach(c => {
+                    cHtml += `
+                        <div class="bg-slate-950 p-2 rounded border border-slate-800 space-y-1">
+                            <div class="flex items-center justify-between text-[10px] text-slate-400">
+                                <span class="font-bold text-blue-400">${c.sender} (${c.role})</span>
+                                <span>${c.time}</span>
+                            </div>
+                            <p class="text-slate-200 text-xs">${c.message}</p>
+                        </div>
+                    `;
+                });
+                chatHistoryDiv.innerHTML = cHtml;
+            }
+        }
+
+        function teacherDeleteGroup(cls, code) {
+            if (confirm(`Xóa tổ nhóm này khỏi lớp ${cls}?`)) {
+                delete appState.classes[cls].groups[code];
+                if (appState.activeGroupCode === code) appState.activeGroupCode = "";
+                saveAppDataLocally();
+                pushDataToCloud();
+                loadTeacherPanelData(cls);
+                renderUI();
+                alert("Đã xóa nhóm thành công!");
+            }
+        }
+
+        function handleTeacherFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const cls = appState.currentClass;
+            appState.classes[cls].attachmentName = file.name;
+            appState.classes[cls].attachmentUrl = URL.createObjectURL(file);
+            document.getElementById('teacherSelectedFileName').innerText = file.name;
+            saveAppDataLocally();
+            pushDataToCloud();
+            alert(`Đã đính kèm tệp ${file.name}!`);
+        }
+
+        function saveTeacherAssignment() {
+            const cls = appState.currentClass;
+            appState.classes[cls].topic = document.getElementById('teacherInputTopic').value.trim();
+            appState.classes[cls].requirement = document.getElementById('teacherInputRequirement').value.trim();
+            saveAppDataLocally();
+            pushDataToCloud();
+            renderUI();
+            alert(`Đã lưu và giao bài tập lên đám mây cho Lớp ${cls}!`);
+        }
+
+        function saveTeacherGrades() {
+            const cls = appState.currentClass;
+            const groupCode = document.getElementById('teacherSelectTargetGroup').value;
+            const gGrade = document.getElementById('teacherInputGradeGroup').value.trim();
+            const pGrade = document.getElementById('teacherInputGradePersonal').value.trim();
+            const feedback = document.getElementById('teacherInputFeedback').value.trim();
+
+            if (!groupCode) {
+                alert("Vui lòng chọn tổ nhóm cần chấm điểm!");
+                return;
+            }
+            if (!appState.classes[cls].grades) appState.classes[cls].grades = {};
+            appState.classes[cls].grades[groupCode] = { groupGrade: gGrade, personalGrade: pGrade };
+            appState.classes[cls].teacherFeedback[groupCode] = feedback;
+
+            saveAppDataLocally();
+            pushDataToCloud();
+            renderUI();
+            alert("Đã xuất bản điểm số lên đám mây thành công!");
+        }
     </script>
-
-    <footer class="bg-white border-t border-slate-200 py-2.5 text-center text-[10px] sm:text-xs text-slate-500 shrink-0 z-10">
-        <p>Bài Tập hoạt động nhóm • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây 100%</p>
-    </footer>
-
 </body>
 </html>
