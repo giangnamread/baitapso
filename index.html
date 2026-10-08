@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bài Tập hoạt động nhóm - bài tập số (Đồng bộ đám mây thời gian thực)</title>
+    <title>Bài Tập hoạt động nhóm - bài tập số (Đồng bộ đám mây đầy đủ)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -31,7 +31,7 @@
                     </div>
                     <div>
                         <h1 class="font-bold text-base md:text-lg text-white tracking-wide">Bài Tập hoạt động nhóm</h1>
-                        <p class="text-xs text-slate-400">Phát triển bởi Thầy giáo Nguyễn Giang Nam • <span id="syncStatusBadge" class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Đang đồng bộ đám mây</span></p>
+                        <p class="text-xs text-slate-400">Phát triển bởi Thầy giáo Nguyễn Giang Nam • <span id="syncStatusBadge" class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Sẵn sàng đồng bộ</span></p>
                     </div>
                 </div>
             </div>
@@ -39,6 +39,9 @@
             <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
                 <button onclick="manualSyncToCloud()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-medium shadow transition flex items-center space-x-1.5">
                     <i class="fa-solid fa-cloud-arrow-up"></i><span>Lưu đám mây</span>
+                </button>
+                <button onclick="manualFetchFromCloud()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg font-medium shadow transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-cloud-arrow-down"></i><span>Tải dữ liệu đám mây</span>
                 </button>
                 <div class="flex items-center space-x-1 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
                     <span class="text-xs text-slate-400 font-medium">Lớp:</span>
@@ -134,22 +137,26 @@
                             </div>
                         </div>
 
-                        <!-- Chat & File Uploads -->
+                        <!-- Chat & File Selection / Contributions -->
                         <div class="space-y-3 pt-2 border-t border-slate-700">
                             <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
-                                <i class="fa-solid fa-comments text-emerald-400"></i><span>Trao đổi nhóm & Nộp bài làm:</span>
+                                <i class="fa-solid fa-comments text-emerald-400"></i><span>Trao đổi nhóm & Đóng góp bài làm:</span>
                             </h4>
                             <div id="groupChatBox" class="bg-slate-900/80 rounded-lg p-3 h-36 overflow-y-auto custom-scrollbar space-y-2 border border-slate-800 text-xs">
                                 <div class="text-slate-500 italic text-center py-8">Chưa có nội dung trao đổi.</div>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <input type="text" id="chatInputMessage" placeholder="Nhập ý kiến thảo luận hoặc nộp bài..." class="flex-grow bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500" onkeypress="if(event.key==='Enter') sendGroupChatMessage()">
-                                <label class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg text-xs cursor-pointer border border-slate-700 transition" title="Đính kèm file bài làm">
-                                    <i class="fa-solid fa-paperclip text-blue-400"></i>
-                                    <input type="file" id="groupFileAttachment" class="hidden" onchange="handleGroupFileUpload(event)">
-                                </label>
-                                <button onclick="sendGroupChatMessage()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow transition">
-                                    <i class="fa-solid fa-paper-plane"></i>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <select id="contributionFileType" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none">
+                                    <option value="Word (.docx)">Word (.docx)</option>
+                                    <option value="Excel (.xlsx)">Excel (.xlsx)</option>
+                                    <option value="PowerPoint (.pptx)">PowerPoint (.pptx)</option>
+                                    <option value="PDF (.pdf)">PDF (.pdf)</option>
+                                    <option value="Hình ảnh (.png/.jpg)">Hình ảnh (.png/.jpg)</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                                <input type="text" id="chatInputMessage" placeholder="Tên tệp hoặc nội dung đóng góp..." class="flex-grow bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500" onkeypress="if(event.key==='Enter') sendGroupContribution()">
+                                <button onclick="sendGroupContribution()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow transition flex items-center space-x-1">
+                                    <i class="fa-solid fa-plus-circle mr-1"></i><span>Đóng Góp</span>
                                 </button>
                             </div>
                         </div>
@@ -214,9 +221,12 @@
                         <span class="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">Quản trị Giáo viên</span>
                         <h2 class="text-sm md:text-base font-bold text-purple-300">Bảng Quản Lý 4 Lớp & Kiểm Tra Thảo Luận, Bài Làm HS</h2>
                     </div>
-                    <p class="text-xs text-slate-300">Dữ liệu được đồng bộ thời gian thực tự động từ học sinh.</p>
+                    <p class="text-xs text-slate-300">Bấm "Tải dữ liệu đám mây" để lấy dữ liệu mới nhất từ học sinh.</p>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button onclick="manualFetchFromCloud()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-cloud-arrow-down"></i><span>Tải dữ liệu đám mây</span>
+                    </button>
                     <button onclick="switchView('student')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3.5 py-2 rounded-lg font-semibold border border-slate-600 transition">
                         <i class="fa-solid fa-arrow-left mr-1"></i>Quay lại HS
                     </button>
@@ -247,17 +257,15 @@
                             <textarea id="teacherInputRequirement" rows="4" placeholder="Nêu yêu cầu sản phẩm..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-white focus:outline-none custom-scrollbar"></textarea>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-300 mb-1">Tài liệu đính kèm:</label>
-                            <label class="flex-grow bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-300 cursor-pointer flex items-center justify-between transition">
-                                <span id="teacherSelectedFileName" class="truncate">Chọn tệp...</span>
-                                <input type="file" id="teacherFileAttachmentInput" class="hidden" onchange="handleTeacherFileUpload(event)">
-                            </label>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Tài liệu đính kèm từ GV:</label>
+                            <input type="text" id="teacherInputAttachmentName" placeholder="Tên tệp tài liệu giao bài..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none">
                         </div>
                     </div>
 
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
                             <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Danh sách tổ & Trạng thái (<span id="teacherSelectedClassName">10E</span>):</h4>
+                            <button onclick="manualFetchFromCloud()" class="bg-blue-600 hover:bg-blue-500 text-white text-[11px] px-2 py-1 rounded font-medium"><i class="fa-solid fa-rotate mr-1"></i>Làm mới</button>
                         </div>
                         <div id="teacherGroupsSummaryContainer" class="bg-slate-900/60 rounded-lg border border-slate-700 p-3 h-64 overflow-y-auto custom-scrollbar space-y-3 text-xs">
                             <div class="text-slate-500 italic text-center py-12">Chưa có tổ nào.</div>
@@ -283,7 +291,7 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Lịch sử thảo luận & Tệp bài làm đóng góp của học sinh:</label>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Lịch sử thảo luận & Đóng góp bài làm của học sinh:</label>
                         <div id="teacherInspectChatHistory" class="bg-slate-900/90 rounded-lg p-3 h-36 overflow-y-auto custom-scrollbar space-y-2 border border-slate-800 text-xs">
                             <div class="text-slate-500 italic text-center py-10">Chưa có nội dung thảo luận.</div>
                         </div>
@@ -448,7 +456,7 @@
                     <ul class="list-disc list-inside space-y-1.5">
                         <li><strong>Tạo nhóm trước:</strong> Đại diện tổ tạo nhóm và phân công chức vụ ngay. Hệ thống cấp mã QR.</li>
                         <li><strong>Tham gia:</strong> Học sinh quét QR hoặc nhập mã nhóm để tham gia.</li>
-                        <li><strong>Thảo luận & Gửi bài:</strong> Thành viên thảo luận, đóng góp tài liệu bài làm và biểu quyết để thư ký nộp bài lên giáo viên.</li>
+                        <li><strong>Thảo luận & Gửi bài:</strong> Thành viên thảo luận, chọn định dạng tệp đóng góp bài làm và bấm "Tải dữ liệu đám mây" để đồng bộ sang thiết bị khác.</li>
                     </ul>
                 </div>
             </div>
@@ -458,7 +466,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT LOGIC & REALTIME FIREBASE SYNC -->
+    <!-- SCRIPT LOGIC & FIREBASE SYNC -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
@@ -480,21 +488,19 @@
             console.error("Firebase init error:", e);
         }
 
-        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v44";
+        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v47";
 
         let appState = {
             currentClass: "10E",
             activeGroupCode: "",
             currentStudentName: "",
             classes: {
-                "10E": { password: "10E2026", topic: "", requirement: "", attachmentName: "", attachmentUrl: "", groups: {}, teacherFeedback: {}, grades: {} },
-                "12A": { password: "12A2026", topic: "", requirement: "", attachmentName: "", attachmentUrl: "", groups: {}, teacherFeedback: {}, grades: {} },
-                "12B": { password: "12B2026", topic: "", requirement: "", attachmentName: "", attachmentUrl: "", groups: {}, teacherFeedback: {}, grades: {} },
-                "12E": { password: "12E2026", topic: "", requirement: "", attachmentName: "", attachmentUrl: "", groups: {}, teacherFeedback: {}, grades: {} }
+                "10E": { password: "10E2026", topic: "", requirement: "", attachmentName: "", groups: {}, teacherFeedback: {}, grades: {} },
+                "12A": { password: "12A2026", topic: "", requirement: "", attachmentName: "", groups: {}, teacherFeedback: {}, grades: {} },
+                "12B": { password: "12B2026", topic: "", requirement: "", attachmentName: "", groups: {}, teacherFeedback: {}, grades: {} },
+                "12E": { password: "12E2026", topic: "", requirement: "", attachmentName: "", groups: {}, teacherFeedback: {}, grades: {} }
             }
         };
-
-        let isRemoteUpdate = false;
 
         function loadAppData() {
             const saved = localStorage.getItem(APP_STORAGE_KEY);
@@ -508,49 +514,52 @@
             localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(appState));
         }
 
-        // Real-time Cloud Sync mapped to artifacts -> giangnam146-5a353 -> public -> data
-        function initRealtimeSync() {
-            if (!db) return;
-            db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("data")
-              .onSnapshot((doc) => {
-                  if (doc.exists) {
-                      const remoteData = doc.data();
-                      if (JSON.stringify(remoteData) !== JSON.stringify(appState)) {
-                          isRemoteUpdate = true;
-                          appState = remoteData;
-                          saveAppDataLocally();
-                          renderUI();
-                          if (!document.getElementById('teacherView').classList.contains('hidden')) {
-                              renderTeacherDashboard();
-                          }
-                          isRemoteUpdate = false;
-                      }
-                  }
-              }, (error) => {
-                  console.error("Firestore sync error:", error);
-                  document.getElementById('syncStatusBadge').innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-400"></i> Offline';
-              });
-        }
-
         async function pushDataToCloud() {
-            if (!db || isRemoteUpdate) return;
+            if (!db) {
+                alert("Lỗi kết nối Firebase!");
+                return;
+            }
             try {
                 await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("data").set(appState);
+                document.getElementById('syncStatusBadge').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Đã lưu đám mây';
             } catch (e) {
                 console.error("Push cloud error:", e);
+                alert("Lỗi lưu đám mây: " + e.message);
             }
         }
 
-        function manualSyncToCloud() {
+        async function manualSyncToCloud() {
             saveAppDataLocally();
-            pushDataToCloud();
-            alert("💾 Đã lưu và đồng bộ toàn bộ dữ liệu lên đám mây thành công!");
+            await pushDataToCloud();
+            alert("💾 Đã lưu & đồng bộ dữ liệu lên đám mây thành công!");
+        }
+
+        async function manualFetchFromCloud() {
+            if (!db) {
+                alert("Lỗi kết nối Firebase!");
+                return;
+            }
+            try {
+                const docRef = await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("data").get();
+                if (docRef.exists) {
+                    appState = docRef.data();
+                    saveAppDataLocally();
+                    renderUI();
+                    if (!document.getElementById('teacherView').classList.contains('hidden')) {
+                        renderTeacherDashboard();
+                    }
+                    alert("☁️ Đã tải dữ liệu mới nhất từ đám mây về thiết bị thành công!");
+                } else {
+                    alert("Chưa có dữ liệu nào trên đám mây.");
+                }
+            } catch (e) {
+                console.error("Fetch cloud error:", e);
+                alert("Lỗi tải đám mây: " + e.message);
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
             loadAppData();
-            initRealtimeSync();
-
             setTimeout(() => {
                 if ('speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
@@ -590,7 +599,6 @@
             const groupCodes = Object.keys(groups);
             appState.activeGroupCode = groupCodes.length > 0 ? groupCodes[0] : "";
             saveAppDataLocally();
-            pushDataToCloud();
             renderUI();
         }
 
@@ -603,7 +611,7 @@
 
             const attachArea = document.getElementById('studentTeacherAttachmentsArea');
             if (classData.attachmentName) {
-                attachArea.innerHTML = `<a href="${classData.attachmentUrl || '#'}" target="_blank" class="text-blue-400 hover:underline flex items-center space-x-1.5"><i class="fa-solid fa-file-arrow-down"></i><span>${classData.attachmentName}</span></a>`;
+                attachArea.innerHTML = `<span class="text-blue-400 font-medium flex items-center space-x-1.5"><i class="fa-solid fa-file-arrow-down"></i><span>${classData.attachmentName}</span></span>`;
             } else {
                 attachArea.innerHTML = `<span class="text-slate-500 italic">Chưa có tài liệu.</span>`;
             }
@@ -695,12 +703,13 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        function sendGroupChatMessage() {
+        function sendGroupContribution() {
+            const fileType = document.getElementById('contributionFileType').value;
             const input = document.getElementById('chatInputMessage');
-            const msg = input.value.trim();
-            if (!msg) return;
+            const details = input.value.trim();
             const cls = appState.currentClass;
             const group = appState.classes[cls].groups[appState.activeGroupCode];
+            
             if (!group) {
                 alert("Vui lòng chọn nhóm trước!");
                 return;
@@ -712,42 +721,20 @@
             const m = group.members.find(x => x.name.toLowerCase() === appState.currentStudentName.toLowerCase());
             if (m) role = m.role;
 
+            const contentMsg = details ? `📁 Đóng góp [<strong>${fileType}</strong>]: ${details}` : `📁 Đóng góp mục: <strong>${fileType}</strong>`;
+
             if (!group.chats) group.chats = [];
             group.chats.push({
                 sender: appState.currentStudentName,
                 role: role,
-                message: msg,
+                message: contentMsg,
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             });
             input.value = "";
             saveAppDataLocally();
             pushDataToCloud();
             renderUI();
-        }
-
-        function handleGroupFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const cls = appState.currentClass;
-            const group = appState.classes[cls].groups[appState.activeGroupCode];
-            if (!group) {
-                alert("Vui lòng chọn nhóm trước!");
-                return;
-            }
-            if (!appState.currentStudentName) {
-                appState.currentStudentName = prompt("Nhập họ và tên học sinh:") || "Học sinh";
-            }
-            if (!group.chats) group.chats = [];
-            group.chats.push({
-                sender: appState.currentStudentName,
-                role: "Đóng góp bài làm",
-                message: `📁 Đã nộp/đóng góp tệp bài làm: <strong>${file.name}</strong>`,
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            });
-            saveAppDataLocally();
-            pushDataToCloud();
-            renderUI();
-            alert(`Đã tải lên tệp bài làm ${file.name} thành công!`);
+            alert(`Đã đóng góp tệp ${fileType} thành công!`);
         }
 
         function toggleConsentVote() {
@@ -1003,7 +990,7 @@
             document.getElementById('teacherSelectedClassName').innerText = `Lớp ${cls}`;
             document.getElementById('teacherInputTopic').value = cData.topic || "";
             document.getElementById('teacherInputRequirement').value = cData.requirement || "";
-            document.getElementById('teacherSelectedFileName').innerText = cData.attachmentName || "Chọn tệp...";
+            document.getElementById('teacherInputAttachmentName').value = cData.attachmentName || "";
 
             const container = document.getElementById('teacherGroupsSummaryContainer');
             const groups = cData.groups;
@@ -1031,7 +1018,7 @@
                                     <button onclick="teacherDeleteGroup('${cls}', '${code}')" class="text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
-                            <p class="text-[11px] text-slate-300">Thành viên: ${g.members ? g.members.length : 0} HS | Thảo luận: ${g.chats ? g.chats.length : 0}</p>
+                            <p class="text-[11px] text-slate-300">Thành viên: ${g.members ? g.members.length : 0} HS | Đóng góp: ${g.chats ? g.chats.length : 0}</p>
                         </div>
                     `;
                 });
@@ -1070,7 +1057,7 @@
             }
 
             if (!group.chats || group.chats.length === 0) {
-                chatHistoryDiv.innerHTML = `<div class="text-slate-500 italic text-center py-10">Nhóm này chưa có nội dung thảo luận hoặc bài làm nào được gửi.</div>`;
+                chatHistoryDiv.innerHTML = `<div class="text-slate-500 italic text-center py-10">Nhóm này chưa có nội dung đóng góp bài làm nào.</div>`;
             } else {
                 let cHtml = '';
                 group.chats.forEach(c => {
@@ -1100,22 +1087,11 @@
             }
         }
 
-        function handleTeacherFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const cls = appState.currentClass;
-            appState.classes[cls].attachmentName = file.name;
-            appState.classes[cls].attachmentUrl = URL.createObjectURL(file);
-            document.getElementById('teacherSelectedFileName').innerText = file.name;
-            saveAppDataLocally();
-            pushDataToCloud();
-            alert(`Đã đính kèm tệp ${file.name}!`);
-        }
-
         function saveTeacherAssignment() {
             const cls = appState.currentClass;
             appState.classes[cls].topic = document.getElementById('teacherInputTopic').value.trim();
             appState.classes[cls].requirement = document.getElementById('teacherInputRequirement').value.trim();
+            appState.classes[cls].attachmentName = document.getElementById('teacherInputAttachmentName').value.trim();
             saveAppDataLocally();
             pushDataToCloud();
             renderUI();
