@@ -51,7 +51,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'giangnam-nhom-online-v36-cloudsecure';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'giangnam-nhom-online-v37-cloudsync';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
             authDomain: "giangnam146-5a353.firebaseapp.com",
@@ -117,7 +117,7 @@
                 </div>
                 <div>
                     <h1 class="font-extrabold text-xs sm:text-base tracking-wide shimmer-title">Bài Tập hoạt động nhóm - bài tập số</h1>
-                    <p class="text-[10px] text-cyan-100 opacity-90">Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây</p>
+                    <p class="text-[10px] text-cyan-100 opacity-90">Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây 100%</p>
                 </div>
             </div>
 
@@ -193,6 +193,7 @@
 
     </main>
 
+    <!-- Modal Container -->
     <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
         <div id="modalContentBox" class="bg-white rounded-3xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center pb-3 border-b border-slate-100 shrink-0">
@@ -208,6 +209,7 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
     <div id="toastNotification" class="fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs border border-white/10">
         <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
         <span id="toastMessage">Thành công!</span>
@@ -231,7 +233,6 @@
             }
         };
 
-        // Fixed passwords for the 4 classes (Fixed and unchangeable)
         const classPasswords = {
             "10E": "10E2026",
             "12A": "12A2026",
@@ -296,7 +297,6 @@
                 window.onSnapshot(docRef, (docSnap) => {
                     if (docSnap.exists()) {
                         masterData = docSnap.data();
-                        // Enforce fixed class passwords
                         for (let cls in classPasswords) {
                             if (!masterData.classes[cls]) {
                                 masterData.classes[cls] = { password: classPasswords[cls], data: JSON.parse(JSON.stringify(blankClassData)) };
@@ -314,11 +314,9 @@
                     }
                 }, () => {
                     isCloudSynced = false;
-                    console.log("Cloud sync active with local storage fallback.");
                 });
             } catch (err) {
                 isCloudSynced = false;
-                console.log("Cloud sync ready.");
             }
         }
 
@@ -341,7 +339,7 @@
                     saveToLocalStorage();
                     isCloudSynced = true;
                     renderWorkspace();
-                    showToast("Đã đồng bộ dữ liệu đám mây thành công!");
+                    showToast("Đã tải dữ liệu mới nhất từ đám mây thành công!");
                 } else {
                     await window.setDoc(docRef, masterData);
                     isCloudSynced = true;
@@ -366,7 +364,6 @@
                 }
             } catch (err) {
                 isCloudSynced = false;
-                console.log("Local backup saved.");
             }
             renderWorkspace();
         }
@@ -523,7 +520,7 @@
             const html = `
                 <div class="space-y-3 text-center py-1">
                     <div class="bg-emerald-50 p-2.5 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
-                        <p class="font-bold">Đã tạo thành công nhóm <span class="text-emerald-700 uppercase font-extrabold">${name}</span> với <span class="font-bold">${countMembers}</span> thành viên!</p>
+                        <p class="font-bold">Đã tạo thành công nhóm <span class="text-emerald-700 uppercase font-extrabold">${name}</span> với <span class="font-bold">${countMembers}</span> thành viên lên đám mây!</p>
                         <p>Các thành viên hãy quét mã QR dưới đây để vào nhóm.</p>
                     </div>
                     <div id="groupCreatedQRCodeContainer" class="flex justify-center bg-slate-50 p-3 rounded-3xl border border-slate-200 inline-block mx-auto"></div>
@@ -700,7 +697,7 @@
                     <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 space-y-1.5">
                         <p class="font-bold text-indigo-900"><i class="fa-solid fa-bullseye text-indigo-600 mr-1"></i> Quy trình hoạt động nhóm:</p>
                         <p class="text-slate-700 leading-relaxed text-xs">
-                            1. <b>Tạo nhóm trước:</b> Đại diện tạo nhóm, thêm sẵn thành viên & phân công chức vụ ngay trong form.<br>
+                            1. <b>Tạo nhóm trước:</b> Đại diện tạo nhóm, thêm sẵn thành viên & phân công chức vụ ngay trong form và lưu thẳng lên đám mây.<br>
                             2. <b>Đăng nhập:</b> Học sinh nhập mật khẩu cố định của lớp và vào nhóm của mình.<br>
                             3. <b>Nộp bài & Biểu quyết:</b> Đóng góp tài liệu, thư ký chốt nộp bài. Các thành viên bấm biểu quyết <b>Đồng ý</b>.<br>
                             4. <b>Chấm điểm:</b> Giáo viên kiểm tra danh sách thành viên, kiểm tra biểu quyết và chấm điểm trực tiếp trên hệ thống.
@@ -1799,7 +1796,7 @@
     </script>
 
     <footer class="bg-white border-t border-slate-200 py-2.5 text-center text-[10px] sm:text-xs text-slate-500 shrink-0 z-10">
-        <p>Bài Tập hoạt động nhóm • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây</p>
+        <p>Bài Tập hoạt động nhóm • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây 100%</p>
     </footer>
 
 </body>
