@@ -44,15 +44,15 @@
         .neon-blink { animation: neonBlink 1.5s infinite ease-in-out; }
     </style>
 </head>
-<body class="h-full bg-slate-50 text-slate-800 flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+<body class="h-full bg-slate-50 text-slate-800 flex flex-col justify-between selection:bg-cyan-500 selection:text-white overflow-x-hidden">
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'giangnam-nhom-online-v32-cloudsecure';
-        const firebaseConfig = {
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'giangnam-nhom-online-v36-cloudsecure';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
             authDomain: "giangnam146-5a353.firebaseapp.com",
             projectId: "giangnam146-5a353",
@@ -109,27 +109,27 @@
         };
     </script>
 
-    <header class="bg-gradient-to-r from-blue-800 via-indigo-800 to-cyan-700 text-white shadow-xl border-b border-cyan-500/25">
-        <div class="max-w-7xl mx-auto px-3 py-3 flex flex-wrap justify-between items-center gap-3">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white/10 p-2.5 rounded-2xl backdrop-blur-md border border-white/25 shadow-inner animate-pulse-glow">
-                    <i class="fa-solid fa-users-rectangle text-2xl text-cyan-300"></i>
+    <header class="bg-gradient-to-r from-blue-800 via-indigo-800 to-cyan-700 text-white shadow-xl border-b border-cyan-500/25 shrink-0 z-30 sticky top-0">
+        <div class="max-w-7xl mx-auto px-3 py-2 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex items-center space-x-2">
+                <div class="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/25 shadow-inner animate-pulse-glow">
+                    <i class="fa-solid fa-users-rectangle text-lg text-cyan-300"></i>
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-sm sm:text-xl tracking-wide shimmer-title">Bài Tập hoạt động nhóm - bài tập số</h1>
-                    <p class="text-[11px] sm:text-xs text-cyan-100 opacity-90">Phát triển bởi Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây 100%</p>
+                    <h1 class="font-extrabold text-xs sm:text-base tracking-wide shimmer-title">Bài Tập hoạt động nhóm - bài tập số</h1>
+                    <p class="text-[10px] text-cyan-100 opacity-90">Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây</p>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-2 flex-wrap gap-2">
-                <button onclick="syncCloudDataNow()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs px-3 py-2 rounded-xl transition shadow flex items-center space-x-1.5 border border-cyan-400/40" title="Đồng bộ dữ liệu đám mây">
-                    <i class="fa-solid fa-cloud-arrow-down animate-bounce"></i>
+            <div class="flex items-center space-x-2 flex-wrap gap-1.5">
+                <button onclick="syncCloudDataNow()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] px-2.5 py-1.5 rounded-xl transition shadow flex items-center space-x-1 border border-cyan-400/40" title="Trạng thái đám mây">
+                    <i class="fa-solid fa-cloud animate-pulse"></i>
                     <span class="hidden sm:inline">Trạng Thái Đám Mây</span>
                 </button>
 
-                <div class="flex bg-blue-950/60 p-1 rounded-xl border border-blue-400/30 items-center shadow-inner">
-                    <span class="text-[11px] text-cyan-200 px-2 font-medium"><i class="fa-solid fa-school"></i> Lớp:</span>
-                    <select id="selectClassGlobal" onchange="switchClass(this.value)" class="bg-blue-900 text-cyan-300 text-xs font-bold px-2 py-1.5 rounded-lg border border-blue-400/50 focus:outline-none">
+                <div class="flex bg-blue-950/60 p-0.5 rounded-xl border border-blue-400/30 items-center shadow-inner">
+                    <span class="text-[10px] text-cyan-200 px-1.5 font-medium"><i class="fa-solid fa-school"></i> Lớp:</span>
+                    <select id="selectClassGlobal" onchange="switchClass(this.value)" class="bg-blue-900 text-cyan-300 text-[11px] font-bold px-2 py-1 rounded-lg border border-blue-400/50 focus:outline-none">
                         <option value="10E">Lớp 10E</option>
                         <option value="12A">Lớp 12A</option>
                         <option value="12B">Lớp 12B</option>
@@ -137,11 +137,11 @@
                     </select>
                 </div>
 
-                <div class="flex bg-blue-950/60 p-1 rounded-xl border border-blue-400/30 shadow-inner">
-                    <button onclick="openTeacherAuthModal()" id="btnRoleTeacher" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-300 hover:text-white">
+                <div class="flex bg-blue-950/60 p-0.5 rounded-xl border border-blue-400/30 shadow-inner">
+                    <button onclick="openTeacherAuthModal()" id="btnRoleTeacher" class="px-2 py-1 text-[11px] font-semibold rounded-lg transition-all text-slate-300 hover:text-white">
                         <i class="fa-solid fa-chalkboard-user mr-1"></i> Quản lý GV
                     </button>
-                    <button onclick="openStudentLoginModal()" id="btnRoleStudent" class="px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow">
+                    <button onclick="openStudentLoginModal()" id="btnRoleStudent" class="px-2 py-1 text-[11px] font-semibold rounded-lg transition-all text-white bg-gradient-to-r from-blue-600 to-cyan-600 shadow">
                         <i class="fa-solid fa-user-graduate mr-1"></i> Học Sinh
                     </button>
                 </div>
@@ -149,70 +149,67 @@
         </div>
     </header>
 
-    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 grid grid-cols-1 gap-6 overflow-y-auto">
+    <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
 
-        <!-- Banner / Quick Intro -->
-        <section class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 relative overflow-hidden">
+        <!-- Banner & Action Bar -->
+        <section class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-3 relative overflow-hidden shrink-0">
             <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-cyan-400/10 to-indigo-500/10 rounded-full blur-2xl -z-0 pointer-events-none"></div>
-            <div class="flex-1 z-10">
+            <div class="flex-1 z-10 w-full">
                 <div class="flex items-center space-x-2 flex-wrap gap-2">
-                    <span id="badgeClassDisplay" class="bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm neon-blink">Lớp 10E</span>
-                    <span id="badgeRoleDisplay" class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Học sinh</span>
-                    <div class="flex items-center space-x-1 bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200 shadow-sm animate-pulse cursor-pointer" onclick="speakIntroSpeech()">
+                    <span id="badgeClassDisplay" class="bg-gradient-to-r from-indigo-500 to-blue-600 text-white text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider shadow-sm neon-blink">Lớp 10E</span>
+                    <span id="badgeRoleDisplay" class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Học sinh</span>
+                    <div class="flex items-center space-x-1 bg-indigo-50 text-indigo-700 text-[11px] font-bold px-3 py-1 rounded-full border border-indigo-200 shadow-sm animate-pulse cursor-pointer" onclick="speakIntroSpeech()">
                         <i class="fa-solid fa-volume-high text-indigo-600 animate-bounce"></i>
                         <span>Giọng đọc AI (Bấm nghe lại)</span>
                     </div>
                 </div>
-                <h2 id="mainBannerTitle" class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">Bài tập: Chưa có đề bài được giao</h2>
-                <p class="text-xs sm:text-sm text-slate-600 mt-1">Môn học: Chưa xác định • Hạn nộp: <span class="font-semibold text-rose-600">Chưa thiết lập</span></p>
+                <h2 id="mainBannerTitle" class="text-lg sm:text-2xl font-extrabold text-slate-900 mt-2">Bài tập: Chưa có đề bài được giao</h2>
+                <p class="text-xs text-slate-600 mt-0.5">Môn học: Chưa xác định • Hạn nộp: <span class="font-semibold text-rose-600">Chưa thiết lập</span></p>
             </div>
             <div class="flex items-center gap-2 w-full md:w-auto flex-wrap z-10">
-                <button onclick="openStudentTaskGuideModal()" class="flex-1 md:flex-none bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-medium px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
+                <button onclick="openStudentTaskGuideModal()" class="flex-1 md:flex-none bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-medium px-3.5 py-2 rounded-2xl text-xs transition shadow-md flex items-center justify-center space-x-1.5">
                     <i class="fa-solid fa-book-open-reader"></i>
                     <span>Hướng dẫn HS</span>
                 </button>
-                <button onclick="openCreateGroupFirstModal()" class="flex-1 md:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
+                <button onclick="openCreateGroupFirstModal()" class="flex-1 md:flex-none bg-indigo-600 text-white font-medium px-3.5 py-2 rounded-2xl text-xs transition shadow-md flex items-center justify-center space-x-1.5">
                     <i class="fa-solid fa-user-plus"></i>
-                    <span>Tạo nhóm & QR</span>
+                    <span>Tự tạo nhóm (Max 6)</span>
                 </button>
-                <button onclick="openQRCodeModal()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
+                <button onclick="openQRCodeModal()" class="flex-1 md:flex-none bg-emerald-600 text-white font-medium px-3.5 py-2 rounded-2xl text-xs transition shadow-md flex items-center justify-center space-x-1.5">
                     <i class="fa-solid fa-qrcode"></i>
                     <span>Mã QR Lớp</span>
                 </button>
-                <button onclick="openTeacherAuthModal()" class="flex-1 md:flex-none bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition shadow-md flex items-center justify-center space-x-2">
+                <button onclick="openTeacherAuthModal()" class="flex-1 md:flex-none bg-slate-900 text-white font-medium px-3.5 py-2 rounded-2xl text-xs transition shadow-md flex items-center justify-center space-x-1.5">
                     <i class="fa-solid fa-key"></i>
                     <span>Quản lý</span>
-                </button>
-                <button onclick="showInfoModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-2.5 rounded-2xl text-xs sm:text-sm transition flex items-center justify-center" title="Hướng dẫn">
-                    <i class="fa-solid fa-circle-question"></i>
                 </button>
             </div>
         </section>
 
         <!-- Dynamic Workspace Container -->
-        <div id="appWorkspaceContainer" class="grid grid-cols-1 gap-6">
+        <div id="appWorkspaceContainer" class="flex flex-col gap-4 pb-12">
             <!-- Rendered dynamically by JS -->
         </div>
 
     </main>
 
     <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-4">
-        <div id="modalContentBox" class="bg-white rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0">
-            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
-                <h3 id="modalTitle" class="text-base sm:text-lg font-bold text-slate-800">Tiêu đề Modal</h3>
+        <div id="modalContentBox" class="bg-white rounded-3xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl border border-slate-100 transform transition-all scale-95 opacity-0 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100 shrink-0">
+                <h3 id="modalTitle" class="text-sm sm:text-base font-bold text-slate-800">Tiêu đề Modal</h3>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-2 rounded-xl">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
-            <div id="modalBody" class="py-4 max-h-[70vh] overflow-y-auto custom-scrollbar text-xs sm:text-sm text-slate-600"></div>
-            <div id="modalFooter" class="pt-3 border-t border-slate-100 flex justify-end space-x-2">
-                <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs sm:text-sm transition">Đóng</button>
+            <div id="modalBody" class="py-3 overflow-y-auto custom-scrollbar text-xs sm:text-sm text-slate-600 flex-1"></div>
+            <div id="modalFooter" class="pt-3 border-t border-slate-100 flex justify-end space-x-2 shrink-0">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Đóng</button>
             </div>
         </div>
     </div>
 
-    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 text-xs sm:text-sm border border-white/10">
-        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+    <div id="toastNotification" class="fixed bottom-4 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-4 py-2.5 rounded-2xl shadow-2xl flex items-center space-x-2.5 text-xs border border-white/10">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
         <span id="toastMessage">Thành công!</span>
     </div>
 
@@ -234,7 +231,14 @@
             }
         };
 
-        // Mật khẩu cố định cho từng lớp
+        // Fixed passwords for the 4 classes (Fixed and unchangeable)
+        const classPasswords = {
+            "10E": "10E2026",
+            "12A": "12A2026",
+            "12B": "12B2026",
+            "12E": "12E2026"
+        };
+
         let masterData = {
             classes: {
                 "10E": { password: "10E2026", data: JSON.parse(JSON.stringify(blankClassData)) },
@@ -244,8 +248,7 @@
             }
         };
 
-        // LocalStorage fallback key for guaranteed persistence
-        const STORAGE_KEY = 'giangnam_baitapso_secure_v35';
+        const STORAGE_KEY = 'giangnam_baitapso_secure_v37_live';
 
         function loadFromLocalStorage() {
             try {
@@ -254,7 +257,7 @@
                     masterData = JSON.parse(saved);
                 }
             } catch(e) {
-                console.log("Local storage fallback load warning:", e);
+                console.log("Local storage load warning:", e);
             }
         }
 
@@ -262,7 +265,7 @@
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(masterData));
             } catch(e) {
-                console.log("Local storage fallback save warning:", e);
+                console.log("Local storage save warning:", e);
             }
         }
 
@@ -271,8 +274,9 @@
         function getCurrentClassContainer() {
             const cls = window.appState.getClass();
             if (!masterData.classes[cls]) {
-                masterData.classes[cls] = { password: cls + "2026", data: JSON.parse(JSON.stringify(blankClassData)) };
+                masterData.classes[cls] = { password: classPasswords[cls] || (cls + "2026"), data: JSON.parse(JSON.stringify(blankClassData)) };
             }
+            masterData.classes[cls].password = classPasswords[cls] || masterData.classes[cls].password;
             return masterData.classes[cls];
         }
 
@@ -280,25 +284,40 @@
             return getCurrentClassContainer().data;
         }
 
+        let isCloudSynced = false;
+
         function initCloudListeners() {
             const db = window.appState.getDb();
             const appId = window.appState.getAppId();
             if (!db) return;
 
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v35');
+                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v37');
                 window.onSnapshot(docRef, (docSnap) => {
                     if (docSnap.exists()) {
                         masterData = docSnap.data();
+                        // Enforce fixed class passwords
+                        for (let cls in classPasswords) {
+                            if (!masterData.classes[cls]) {
+                                masterData.classes[cls] = { password: classPasswords[cls], data: JSON.parse(JSON.stringify(blankClassData)) };
+                            } else {
+                                masterData.classes[cls].password = classPasswords[cls];
+                            }
+                        }
                         saveToLocalStorage();
+                        isCloudSynced = true;
                         renderWorkspace();
                     } else {
-                        window.setDoc(docRef, masterData).catch(err => console.log(err));
+                        window.setDoc(docRef, masterData).then(() => {
+                            isCloudSynced = true;
+                        }).catch(() => {});
                     }
-                }, (error) => {
+                }, () => {
+                    isCloudSynced = false;
                     console.log("Cloud sync active with local storage fallback.");
                 });
             } catch (err) {
+                isCloudSynced = false;
                 console.log("Cloud sync ready.");
             }
         }
@@ -312,18 +331,24 @@
                 return;
             }
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v35');
+                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v37');
                 const docSnap = await window.getDoc(docRef);
                 if (docSnap.exists()) {
                     masterData = docSnap.data();
+                    for (let cls in classPasswords) {
+                        if (masterData.classes[cls]) masterData.classes[cls].password = classPasswords[cls];
+                    }
                     saveToLocalStorage();
+                    isCloudSynced = true;
                     renderWorkspace();
-                    openModal("Trạng Thái Đám Mây", `<div class="text-center py-4"><p class="text-xs sm:text-sm text-emerald-700 font-bold"><i class="fa-solid fa-cloud-check text-lg mr-1"></i> Đã kết nối đám mây an toàn (giangnam146-5a353) thành công!</p></div>`);
+                    showToast("Đã đồng bộ dữ liệu đám mây thành công!");
                 } else {
                     await window.setDoc(docRef, masterData);
-                    openModal("Trạng Thái Đám Mây", `<div class="text-center py-4"><p class="text-xs sm:text-sm text-emerald-700 font-bold"><i class="fa-solid fa-cloud-check text-lg mr-1"></i> Đã khởi tạo và đồng bộ dữ liệu đám mây thành công!</p></div>`);
+                    isCloudSynced = true;
+                    showToast("Đã khởi tạo và đồng bộ đám mây thành công!");
                 }
             } catch (err) {
+                isCloudSynced = false;
                 renderWorkspace();
                 showToast("Đã đồng bộ cục bộ an toàn");
             }
@@ -335,16 +360,18 @@
             const appId = window.appState.getAppId();
             try {
                 if (db) {
-                    const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v35');
+                    const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v37');
                     await window.setDoc(docRef, masterData);
+                    isCloudSynced = true;
                 }
             } catch (err) {
+                isCloudSynced = false;
                 console.log("Local backup saved.");
             }
             renderWorkspace();
         }
 
-        // 100% Vietnamese Speech Synthesis Auto-Play (vi-VN)
+        // 100% Vietnamese Speech Synthesis Auto-Play (vi-VN) on web load
         function speakIntroSpeech() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
@@ -384,27 +411,27 @@
         function openCreateGroupFirstModal() {
             const currentClass = window.appState.getClass();
             const html = `
-                <div class="space-y-4 py-2">
-                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-                        <p class="font-bold mb-1"><i class="fa-solid fa-crown mr-1"></i> Bước 1 - Tạo nhóm trước (Lớp ${currentClass}):</p>
-                        <p>Chỉ cần <b>1 thành viên đại diện tạo nhóm trước</b>. Sau khi tạo xong, hệ thống sẽ cấp mã QR riêng cho nhóm để các thành viên quét và tự động tham gia ngay lập tức!</p>
+                <div class="space-y-3 py-1">
+                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 text-[11px] text-indigo-800">
+                        <p class="font-bold mb-0.5"><i class="fa-solid fa-crown mr-1"></i> Bước 1 - Tạo nhóm trước (Lớp ${currentClass}):</p>
+                        <p>Chỉ cần <b>1 thành viên đại diện tạo nhóm trước</b>. Thêm sẵn thành viên & phân công chức vụ ngay trong form này để giảm thiểu thao tác!</p>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Tên tổ nhóm (VD: Tổ 1)</label>
-                            <input type="text" id="inpNewGroupNameFirst" placeholder="Nhập tên tổ..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs sm:text-sm font-semibold">
+                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Tên tổ nhóm (VD: Tổ 1)</label>
+                            <input type="text" id="inpNewGroupNameFirst" placeholder="Nhập tên tổ..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Mã nhóm (VD: ${currentClass}-T1)</label>
-                            <input type="text" id="inpNewGroupCodeFirst" placeholder="Nhập mã nhóm..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs sm:text-sm font-semibold">
+                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Mã nhóm (VD: ${currentClass}-T1)</label>
+                            <input type="text" id="inpNewGroupCodeFirst" placeholder="Nhập mã nhóm..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold">
                         </div>
                     </div>
 
-                    <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
-                        <label class="block text-xs font-bold text-slate-700"><i class="fa-solid fa-users-gear text-indigo-600 mr-1"></i> Thêm sẵn thành viên và phân công chức vụ:</label>
-                        <div id="preAddedMembersContainer" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-1">
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-700"><i class="fa-solid fa-users-gear text-indigo-600 mr-1"></i> Thêm sẵn thành viên và phân công chức vụ:</label>
+                        <div id="preAddedMembersContainer" class="space-y-2 max-h-36 overflow-y-auto custom-scrollbar pr-1">
                             <div class="flex gap-2 items-center member-row">
-                                <input type="text" placeholder="Họ và tên HS" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs member-name-input">
+                                <input type="text" placeholder="Họ và tên HS" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs member-name-input">
                                 <select class="bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-bold text-indigo-600 member-role-select">
                                     <option value="Nhóm trưởng">Nhóm trưởng</option>
                                     <option value="Nhóm phó">Nhóm phó</option>
@@ -413,15 +440,15 @@
                                 </select>
                             </div>
                         </div>
-                        <button onclick="addMoreMemberRow()" type="button" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-semibold transition border border-indigo-200">
+                        <button onclick="addMoreMemberRow()" type="button" class="px-3 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-semibold transition border border-indigo-200">
                             <i class="fa-solid fa-plus mr-1"></i> Thêm thành viên khác
                         </button>
                     </div>
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="confirmCreateGroupFirst()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Tạo Nhóm & Xuất Mã QR</button>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
+                <button onclick="confirmCreateGroupFirst()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Tạo Nhóm & Xuất Mã QR</button>
             `;
             openModal(`Tạo Nhóm Trước (Lớp ${currentClass})`, html, footer);
         }
@@ -432,7 +459,7 @@
             const div = document.createElement('div');
             div.className = "flex gap-2 items-center member-row";
             div.innerHTML = `
-                <input type="text" placeholder="Họ và tên HS" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs member-name-input">
+                <input type="text" placeholder="Họ và tên HS" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs member-name-input">
                 <select class="bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-bold text-indigo-600 member-role-select">
                     <option value="Nhóm trưởng">Nhóm trưởng</option>
                     <option value="Nhóm phó">Nhóm phó</option>
@@ -494,17 +521,17 @@
 
             const groupJoinUrl = window.location.href.split('#')[0] + `?class=${window.appState.getClass()}&group=${encodeURIComponent(name)}`;
             const html = `
-                <div class="space-y-4 text-center py-2">
-                    <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
+                <div class="space-y-3 text-center py-1">
+                    <div class="bg-emerald-50 p-2.5 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
                         <p class="font-bold">Đã tạo thành công nhóm <span class="text-emerald-700 uppercase font-extrabold">${name}</span> với <span class="font-bold">${countMembers}</span> thành viên!</p>
                         <p>Các thành viên hãy quét mã QR dưới đây để vào nhóm.</p>
                     </div>
-                    <div id="groupCreatedQRCodeContainer" class="flex justify-center bg-slate-50 p-4 rounded-3xl border border-slate-200 inline-block mx-auto"></div>
-                    <p class="text-[11px] text-slate-500 font-mono select-all bg-slate-100 p-2 rounded-xl">Link tham gia: ${groupJoinUrl}</p>
+                    <div id="groupCreatedQRCodeContainer" class="flex justify-center bg-slate-50 p-3 rounded-3xl border border-slate-200 inline-block mx-auto"></div>
+                    <p class="text-[10px] text-slate-500 font-mono select-all bg-slate-100 p-2 rounded-xl">Link: ${groupJoinUrl}</p>
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal(); openStudentLoginModal();" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow">Đăng Nhập Vào Nhóm Ngay</button>
+                <button onclick="closeModal(); openStudentLoginModal();" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow">Đăng Nhập Vào Nhóm Ngay</button>
             `;
             openModal(`Mã QR Nhóm: ${name}`, html, footer);
 
@@ -514,8 +541,8 @@
                     container.innerHTML = "";
                     new QRCode(container, {
                         text: groupJoinUrl,
-                        width: 170,
-                        height: 170,
+                        width: 150,
+                        height: 150,
                         colorDark: "#1e293b",
                         colorLight: "#ffffff",
                         correctLevel: QRCode.CorrectLevel.H
@@ -530,18 +557,18 @@
             const groupList = Object.keys(data.groups);
 
             let groupOptionsHtml = groupList.length === 0 
-                ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm & QR" trước!</option>'
+                ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm" trước!</option>'
                 : groupList.map(gName => `<option value="${gName}" ${window.appState.getGroup() === gName ? 'selected' : ''}>${gName} (${data.groups[gName].code})</option>`).join('');
 
             const html = `
-                <div class="space-y-4 py-2">
-                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-                        <p class="font-bold mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Đăng nhập vào nhóm:</p>
-                        <p>Học sinh nhập tên, chọn lớp, mật khẩu (cố định theo lớp) và nhóm đã được tạo trước.</p>
+                <div class="space-y-3 py-1">
+                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
+                        <p class="font-bold mb-0.5"><i class="fa-solid fa-shield-halved mr-1"></i> Đăng nhập vào nhóm:</p>
+                        <p>Học sinh nhập tên, chọn lớp, mật khẩu cố định (ví dụ: 10E2026) và nhóm.</p>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Chọn Lớp học</label>
-                        <select id="studentLoginClassSelect" onchange="previewClassGroupsInModal(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm font-semibold">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Chọn Lớp học</label>
+                        <select id="studentLoginClassSelect" onchange="previewClassGroupsInModal(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-semibold">
                             <option value="10E" ${window.appState.getClass() === '10E' ? 'selected' : ''}>Lớp 10E (Mã: 10E2026)</option>
                             <option value="12A" ${window.appState.getClass() === '12A' ? 'selected' : ''}>Lớp 12A (Mã: 12A2026)</option>
                             <option value="12B" ${window.appState.getClass() === '12B' ? 'selected' : ''}>Lớp 12B (Mã: 12B2026)</option>
@@ -549,24 +576,24 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Mật khẩu truy cập lớp</label>
-                        <input type="password" id="studentLoginPass" placeholder="Nhập mật khẩu lớp..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm font-mono">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Mật khẩu truy cập lớp</label>
+                        <input type="password" id="studentLoginPass" placeholder="Nhập mật khẩu lớp..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-mono">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Họ và tên Học sinh</label>
-                        <input type="text" id="studentLoginName" placeholder="VD: Nguyễn Văn A" value="${window.appState.getStudentName()}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm font-semibold">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Họ và tên Học sinh</label>
+                        <input type="text" id="studentLoginName" placeholder="VD: Nguyễn Văn A" value="${window.appState.getStudentName()}" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-semibold">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Chọn Tổ / Nhóm</label>
-                        <select id="studentLoginGroupSelect" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm font-bold text-indigo-600">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Chọn Tổ / Nhóm</label>
+                        <select id="studentLoginGroupSelect" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-bold text-indigo-600">
                             ${groupOptionsHtml}
                         </select>
                     </div>
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="confirmStudentLogin()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Vào Nhóm Ngay</button>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
+                <button onclick="confirmStudentLogin()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Vào Nhóm Ngay</button>
             `;
             openModal("Đăng Nhập Học Sinh", html, footer);
         }
@@ -578,7 +605,7 @@
             const selectGroupEl = document.getElementById('studentLoginGroupSelect');
             if (selectGroupEl) {
                 selectGroupEl.innerHTML = groupList.length === 0 
-                    ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm & QR" trước!</option>'
+                    ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm" trước!</option>'
                     : groupList.map(gName => `<option value="${gName}">${gName} (${data.groups[gName].code})</option>`).join('');
             }
         }
@@ -589,7 +616,7 @@
             const name = document.getElementById('studentLoginName').value.trim();
             const grp = document.getElementById('studentLoginGroupSelect').value;
             
-            const expectedPass = masterData.classes[cls].password;
+            const expectedPass = classPasswords[cls];
             if (pass !== expectedPass) {
                 showToast("Mật khẩu truy cập lớp không chính xác! (Mã cố định: " + expectedPass + ")", "error");
                 return;
@@ -664,24 +691,24 @@
                 `).join('');
 
             const html = `
-                <div class="space-y-4 text-xs sm:text-sm text-slate-700">
-                    <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-4 rounded-2xl shadow">
-                        <h4 class="font-extrabold text-base mb-1"><i class="fa-solid fa-circle-info mr-2"></i> HƯỚNG DẪN HOẠT ĐỘNG NHÓM SỐ</h4>
-                        <p class="text-xs text-cyan-100">Lớp: <b class="neon-blink">${currentClass}</b> • Nhóm: <b class="neon-blink">${currentGroup}</b></p>
+                <div class="space-y-3 text-xs sm:text-sm text-slate-700 py-1">
+                    <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-3 rounded-2xl shadow">
+                        <h4 class="font-extrabold text-sm mb-0.5"><i class="fa-solid fa-circle-info mr-1.5"></i> HƯỚNG DẪN HOẠT ĐỘNG NHÓM SỐ</h4>
+                        <p class="text-[11px] text-cyan-100">Lớp: <b class="neon-blink">${currentClass}</b> • Nhóm: <b class="neon-blink">${currentGroup}</b></p>
                     </div>
 
-                    <div class="bg-indigo-50 p-3.5 rounded-2xl border border-indigo-100 space-y-2">
-                        <p class="font-bold text-indigo-900"><i class="fa-solid fa-bullseye text-indigo-600 mr-1.5"></i> Giới thiệu quy trình hoạt động nhóm:</p>
-                        <p class="text-slate-700 leading-relaxed">
-                            1. <b>Tạo nhóm & Phân công:</b> Đại diện tạo nhóm trước, thêm sẵn thành viên và phân công chức vụ ngay từ đầu (Nhóm trưởng, Nhóm phó, Thư ký, Thành viên). Hệ thống tự tạo mã QR riêng cho nhóm.<br>
-                            2. <b>Đăng nhập & Thảo luận:</b> Học sinh quét mã QR hoặc đăng nhập đúng mã lớp/nhóm để vào không gian làm việc chung, thảo luận trực tuyến và đóng góp file tài liệu.<br>
-                            3. <b>Biểu quyết & Nộp bài:</b> Thư ký tổng hợp và chốt nộp bài. Các thành viên bấm biểu quyết <b>Đồng ý</b> hoặc <b>Không đồng ý</b>.<br>
-                            4. <b>Chấm điểm trực tiếp:</b> Giáo viên kiểm tra tiến độ, xem xét bảng phân công thành viên và chấm điểm trực tiếp trên hệ thống.
+                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 space-y-1.5">
+                        <p class="font-bold text-indigo-900"><i class="fa-solid fa-bullseye text-indigo-600 mr-1"></i> Quy trình hoạt động nhóm:</p>
+                        <p class="text-slate-700 leading-relaxed text-xs">
+                            1. <b>Tạo nhóm trước:</b> Đại diện tạo nhóm, thêm sẵn thành viên & phân công chức vụ ngay trong form.<br>
+                            2. <b>Đăng nhập:</b> Học sinh nhập mật khẩu cố định của lớp và vào nhóm của mình.<br>
+                            3. <b>Nộp bài & Biểu quyết:</b> Đóng góp tài liệu, thư ký chốt nộp bài. Các thành viên bấm biểu quyết <b>Đồng ý</b>.<br>
+                            4. <b>Chấm điểm:</b> Giáo viên kiểm tra danh sách thành viên, kiểm tra biểu quyết và chấm điểm trực tiếp trên hệ thống.
                         </p>
                     </div>
 
-                    <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2">
-                        <p class="font-bold text-slate-800"><i class="fa-solid fa-file-lines text-indigo-600 mr-1.5"></i> Đề bài hiện tại từ Giáo viên:</p>
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1.5">
+                        <p class="font-bold text-slate-800"><i class="fa-solid fa-file-lines text-indigo-600 mr-1"></i> Đề bài hiện tại từ Giáo viên:</p>
                         <p class="text-slate-800 font-semibold">• Chủ đề: ${task.title}</p>
                         <p class="text-slate-600">• Môn học: ${task.subject} | Hạn nộp: <span class="text-rose-600 font-bold">${task.deadline}</span></p>
                         <p class="text-slate-600">• Yêu cầu: ${task.description}</p>
@@ -694,30 +721,30 @@
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal()" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs sm:text-sm transition shadow">Đã hiểu & Bắt đầu làm bài</button>
+                <button onclick="closeModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Đã hiểu & Bắt đầu làm bài</button>
             `;
             openModal("Hướng Dẫn Hoạt Động Nhóm Số", html, footer);
         }
 
         function openTeacherAuthModal() {
             const html = `
-                <div class="space-y-4 py-2">
+                <div class="space-y-3 py-1">
                     <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 flex items-center space-x-3">
-                        <div class="text-indigo-600 text-2xl"><i class="fa-solid fa-lock"></i></div>
+                        <div class="text-indigo-600 text-xl"><i class="fa-solid fa-lock"></i></div>
                         <div>
-                            <h4 class="font-bold text-indigo-900 text-sm">Khu vực Quản trị Giáo Viên</h4>
-                            <p class="text-xs text-indigo-700">Nhập mật khẩu quản trị chung (*******) để mở bảng quản lý 4 lớp học, giao bài tập và chấm điểm.</p>
+                            <h4 class="font-bold text-indigo-900 text-xs sm:text-sm">Khu vực Quản trị Giáo Viên</h4>
+                            <p class="text-[11px] text-indigo-700">Nhập mật khẩu quản trị chung (*******) để mở bảng quản lý 4 lớp học, giao bài tập và chấm điểm.</p>
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Mật khẩu quản trị giáo viên</label>
-                        <input type="password" id="inpTeacherAdminPass" placeholder="Nhập mật khẩu quản trị..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm font-mono focus:ring-2 focus:ring-indigo-500">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Mật khẩu quản trị giáo viên</label>
+                        <input type="password" id="inpTeacherAdminPass" placeholder="Nhập mật khẩu quản trị..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs font-mono">
                     </div>
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="verifyTeacherAdminLogin()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Đăng Nhập Quản Trị</button>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
+                <button onclick="verifyTeacherAdminLogin()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Đăng Nhập Quản Trị</button>
             `;
             openModal("Xác Thực Giáo Viên Quản Lý", html, footer);
         }
@@ -729,8 +756,8 @@
                 
                 const btnT = document.getElementById('btnRoleTeacher');
                 const btnS = document.getElementById('btnRoleStudent');
-                if (btnT) btnT.className = "px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-white bg-indigo-600 shadow";
-                if (btnS) btnS.className = "px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-300 hover:text-white";
+                if (btnT) btnT.className = "px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all text-white bg-indigo-600 shadow";
+                if (btnS) btnS.className = "px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all text-slate-300 hover:text-white";
 
                 const badgeRole = document.getElementById('badgeRoleDisplay');
                 if (badgeRole) badgeRole.innerText = `Giáo viên quản lý 4 lớp`;
@@ -767,52 +794,55 @@
             const teacherFiles = data.task.teacherFiles || [];
 
             return `
-                <div class="space-y-6">
+                <div class="flex flex-col gap-4">
                     <!-- Teacher 4 Classes Control Panel -->
-                    <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-white rounded-3xl p-5 sm:p-6 shadow-2xl border border-indigo-500/25">
-                        <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+                    <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-white rounded-3xl p-4 sm:p-5 shadow-xl border border-indigo-500/25">
+                        <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
                             <div>
-                                <h3 class="font-extrabold text-base sm:text-lg flex items-center space-x-2 text-cyan-300">
+                                <h3 class="font-extrabold text-sm sm:text-base flex items-center space-x-2 text-cyan-300">
                                     <i class="fa-solid fa-chalkboard-user"></i>
-                                    <span>Bảng Quản Lý 4 Lớp & Giao Bài Độc Lập</span>
+                                    <span>Bảng Quản Lý 4 Lớp & Giao Bài (Đám Mây)</span>
                                 </h3>
-                                <p class="text-xs text-slate-300 mt-1">Giáo viên quản lý mã lớp cố định, giao bài tập và đính kèm tài liệu học tập.</p>
+                                <p class="text-[11px] text-slate-300">Quản lý mã lớp cố định, giao bài tập và đính kèm tài liệu.</p>
                             </div>
-                            <button onclick="switchRoleToStudent()" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition border border-white/20">
-                                <i class="fa-solid fa-right-from-bracket mr-1"></i> Chế độ Học sinh
-                            </button>
+                            <div class="flex gap-2">
+                                <button onclick="syncCloudDataNow()" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold transition shadow">
+                                    <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Tải lại dữ liệu Đám Mây
+                                </button>
+                                <button onclick="switchRoleToStudent()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition border border-white/20">
+                                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Chế độ HS
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
                             ${classesList.map(cls => {
-                                const pass = masterData.classes[cls].password;
+                                const pass = classPasswords[cls];
                                 const isSelected = cls === currentClass;
                                 const clsTask = masterData.classes[cls].data.task.title;
                                 return `
-                                    <div class="bg-white/10 p-4 rounded-2xl border ${isSelected ? 'border-cyan-400 bg-white/15 shadow-lg' : 'border-white/10'} flex flex-col justify-between space-y-3 backdrop-blur-sm">
+                                    <div class="bg-white/10 p-3.5 rounded-2xl border ${isSelected ? 'border-cyan-400 bg-white/15 shadow-lg' : 'border-white/10'} flex flex-col justify-between space-y-2.5 backdrop-blur-sm">
                                         <div>
                                             <div class="flex justify-between items-center">
-                                                <h4 class="font-extrabold text-white text-base sm:text-lg neon-blink">Lớp ${cls}</h4>
-                                                ${isSelected ? '<span class="bg-cyan-400 text-slate-950 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow">Đang chọn</span>' : ''}
+                                                <h4 class="font-extrabold text-white text-sm sm:text-base neon-blink">Lớp ${cls}</h4>
+                                                ${isSelected ? '<span class="bg-cyan-400 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow">Đang chọn</span>' : ''}
                                             </div>
-                                            <p class="text-[11px] text-cyan-200 mt-1 truncate">Bài: ${clsTask}</p>
-                                            <div class="mt-3 bg-slate-950/60 p-2.5 rounded-xl border border-white/10">
-                                                <span class="text-[10px] text-slate-300 block mb-1">Mã cố định vào lớp:</span>
+                                            <p class="text-[11px] text-cyan-200 mt-0.5 truncate">Bài: ${clsTask}</p>
+                                            <div class="mt-2.5 bg-slate-950/60 p-2 rounded-xl border border-white/10">
+                                                <span class="text-[10px] text-slate-300 block mb-0.5">Mã vào lớp (Cố định):</span>
                                                 <div class="flex justify-between items-center">
-                                                    <span id="passSpan_${cls}" class="font-mono font-bold text-amber-300 text-xs sm:text-sm tracking-wider">*******</span>
-                                                    <div class="flex space-x-1">
-                                                        <button onclick="togglePasswordView('${cls}', '${pass}')" class="p-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded-lg text-white transition" title="Ẩn/Hiện mật khẩu">
-                                                            <i class="fa-solid fa-eye" id="eyeIcon_${cls}"></i>
-                                                        </button>
-                                                    </div>
+                                                    <span id="passSpan_${cls}" class="font-mono font-bold text-amber-300 text-xs tracking-wider">*******</span>
+                                                    <button onclick="togglePasswordView('${cls}', '${pass}')" class="p-1 text-xs bg-slate-700 hover:bg-slate-600 rounded-lg text-white transition" title="Ẩn/Hiện mật khẩu">
+                                                        <i class="fa-solid fa-eye" id="eyeIcon_${cls}"></i>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="space-y-2">
-                                            <button onclick="switchClassFromTeacher('${cls}')" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition shadow">
+                                        <div class="space-y-1.5">
+                                            <button onclick="switchClassFromTeacher('${cls}')" class="w-full py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold transition shadow">
                                                 Xem Kho & Tổ Lớp ${cls}
                                             </button>
-                                            <button onclick="openAssignTaskModal('${cls}')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition shadow">
+                                            <button onclick="openAssignTaskModal('${cls}')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition shadow">
                                                 <i class="fa-solid fa-file-pen mr-1"></i> Giao bài & Đính kèm TL
                                             </button>
                                         </div>
@@ -823,39 +853,39 @@
                     </div>
 
                     <!-- Selected Class Detailed Management -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                        <div class="lg:col-span-2 flex flex-col gap-4">
                             <!-- Quick Task Editor -->
-                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
+                            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
                                 <div class="flex justify-between items-center mb-3">
                                     <h3 class="font-bold text-slate-800 flex items-center space-x-2 text-xs sm:text-sm">
                                         <i class="fa-solid fa-file-pen text-indigo-600"></i>
                                         <span>Cập nhật Bài tập & Tài liệu đính kèm (Lớp ${currentClass})</span>
                                     </h3>
                                 </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-2.5">
                                     <div>
                                         <label class="block text-[11px] font-bold text-slate-600 mb-1">Tiêu đề bài tập</label>
-                                        <input type="text" id="teacherTaskTitle" value="${data.task.title === 'Chưa có đề bài được giao' ? '' : data.task.title}" placeholder="VD: Tư duy logic..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
+                                        <input type="text" id="teacherTaskTitle" value="${data.task.title === 'Chưa có đề bài được giao' ? '' : data.task.title}" placeholder="VD: Tư duy logic..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
                                     </div>
                                     <div>
                                         <label class="block text-[11px] font-bold text-slate-600 mb-1">Môn học</label>
-                                        <input type="text" id="teacherTaskSubject" value="${data.task.subject === 'Chưa phân loại' ? '' : data.task.subject}" placeholder="VD: Tin học" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
+                                        <input type="text" id="teacherTaskSubject" value="${data.task.subject === 'Chưa phân loại' ? '' : data.task.subject}" placeholder="VD: Tin học" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
                                     </div>
                                     <div>
                                         <label class="block text-[11px] font-bold text-slate-600 mb-1">Hạn nộp</label>
-                                        <input type="text" id="teacherTaskDeadline" value="${data.task.deadline === 'Chưa xác định' ? '' : data.task.deadline}" placeholder="VD: 25/10/2026 23:59" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
+                                        <input type="text" id="teacherTaskDeadline" value="${data.task.deadline === 'Chưa xác định' ? '' : data.task.deadline}" placeholder="VD: 25/10/2026" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
                                     </div>
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-2.5">
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Yêu cầu chi tiết sản phẩm</label>
-                                    <textarea id="teacherTaskDesc" rows="2" placeholder="Nhập yêu cầu sản phẩm..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">${data.task.description === 'Giáo viên chưa cập nhật nội dung bài tập cho lớp này.' ? '' : data.task.description}</textarea>
+                                    <textarea id="teacherTaskDesc" rows="2" placeholder="Nhập yêu cầu sản phẩm..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">${data.task.description === 'Giáo viên chưa cập nhật nội dung bài tập cho lớp này.' ? '' : data.task.description}</textarea>
                                 </div>
 
-                                <div class="mb-4 bg-indigo-50 p-3.5 rounded-2xl border border-indigo-100">
+                                <div class="mb-3 bg-indigo-50 p-3 rounded-2xl border border-indigo-100">
                                     <div class="flex justify-between items-center mb-2">
-                                        <label class="block text-xs font-bold text-indigo-900"><i class="fa-solid fa-paperclip mr-1"></i> Tài liệu giao bài (Word, Excel, Hình ảnh, PDF...):</label>
-                                        <button onclick="openTeacherUploadFileModal()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 transition shadow-sm flex items-center space-x-1">
+                                        <label class="block text-xs font-bold text-indigo-900"><i class="fa-solid fa-paperclip mr-1"></i> Tài liệu giao bài (Word, Excel, PDF...):</label>
+                                        <button onclick="openTeacherUploadFileModal()" class="px-2.5 py-1 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 transition shadow-sm flex items-center space-x-1">
                                             <i class="fa-solid fa-upload"></i>
                                             <span>Thêm tài liệu</span>
                                         </button>
@@ -873,31 +903,31 @@
                                     </div>
                                 </div>
 
-                                <button onclick="saveTeacherTaskInfo()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-2xl text-xs transition shadow">
-                                    <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu & Đồng bộ bài tập Lớp ${currentClass} lên đám mây
+                                <button onclick="saveTeacherTaskInfo()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow">
+                                    <i class="fa-solid fa-floppy-disk mr-1"></i> Lưu & Đồng bộ bài tập Lớp ${currentClass} lên Đám Mây
                                 </button>
                             </div>
 
                             <!-- Groups & Participation Tracker Table -->
-                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
-                                <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
+                                <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
                                     <h3 class="font-bold text-slate-800 flex items-center space-x-2 text-xs sm:text-sm">
                                         <i class="fa-solid fa-chart-pie text-blue-600"></i>
-                                        <span>Danh sách tổ & Thống kê học sinh tham gia (Lớp ${currentClass})</span>
+                                        <span>Danh sách tổ & Thống kê học sinh (Lớp ${currentClass})</span>
                                     </h3>
-                                    <button onclick="openAddGroupModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3.5 py-2 rounded-2xl transition flex items-center space-x-1">
+                                    <button onclick="openAddGroupModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center space-x-1">
                                         <i class="fa-solid fa-plus-circle"></i>
-                                        <span>Thêm tổ (Max 6)</span>
+                                        <span>Thêm tổ</span>
                                     </button>
                                 </div>
                                 <div class="overflow-x-auto">
-                                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                                    <table class="w-full text-left border-collapse text-xs">
                                         <thead>
                                             <tr class="border-b border-slate-100 text-slate-400 font-semibold text-xs">
-                                                <th class="py-3 px-3">Tổ nhóm</th>
-                                                <th class="py-3 px-3">Thành viên tham gia & Bảng phân công</th>
-                                                <th class="py-3 px-3">Trạng thái Nộp & Đồng thuận</th>
-                                                <th class="py-3 px-3 text-right">Chấm điểm trực tiếp</th>
+                                                <th class="py-2.5 px-2">Tổ nhóm</th>
+                                                <th class="py-2.5 px-2">Thành viên & Phân công</th>
+                                                <th class="py-2.5 px-2">Trạng thái Nộp</th>
+                                                <th class="py-2.5 px-2 text-right">Chấm điểm</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-slate-100">
@@ -909,23 +939,23 @@
                                                 const agreeCount = Object.values(consentsObj).filter(v => v === 'Đồng ý').length;
                                                 return `
                                                     <tr class="hover:bg-slate-50/80 transition">
-                                                        <td class="py-3.5 px-3 font-semibold text-slate-800">
-                                                            <span class="inline-flex items-center px-2.5 py-1.5 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-extrabold neon-blink">
-                                                                <i class="fa-solid fa-users mr-1.5 text-indigo-500"></i> ${groupName} (${g.code})
+                                                        <td class="py-3 px-2 font-semibold text-slate-800">
+                                                            <span class="inline-flex items-center px-2 py-1 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-extrabold neon-blink">
+                                                                <i class="fa-solid fa-users mr-1 text-indigo-500"></i> ${groupName}
                                                             </span>
                                                         </td>
-                                                        <td class="py-3.5 px-3">
-                                                            <span class="font-bold text-indigo-600">${participantsCount} đã vào</span> / <span class="text-slate-600">${g.membersCount} HS</span>
+                                                        <td class="py-3 px-2">
+                                                            <span class="font-bold text-indigo-600">${participantsCount} đã vào</span>
                                                             <p class="text-[10px] text-slate-400 truncate">${Object.keys(g.participants || {}).join(', ') || 'Chưa có'}</p>
                                                         </td>
-                                                        <td class="py-3.5 px-3">
-                                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${g.submittedStatus ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                                                                ${g.submittedStatus ? 'Đã nộp bài' : 'Đang thực hiện'}
+                                                        <td class="py-3 px-2">
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${g.submittedStatus ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                                                                ${g.submittedStatus ? 'Đã nộp' : 'Đang làm'}
                                                             </span>
-                                                            <p class="text-[10px] text-slate-500 mt-0.5">Đồng thuận: ${agreeCount}/${participantsCount} HS</p>
+                                                            <p class="text-[10px] text-slate-500 mt-0.5">Đồng thuận: ${agreeCount}/${participantsCount}</p>
                                                         </td>
-                                                        <td class="py-3.5 px-3 text-right">
-                                                            <button onclick="openTeacherInspectModal('${groupName}')" class="px-3 py-1.5 rounded-xl text-xs font-medium transition bg-emerald-50 hover:bg-emerald-100 text-emerald-700">
+                                                        <td class="py-3 px-2 text-right">
+                                                            <button onclick="openTeacherInspectModal('${groupName}')" class="px-2.5 py-1.5 rounded-xl text-xs font-medium transition bg-emerald-50 hover:bg-emerald-100 text-emerald-700">
                                                                 <i class="fa-solid fa-marker mr-1"></i> Chấm bài
                                                             </button>
                                                         </td>
@@ -939,23 +969,23 @@
                         </div>
 
                         <!-- Grading & Evaluation Panel -->
-                        <div class="space-y-6">
-                            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
+                        <div class="flex flex-col gap-4">
+                            <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
                                 <h3 class="font-bold text-slate-800 text-xs sm:text-sm mb-3 flex items-center space-x-2">
                                     <i class="fa-solid fa-award text-amber-500"></i>
                                     <span>Chấm Điểm & Nhận Xét (Lớp ${currentClass})</span>
                                 </h3>
-                                <div class="grid grid-cols-2 gap-3 mb-4">
-                                    <div class="bg-amber-50 p-3.5 rounded-2xl border border-amber-100 text-center">
-                                        <span class="text-xs text-amber-700 font-medium">Điểm Nhóm</span>
-                                        <div class="text-xl sm:text-2xl font-extrabold text-amber-600 mt-1" id="displayGroupScore">${data.grades.groupScore}</div>
+                                <div class="grid grid-cols-2 gap-2.5 mb-3">
+                                    <div class="bg-amber-50 p-3 rounded-2xl border border-amber-100 text-center">
+                                        <span class="text-[11px] text-amber-700 font-medium">Điểm Nhóm</span>
+                                        <div class="text-lg sm:text-xl font-extrabold text-amber-600 mt-0.5">${data.grades.groupScore}</div>
                                     </div>
-                                    <div class="bg-indigo-50 p-3.5 rounded-2xl border border-indigo-100 text-center">
-                                        <span class="text-xs text-indigo-700 font-medium">Điểm Cá Nhân (TB)</span>
-                                        <div class="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-1" id="displayIndScore">${data.grades.individualScore}</div>
+                                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 text-center">
+                                        <span class="text-[11px] text-indigo-700 font-medium">Điểm Cá Nhân</span>
+                                        <div class="text-lg sm:text-xl font-extrabold text-indigo-600 mt-0.5">${data.grades.individualScore}</div>
                                     </div>
                                 </div>
-                                <div class="space-y-3">
+                                <div class="space-y-2.5">
                                     <div>
                                         <label class="block text-[11px] font-bold text-slate-600 mb-1">Điểm nhóm</label>
                                         <input type="text" id="inputGrGroupScore" value="${data.grades.groupScore}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold">
@@ -968,7 +998,7 @@
                                         <label class="block text-[11px] font-bold text-slate-600 mb-1">Nhận xét của giáo viên</label>
                                         <textarea id="inputGrFeedback" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">${data.grades.feedback}</textarea>
                                     </div>
-                                    <button onclick="saveTeacherGradesAndFeedback()" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
+                                    <button onclick="saveTeacherGradesAndFeedback()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow">
                                         <i class="fa-solid fa-circle-check mr-1"></i> Xuất bản điểm lên đám mây
                                     </button>
                                 </div>
@@ -977,6 +1007,22 @@
                     </div>
                 </div>
             `;
+        }
+
+        function saveTeacherTaskInfo() {
+            const title = document.getElementById('teacherTaskTitle').value.trim();
+            const subject = document.getElementById('teacherTaskSubject').value.trim();
+            const deadline = document.getElementById('teacherTaskDeadline').value.trim();
+            const desc = document.getElementById('teacherTaskDesc').value.trim();
+
+            const data = getCurrentData();
+            if (title) data.task.title = title;
+            if (subject) data.task.subject = subject;
+            if (deadline) data.task.deadline = deadline;
+            if (desc) data.task.description = desc;
+
+            saveToCloud();
+            showToast("Đã lưu & đồng bộ bài tập lên đám mây thành công!");
         }
 
         function saveTeacherGradesAndFeedback() {
@@ -995,24 +1041,24 @@
 
         function openTeacherUploadFileModal() {
             const html = `
-                <div class="space-y-4 py-2">
-                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-                        <p class="font-bold mb-1">Đính kèm tài liệu giao bài (Word, Excel, PDF, Hình ảnh...):</p>
+                <div class="space-y-3 py-1">
+                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
+                        <p class="font-bold mb-0.5">Đính kèm tài liệu giao bài (Word, Excel, PDF...):</p>
                         <p>Nhập tên file và đường dẫn trực tuyến để học sinh tải về.</p>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tên tài liệu</label>
-                        <input type="text" id="inpTeacherFileName" placeholder="VD: Huong_dan.docx" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Tên tài liệu</label>
+                        <input type="text" id="inpTeacherFileName" placeholder="VD: Huong_dan.docx" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Đường dẫn file (URL / Google Drive)</label>
-                        <input type="text" id="inpTeacherFileLink" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Đường dẫn file (URL / Google Drive)</label>
+                        <input type="text" id="inpTeacherFileLink" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                     </div>
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="confirmTeacherUploadFile()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-xs transition shadow">Đính Kèm</button>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
+                <button onclick="confirmTeacherUploadFile()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-xs transition shadow">Đính Kèm</button>
             `;
             openModal("Giáo Viên Đính Kèm Tài Liệu", html, footer);
         }
@@ -1047,46 +1093,46 @@
 
             let filesPreviewHtml = teacherFiles.length === 0 
                 ? '<p class="text-slate-400 italic text-[11px]">Chưa có file tài liệu.</p>'
-                : teacherFiles.map((f, i) => `<span class="inline-flex items-center bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-semibold mr-1 mb-1 border border-indigo-200"><i class="fa-solid fa-file-word text-blue-600 mr-1"></i> ${f.name}</span>`).join('');
+                : teacherFiles.map((f, i) => `<span class="inline-flex items-center bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-lg text-xs font-semibold mr-1 mb-1 border border-indigo-200"><i class="fa-solid fa-file-word text-blue-600 mr-1"></i> ${f.name}</span>`).join('');
 
             const html = `
-                <div class="space-y-3">
-                    <div class="bg-indigo-50 p-3 rounded-2xl text-xs text-indigo-800">
+                <div class="space-y-3 py-1">
+                    <div class="bg-indigo-50 p-2.5 rounded-2xl text-xs text-indigo-800">
                         <p class="font-bold">Đang giao bài tập riêng cho: <span class="text-indigo-600 uppercase font-extrabold">Lớp ${targetClass}</span></p>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tiêu đề bài tập</label>
-                        <input type="text" id="assignTaskTitle" value="${clsData.title === 'Chưa có đề bài được giao' ? '' : clsData.title}" placeholder="VD: Ứng dụng AI..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Tiêu đề bài tập</label>
+                        <input type="text" id="assignTaskTitle" value="${clsData.title === 'Chưa có đề bài được giao' ? '' : clsData.title}" placeholder="VD: Ứng dụng AI..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Môn học</label>
-                        <input type="text" id="assignTaskSubject" value="${clsData.subject === 'Chưa phân loại' ? '' : clsData.subject}" placeholder="VD: Tin học" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Môn học</label>
+                        <input type="text" id="assignTaskSubject" value="${clsData.subject === 'Chưa phân loại' ? '' : clsData.subject}" placeholder="VD: Tin học" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Hạn nộp</label>
-                        <input type="text" id="assignTaskDeadline" value="${clsData.deadline === 'Chưa xác định' ? '' : clsData.deadline}" placeholder="VD: 25/10/2026 23:59" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Hạn nộp</label>
+                        <input type="text" id="assignTaskDeadline" value="${clsData.deadline === 'Chưa xác định' ? '' : clsData.deadline}" placeholder="VD: 25/10/2026" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Yêu cầu sản phẩm</label>
-                        <textarea id="assignTaskDesc" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm">${clsData.description === 'Giáo viên chưa cập nhật nội dung bài tập cho lớp này.' ? '' : clsData.description}</textarea>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Yêu cầu sản phẩm</label>
+                        <textarea id="assignTaskDesc" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">${clsData.description === 'Giáo viên chưa cập nhật nội dung bài tập cho lớp này.' ? '' : clsData.description}</textarea>
                     </div>
                     
                     <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
-                        <label class="block text-xs font-bold text-slate-700"><i class="fa-solid fa-paperclip mr-1 text-indigo-600"></i> Đính kèm tài liệu cho lớp (Word, Excel, PDF...):</label>
-                        <div id="assignModalFilesContainer" class="flex flex-wrap gap-1 mb-2">${filesPreviewHtml}</div>
+                        <label class="block text-[11px] font-bold text-slate-700"><i class="fa-solid fa-paperclip mr-1 text-indigo-600"></i> Đính kèm file tài liệu (Word, Excel...):</label>
+                        <div id="assignModalFilesContainer" class="flex flex-wrap gap-1 mb-1.5">${filesPreviewHtml}</div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <input type="text" id="inpAssignFileName" placeholder="Tên file (VD: bai_tap.docx)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                            <input type="text" id="inpAssignFileName" placeholder="Tên file (VD: bai_tap.docx)" class="bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs">
                             <div class="flex space-x-1">
-                                <input type="text" id="inpAssignFileLink" placeholder="Đường dẫn file (URL)" class="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs">
-                                <button onclick="addFileToAssignment('${targetClass}')" type="button" class="px-3 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-sm">+</button>
+                                <input type="text" id="inpAssignFileLink" placeholder="Đường dẫn file (URL)" class="flex-1 bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs">
+                                <button onclick="addFileToAssignment('${targetClass}')" type="button" class="px-3 py-1.5 bg-indigo-600 text-white rounded-xl text-xs font-bold transition shadow-sm">+</button>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="saveAssignedTaskForClass('${targetClass}')" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Giao Bài Cho Lớp ${targetClass}</button>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
+                <button onclick="saveAssignedTaskForClass('${targetClass}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Giao Bài Cho Lớp ${targetClass}</button>
             `;
             openModal(`Giao Bài Cho Lớp ${targetClass}`, html, footer);
         }
@@ -1166,10 +1212,10 @@
                     const isMe = pName === studentName;
                     return `
                         <tr class="hover:bg-slate-50 transition">
-                            <td class="py-2.5 px-3 font-semibold text-slate-800">
+                            <td class="py-2.5 px-2 font-semibold text-slate-800">
                                 ${pName} ${isMe ? '<span class="text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded-md font-bold">Bạn</span>' : ''}
                             </td>
-                            <td class="py-2.5 px-3">
+                            <td class="py-2.5 px-2">
                                 <select onchange="updateMemberRoleInsideGroup('${pName}', this.value)" class="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-indigo-600">
                                     <option value="Nhóm trưởng" ${pInfo.role === 'Nhóm trưởng' ? 'selected' : ''}>Nhóm trưởng</option>
                                     <option value="Nhóm phó" ${pInfo.role === 'Nhóm phó' ? 'selected' : ''}>Nhóm phó</option>
@@ -1177,7 +1223,7 @@
                                     <option value="Thành viên" ${pInfo.role === 'Thành viên' ? 'selected' : ''}>Thành viên</option>
                                 </select>
                             </td>
-                            <td class="py-2.5 px-3 text-right">
+                            <td class="py-2.5 px-2 text-right">
                                 <span class="text-[11px] font-bold ${consentVal === 'Đồng ý' ? 'text-emerald-600' : 'text-amber-600'}">${consentVal}</span>
                             </td>
                         </tr>
@@ -1185,39 +1231,39 @@
                 }).join('');
 
             return `
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="flex flex-col gap-4">
                         <!-- Group Info Card & Roster Table Sent to Teacher -->
-                        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
-                            <div class="flex items-center justify-between mb-4">
-                                <div class="flex items-center space-x-3 text-left">
-                                    <div class="bg-indigo-100 text-indigo-700 p-3 rounded-2xl animate-pulse">
-                                        <i class="fa-solid fa-users text-xl"></i>
+                        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-2.5 text-left">
+                                    <div class="bg-indigo-100 text-indigo-700 p-2.5 rounded-2xl animate-pulse">
+                                        <i class="fa-solid fa-users text-lg"></i>
                                     </div>
                                     <div>
-                                        <h3 class="font-extrabold text-slate-900 text-sm sm:text-base neon-blink text-indigo-700">${activeGroupKey || 'Chưa chọn nhóm'} (${currentClass})</h3>
-                                        <p class="text-xs text-slate-500">HS: <span class="font-bold text-blue-600">${studentName || 'Chưa đăng nhập'}</span></p>
-                                        <p class="text-[11px] text-indigo-600 font-bold mt-0.5">Vai trò: ${myInfo.role}</p>
+                                        <h3 class="font-extrabold text-slate-900 text-xs sm:text-sm neon-blink text-indigo-700">${activeGroupKey || 'Chưa chọn nhóm'} (${currentClass})</h3>
+                                        <p class="text-[11px] text-slate-500">HS: <span class="font-bold text-blue-600">${studentName || 'Chưa đăng nhập'}</span></p>
+                                        <p class="text-[10px] text-indigo-600 font-bold">Vai trò: ${myInfo.role}</p>
                                     </div>
                                 </div>
-                                <button onclick="openStudentLoginModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl transition">
+                                <button onclick="openStudentLoginModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-xl transition">
                                     <i class="fa-solid fa-right-left"></i> Đổi
                                 </button>
                             </div>
                             
                             <!-- Bảng phân công danh sách học sinh -->
-                            <div class="space-y-2 mt-3 bg-indigo-50/60 p-3.5 rounded-2xl border border-indigo-100">
+                            <div class="space-y-2 mt-2 bg-indigo-50/60 p-3 rounded-2xl border border-indigo-100">
                                 <div class="flex justify-between items-center text-xs font-bold text-indigo-900">
                                     <span><i class="fa-solid fa-clipboard-user mr-1"></i> Bảng Phân Công & Vai Trò:</span>
-                                    <span class="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full">Đồng bộ GV</span>
+                                    <span class="text-[9px] bg-indigo-600 text-white px-2 py-0.5 rounded-full">Đồng bộ GV</span>
                                 </div>
-                                <div class="overflow-x-auto my-2 bg-white rounded-xl border border-indigo-200">
+                                <div class="overflow-x-auto my-1.5 bg-white rounded-xl border border-indigo-200">
                                     <table class="w-full text-left border-collapse text-xs">
                                         <thead>
-                                            <tr class="border-b border-indigo-100 text-slate-400 font-semibold text-[11px] bg-slate-50">
-                                                <th class="py-2 px-3">Họ và tên</th>
-                                                <th class="py-2 px-3">Vai trò</th>
-                                                <th class="py-2 px-3 text-right">Biểu quyết</th>
+                                            <tr class="border-b border-indigo-100 text-slate-400 font-semibold text-[10px] bg-slate-50">
+                                                <th class="py-2 px-2">Họ và tên</th>
+                                                <th class="py-2 px-2">Vai trò</th>
+                                                <th class="py-2 px-2 text-right">Biểu quyết</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-slate-100">
@@ -1226,19 +1272,19 @@
                                     </table>
                                 </div>
                                 <div class="pt-1 text-center">
-                                    <span class="text-xs font-extrabold text-indigo-800 bg-white px-3 py-1.5 rounded-full shadow-sm border border-indigo-200 block">
-                                        📋 Báo cáo: Dưới danh sách này có <b class="text-indigo-600 text-sm">${memberCount}</b> thành viên của nhóm.
+                                    <span class="text-[11px] font-extrabold text-indigo-800 bg-white px-3 py-1.5 rounded-full shadow-sm border border-indigo-200 block">
+                                        📋 Báo cáo: Dưới danh sách này có <b class="text-indigo-600 text-xs">${memberCount}</b> thành viên của nhóm.
                                     </span>
                                 </div>
                             </div>
 
-                            <div class="mt-4 space-y-2">
-                                <button onclick="openStudentTaskGuideModal()" class="w-full bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-medium py-2.5 rounded-2xl text-xs transition border border-cyan-200 flex items-center justify-center space-x-1.5">
+                            <div class="mt-3 space-y-2">
+                                <button onclick="openStudentTaskGuideModal()" class="w-full bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-medium py-2 rounded-2xl text-xs transition border border-cyan-200 flex items-center justify-center space-x-1.5">
                                     <i class="fa-solid fa-book-open-reader"></i>
                                     <span>Xem hướng dẫn nhóm</span>
                                 </button>
                                 ${myInfo.role === 'Thư ký' || myInfo.role === 'Nhóm trưởng' ? `
-                                    <button onclick="openSecretarySubmitModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-2xl text-xs transition shadow-sm flex items-center justify-center space-x-2">
+                                    <button onclick="openSecretarySubmitModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-2xl text-xs transition shadow-sm flex items-center justify-center space-x-2">
                                         <i class="fa-solid fa-paper-plane"></i>
                                         <span>Thư ký chốt & Nộp bài</span>
                                     </button>
@@ -1253,54 +1299,54 @@
 
                         <!-- Grades Box -->
                         <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200">
-                            <h4 class="font-bold text-slate-800 text-xs mb-2.5 flex items-center space-x-2">
+                            <h4 class="font-bold text-slate-800 text-xs mb-2 flex items-center space-x-2">
                                 <i class="fa-solid fa-award text-amber-500"></i>
                                <span>Điểm số & Nhận xét từ Giáo viên</span>
                             </h4>
                             <div class="space-y-2 text-xs">
-                                <div class="flex justify-between bg-amber-50 p-2.5 rounded-xl border border-amber-100 font-semibold">
+                                <div class="flex justify-between bg-amber-50 p-2 rounded-xl border border-amber-100 font-semibold">
                                     <span class="text-amber-800">Điểm nhóm:</span>
                                     <span class="text-amber-600 font-extrabold text-sm">${data.grades.groupScore}</span>
                                 </div>
-                                <div class="flex justify-between bg-indigo-50 p-2.5 rounded-xl border border-indigo-100 font-semibold">
+                                <div class="flex justify-between bg-indigo-50 p-2 rounded-xl border border-indigo-100 font-semibold">
                                     <span class="text-indigo-800">Điểm cá nhân:</span>
                                     <span class="text-indigo-600 font-extrabold text-sm">${data.grades.individualScore}</span>
                                 </div>
-                                <p class="text-slate-600 italic bg-slate-50 p-2.5 rounded-xl">"${data.grades.feedback}"</p>
+                                <p class="text-slate-600 italic bg-slate-50 p-2 rounded-xl">"${data.grades.feedback}"</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Right Column: Task Details, Submissions & Chat -->
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-white rounded-3xl p-5 shadow-xl border border-indigo-500/30">
-                            <div class="flex justify-between items-start mb-3">
+                    <div class="lg:col-span-2 flex flex-col gap-4">
+                        <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-blue-950 text-white rounded-3xl p-4 sm:p-5 shadow-xl border border-indigo-500/30">
+                            <div class="flex justify-between items-start mb-2.5">
                                 <div>
-                                    <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase">Đề bài từ Giáo viên • Lớp ${currentClass}</span>
-                                    <h3 class="text-lg sm:text-xl font-extrabold text-white mt-2">${task.title}</h3>
+                                    <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase">Đề bài từ Giáo viên • Lớp ${currentClass}</span>
+                                    <h3 class="text-base sm:text-lg font-extrabold text-white mt-1.5">${task.title}</h3>
                                 </div>
                                 <div class="text-right">
-                                    <span class="text-xs text-rose-300 font-bold block"><i class="fa-regular fa-clock mr-1"></i> Hạn: ${task.deadline}</span>
-                                    <span class="text-[11px] text-cyan-200">Môn: ${task.subject}</span>
+                                    <span class="text-[11px] text-rose-300 font-bold block"><i class="fa-regular fa-clock mr-1"></i> Hạn: ${task.deadline}</span>
+                                    <span class="text-[10px] text-cyan-200">Môn: ${task.subject}</span>
                                 </div>
                             </div>
-                            <div class="bg-white/10 p-3.5 rounded-2xl border border-white/10 text-xs sm:text-sm text-cyan-50 space-y-2">
-                                <p class="font-semibold"><i class="fa-solid fa-file-lines text-cyan-300 mr-1.5"></i> Yêu cầu sản phẩm:</p>
+                            <div class="bg-white/10 p-3 rounded-2xl border border-white/10 text-xs text-cyan-50 space-y-1.5">
+                                <p class="font-semibold"><i class="fa-solid fa-file-lines text-cyan-300 mr-1"></i> Yêu cầu sản phẩm:</p>
                                 <p class="text-slate-200 leading-relaxed">${task.description}</p>
                             </div>
-                            <div class="mt-4 pt-3 border-t border-white/10">
-                                <p class="text-xs font-bold text-cyan-200 mb-2"><i class="fa-solid fa-paperclip mr-1"></i> Tài liệu đính kèm giao bài (Tải về để làm):</p>
-                                <div class="space-y-1.5">${teacherFilesStudentHtml}</div>
+                            <div class="mt-3 pt-2.5 border-t border-white/10">
+                                <p class="text-[11px] font-bold text-cyan-200 mb-1.5"><i class="fa-solid fa-paperclip mr-1"></i> Tài liệu đính kèm từ giáo viên (Tải về để làm):</p>
+                                <div class="space-y-1">${teacherFilesStudentHtml}</div>
                             </div>
                         </div>
 
                         <!-- Submissions Grid -->
-                        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
+                        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200">
                             <h4 class="font-bold text-slate-800 text-xs sm:text-sm mb-3 flex items-center space-x-2">
                                 <i class="fa-solid fa-folder-open text-blue-600"></i>
-                                <span>Kho nộp bài chung của nhóm (Mọi thành viên đều có quyền đóng góp tài liệu)</span>
+                                <span>Kho nộp bài chung của nhóm (Mọi thành viên đều có thể đóng góp tài liệu)</span>
                             </h4>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                                 ${renderSubmissionCard('Word (.docx)', 'fa-file-word', 'text-blue-600', groupInfo.submissions?.word, 'word')}
                                 ${renderSubmissionCard('Excel (.xlsx)', 'fa-file-excel', 'text-emerald-600', groupInfo.submissions?.excel, 'excel')}
                                 ${renderSubmissionCard('PowerPoint (.pptx)', 'fa-file-powerpoint', 'text-amber-600', groupInfo.submissions?.ppt, 'ppt')}
@@ -1311,32 +1357,32 @@
                         </div>
 
                         <!-- Chat Box -->
-                        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 flex flex-col h-[340px]">
-                            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-                                <div class="flex items-center space-x-2 text-xs sm:text-sm font-bold text-slate-800">
+                        <div class="bg-white rounded-3xl p-4 sm:p-5 shadow-sm border border-slate-200 flex flex-col h-[320px]">
+                            <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                                <div class="flex items-center space-x-2 text-xs font-bold text-slate-800">
                                     <i class="fa-solid fa-comments text-blue-600"></i>
                                     <span>Thảo luận nhóm (${activeGroupKey || 'Tổ'} - Lớp ${currentClass})</span>
                                 </div>
-                                <span class="bg-emerald-50 text-emerald-600 text-[11px] px-2.5 py-1 rounded-full font-medium">Đám mây</span>
+                                <span class="bg-emerald-50 text-emerald-600 text-[10px] px-2 py-0.5 rounded-full font-medium">Đám mây</span>
                             </div>
 
-                            <div id="chatMessagesBox" class="flex-1 overflow-y-auto custom-scrollbar space-y-3 py-4">
+                            <div id="chatMessagesBox" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 py-3">
                                 ${data.discussions.length === 0 ? `
                                     <p class="text-slate-400 text-xs italic text-center py-10">Chưa có tin nhắn thảo luận nào.</p>
                                 ` : data.discussions.map(msg => `
-                                    <div class="flex flex-col space-y-1 bg-slate-50 p-3 rounded-2xl border border-slate-100 shadow-sm">
-                                        <div class="flex justify-between items-center text-xs">
+                                    <div class="flex flex-col space-y-0.5 bg-slate-50 p-2.5 rounded-2xl border border-slate-100 shadow-sm">
+                                        <div class="flex justify-between items-center text-[11px]">
                                             <span class="font-bold text-slate-800">${msg.sender}</span>
                                             <span class="text-slate-400">${msg.time}</span>
                                         </div>
-                                        <p class="text-xs sm:text-sm text-slate-600">${msg.text}</p>
+                                        <p class="text-xs text-slate-600">${msg.text}</p>
                                     </div>
                                 `).join('')}
                             </div>
 
-                            <div class="pt-3 border-t border-slate-100 flex items-center space-x-2">
-                                <input type="text" id="chatInputText" placeholder="Nhập tin nhắn thảo luận..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none" onkeypress="if(event.key==='Enter') sendChatMessage()">
-                                <button onclick="sendChatMessage()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-2xl text-xs sm:text-sm transition shadow-sm">
+                            <div class="pt-2.5 border-t border-slate-100 flex items-center space-x-2">
+                                <input type="text" id="chatInputText" placeholder="Nhập tin nhắn thảo luận..." class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-3 py-2 text-xs focus:outline-none" onkeypress="if(event.key==='Enter') sendChatMessage()">
+                                <button onclick="sendChatMessage()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-2xl text-xs transition shadow-sm">
                                     <i class="fa-solid fa-paper-plane"></i>
                                 </button>
                             </div>
@@ -1349,9 +1395,9 @@
         function renderSubmissionCard(title, iconClass, colorClass, subData, fileKey) {
             const hasSub = subData && subData.name;
             return `
-                <div class="p-3 bg-slate-50 rounded-2xl border ${hasSub ? 'border-emerald-200 bg-emerald-50/40 shadow-sm' : 'border-slate-200'} flex flex-col justify-between space-y-2">
+                <div class="p-2.5 bg-slate-50 rounded-2xl border ${hasSub ? 'border-emerald-200 bg-emerald-50/40 shadow-sm' : 'border-slate-200'} flex flex-col justify-between space-y-2">
                     <div class="flex items-center space-x-2">
-                        <i class="fa-solid ${iconClass} ${colorClass} text-lg sm:text-xl"></i>
+                        <i class="fa-solid ${iconClass} ${colorClass} text-lg"></i>
                         <div class="overflow-hidden">
                             <h5 class="text-xs font-bold text-slate-800 truncate">${title}</h5>
                             <p class="text-[10px] text-slate-500 truncate">${hasSub ? `${subData.name} (${subData.submittedBy})` : 'Chưa nộp'}</p>
@@ -1381,17 +1427,17 @@
             const currentVote = data.groups[currentGroup]?.consents?.[studentName] || 'Chưa bỏ phiếu';
 
             const html = `
-                <div class="space-y-4 text-center py-2">
+                <div class="space-y-3 text-center py-1">
                     <p class="text-xs sm:text-sm text-slate-700">Thư ký đã tổng hợp bài làm. Bạn có đồng ý chốt nộp bài này cho giáo viên không?</p>
-                    <div class="flex justify-center space-x-3">
-                        <button onclick="submitConsentVote('Đồng ý')" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow ${currentVote === 'Đồng ý' ? 'ring-4 ring-emerald-300' : ''}">
+                    <div class="flex justify-center space-x-2.5">
+                        <button onclick="submitConsentVote('Đồng ý')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow ${currentVote === 'Đồng ý' ? 'ring-4 ring-emerald-300' : ''}">
                             <i class="fa-solid fa-check mr-1"></i> Đồng ý nộp
                         </button>
-                        <button onclick="submitConsentVote('Không đồng ý')" class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs transition shadow ${currentVote === 'Không đồng ý' ? 'ring-4 ring-rose-300' : ''}">
+                        <button onclick="submitConsentVote('Không đồng ý')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs transition shadow ${currentVote === 'Không đồng ý' ? 'ring-4 ring-rose-300' : ''}">
                             <i class="fa-solid fa-xmark mr-1"></i> Chưa đồng ý
                         </button>
                     </div>
-                    <p class="text-xs text-slate-500">Trạng thái biểu quyết hiện tại của bạn: <b class="text-indigo-600">${currentVote}</b></p>
+                    <p class="text-xs text-slate-500">Trạng thái hiện tại của bạn: <b class="text-indigo-600">${currentVote}</b></p>
                 </div>
             `;
             openModal("Biểu Quyết Nộp Bài", html);
@@ -1424,19 +1470,19 @@
             }).join('');
 
             const html = `
-                <div class="space-y-4 text-xs sm:text-sm">
-                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100">
+                <div class="space-y-3 text-xs sm:text-sm">
+                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100">
                         <p class="font-bold text-indigo-900">Thư ký/Trưởng nhóm chốt nộp bài:</p>
                         <p class="text-indigo-700">Dưới danh sách này có <b>${memberCount}</b> thành viên của nhóm. Kiểm tra biểu quyết trước khi nộp.</p>
                     </div>
-                    <ul class="space-y-1 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+                    <ul class="space-y-1 bg-slate-50 p-2.5 rounded-2xl border border-slate-200">
                         ${consentDetailsHtml || '<p class="text-slate-400 italic">Chưa có thông tin biểu quyết.</p>'}
                     </ul>
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="confirmSecretaryFinalSubmit()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow">Xác Nhận Nộp Bài Chính Thức</button>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
+                <button onclick="confirmSecretaryFinalSubmit()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow">Xác Nhận Nộp Bài Chính Thức</button>
             `;
             openModal("Thư Ký Chốt & Nộp Bài", html, footer);
         }
@@ -1466,24 +1512,24 @@
             }
 
             const html = `
-                <div class="space-y-4 py-2">
-                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
+                <div class="space-y-3 py-1">
+                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
                         <p class="font-bold">Đóng góp file cho mục: ${fileTitle} (${currentGroup})</p>
-                        <p>Học sinh đóng góp: <b>${studentName}</b></p>
+                        <p>Học sinh: <b>${studentName}</b></p>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Tên file</label>
-                        <input type="text" id="inpUploadFileName" placeholder="VD: Bao_cao.docx" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Tên file</label>
+                        <input type="text" id="inpUploadFileName" placeholder="VD: Bao_cao.docx" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Đường dẫn file (URL / Google Drive)</label>
-                        <input type="text" id="inpUploadFileLink" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Đường dẫn file (URL / Google Drive)</label>
+                        <input type="text" id="inpUploadFileLink" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2 text-xs">
                     </div>
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="saveStudentFileSubmission('${fileKey}')" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow">Xác Nhận Đóng Góp</button>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
+                <button onclick="saveStudentFileSubmission('${fileKey}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition shadow">Xác Nhận Đóng Góp</button>
             `;
             openModal(`Đóng Góp File: ${fileTitle}`, html, footer);
         }
@@ -1524,14 +1570,14 @@
             const memberCount = Object.keys(participants).length;
 
             let subsHtml = Object.keys(subs).length === 0 
-                ? `<p class="text-slate-400 italic text-xs py-2">Tổ này chưa nộp file nào.</p>`
+                ? `<p class="text-slate-400 italic text-xs py-1">Tổ này chưa nộp file nào.</p>`
                 : Object.entries(subs).map(([k, s]) => `
-                    <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
+                    <div class="p-2 bg-slate-50 rounded-xl border border-slate-200 flex justify-between items-center text-xs">
                         <div>
                             <span class="font-bold uppercase text-indigo-700">[${k}]</span> <span class="font-semibold text-slate-800">${s.name}</span>
                             <span class="text-slate-500 block text-[10px]">Đóng góp: ${s.submittedBy} • ${s.date}</span>
                         </div>
-                        <a href="${s.link}" target="_blank" class="px-3 py-1 bg-blue-600 text-white rounded-lg font-semibold">Xem</a>
+                        <a href="${s.link}" target="_blank" class="px-2.5 py-1 bg-blue-600 text-white rounded-lg font-semibold">Xem</a>
                     </div>
                 `).join('');
 
@@ -1551,10 +1597,10 @@
                 }).join('');
 
             const html = `
-                <div class="space-y-4 text-xs sm:text-sm">
-                    <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100">
-                        <h4 class="font-bold text-indigo-900 text-sm">Kiểm tra chi tiết ${groupName} (Mã: ${g.code})</h4>
-                        <p class="text-xs text-indigo-700">Trạng thái nộp bài: <b>${g.submittedStatus ? 'Đã nộp chính thức' : 'Chưa nộp'}</b> | Dưới danh sách này có <b>${memberCount}</b> thành viên của nhóm.</p>
+                <div class="space-y-3 text-xs sm:text-sm py-1">
+                    <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100">
+                        <h4 class="font-bold text-indigo-900 text-xs sm:text-sm">Kiểm tra chi tiết ${groupName} (Mã: ${g.code})</h4>
+                        <p class="text-[11px] text-indigo-700">Trạng thái: <b>${g.submittedStatus ? 'Đã nộp' : 'Chưa nộp'}</b> | Dưới danh sách có <b>${memberCount}</b> thành viên.</p>
                     </div>
 
                     <div class="space-y-1">
@@ -1567,21 +1613,21 @@
                         ${subsHtml}
                     </div>
 
-                    <div class="bg-amber-50 p-3.5 rounded-2xl border border-amber-200 space-y-2">
-                        <h5 class="font-bold text-amber-900 flex items-center"><i class="fa-solid fa-stamp mr-1.5 text-amber-600"></i> Chấm điểm trực tiếp:</h5>
+                    <div class="bg-amber-50 p-3 rounded-2xl border border-amber-200 space-y-2">
+                        <h5 class="font-bold text-amber-900 flex items-center"><i class="fa-solid fa-stamp mr-1 text-amber-600"></i> Chấm điểm trực tiếp:</h5>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-[10px] font-bold text-amber-900">Điểm nhóm</label>
-                                <input type="text" id="inspectGroupScore" value="${data.grades.groupScore}" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 text-xs font-bold">
+                                <input type="text" id="inspectGroupScore" value="${data.grades.groupScore}" class="w-full bg-white border border-amber-300 rounded-xl px-2 py-1.5 text-xs font-bold">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-bold text-amber-900">Điểm cá nhân TB</label>
-                                <input type="text" id="inspectIndScore" value="${data.grades.individualScore}" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 text-xs font-bold">
+                                <label class="block text-[10px] font-bold text-amber-900">Điểm cá nhân</label>
+                                <input type="text" id="inspectIndScore" value="${data.grades.individualScore}" class="w-full bg-white border border-amber-300 rounded-xl px-2 py-1.5 text-xs font-bold">
                             </div>
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-amber-900">Nhận xét của giáo viên</label>
-                            <textarea id="inspectFeedback" rows="2" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 text-xs">${data.grades.feedback}</textarea>
+                            <textarea id="inspectFeedback" rows="2" class="w-full bg-white border border-amber-300 rounded-xl px-2 py-1.5 text-xs">${data.grades.feedback}</textarea>
                         </div>
                         <button onclick="stampGradeToGroup('${groupName}')" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow">
                             <i class="fa-solid fa-circle-check mr-1"></i> Lưu & Đóng dấu điểm nhóm
@@ -1590,7 +1636,7 @@
                 </div>
             `;
             const footer = `
-                <button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Đóng</button>
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Đóng</button>
             `;
             openModal(`Kiểm tra & Chấm Bài - ${groupName}`, html, footer);
         }
@@ -1620,7 +1666,7 @@
             if (!modal) return;
             modalTitle.innerText = title;
             modalBody.innerHTML = htmlContent;
-            modalFooter.innerHTML = footerHtml || `<button onclick="closeModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Đóng</button>`;
+            modalFooter.innerHTML = footerHtml || `<button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Đóng</button>`;
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modalContentBox.classList.remove('scale-95', 'opacity-0');
@@ -1642,9 +1688,9 @@
             if (!toast || !msgEl || !iconEl) return;
             msgEl.innerText = message;
             if (type === 'error') {
-                iconEl.className = "fa-solid fa-circle-exclamation text-rose-400 text-lg";
+                iconEl.className = "fa-solid fa-circle-exclamation text-rose-400 text-base";
             } else {
-                iconEl.className = "fa-solid fa-circle-check text-emerald-400 text-lg";
+                iconEl.className = "fa-solid fa-circle-check text-emerald-400 text-base";
             }
             toast.classList.remove('translate-y-20', 'opacity-0');
             setTimeout(() => {
@@ -1679,8 +1725,8 @@
             window.appState.setRole('student');
             const btnT = document.getElementById('btnRoleTeacher');
             const btnS = document.getElementById('btnRoleStudent');
-            if (btnT) btnT.className = "px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-slate-300 hover:text-white";
-            if (btnS) btnS.className = "px-2.5 py-1.5 text-xs font-semibold rounded-lg transition-all text-white bg-indigo-600 shadow";
+            if (btnT) btnT.className = "px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all text-slate-300 hover:text-white";
+            if (btnS) btnS.className = "px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all text-white bg-indigo-600 shadow";
             const badgeRole = document.getElementById('badgeRoleDisplay');
             if (badgeRole) badgeRole.innerText = `Học sinh`;
             renderWorkspace();
@@ -1695,9 +1741,9 @@
             const currentUrl = window.location.href;
             const cls = window.appState.getClass();
             const html = `
-                <div class="space-y-4 text-center py-2">
+                <div class="space-y-3 text-center py-1">
                     <p class="text-xs text-slate-600">Quét mã QR để truy cập trực tuyến <b>Lớp ${cls}</b>:</p>
-                    <div id="modalQRCodeContainer" class="flex justify-center bg-slate-50 p-4 rounded-3xl border border-slate-200 inline-block mx-auto"></div>
+                    <div id="modalQRCodeContainer" class="flex justify-center bg-slate-50 p-3 rounded-3xl border border-slate-200 inline-block mx-auto"></div>
                 </div>
             `;
             openModal(`Mã QR Lớp ${cls}`, html);
@@ -1708,8 +1754,8 @@
                     container.innerHTML = "";
                     new QRCode(container, {
                         text: currentUrl,
-                        width: 170,
-                        height: 170,
+                        width: 150,
+                        height: 150,
                         colorDark: "#1e293b",
                         colorLight: "#ffffff",
                         correctLevel: QRCode.CorrectLevel.H
@@ -1736,10 +1782,6 @@
             saveToCloud();
         }
 
-        function showInfoModal() {
-            openStudentTaskGuideModal();
-        }
-
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             const urlClass = urlParams.get('class');
@@ -1752,13 +1794,12 @@
             }
 
             renderWorkspace();
-            setTimeout(() => { speakIntroSpeech(); }, 600);
+            setTimeout(() => { speakIntroSpeech(); }, 500);
         };
     </script>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-3 text-center text-[11px] sm:text-xs text-slate-500">
-        <p>Bài Tập hoạt động nhóm • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây 100%</p>
+    <footer class="bg-white border-t border-slate-200 py-2.5 text-center text-[10px] sm:text-xs text-slate-500 shrink-0 z-10">
+        <p>Bài Tập hoạt động nhóm • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Lưu trữ đám mây</p>
     </footer>
 
 </body>
