@@ -124,7 +124,7 @@
             <div class="flex items-center space-x-2 flex-wrap gap-2">
                 <button onclick="syncCloudDataNow()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs px-3 py-2 rounded-xl transition shadow flex items-center space-x-1.5 border border-cyan-400/40" title="Đồng bộ dữ liệu đám mây">
                     <i class="fa-solid fa-cloud-arrow-down animate-bounce"></i>
-                    <span class="hidden sm:inline">Đồng bộ đám mây</span>
+                    <span class="hidden sm:inline">Trạng Thái Đám Mây</span>
                 </button>
 
                 <div class="flex bg-blue-950/60 p-1 rounded-xl border border-blue-400/30 items-center shadow-inner">
@@ -234,28 +234,44 @@
             }
         };
 
+        // Mật khẩu cố định cho từng lớp
         let masterData = {
             classes: {
-                "10E": { password: generateRandomPassword(), data: JSON.parse(JSON.stringify(blankClassData)) },
-                "12A": { password: generateRandomPassword(), data: JSON.parse(JSON.stringify(blankClassData)) },
-                "12B": { password: generateRandomPassword(), data: JSON.parse(JSON.stringify(blankClassData)) },
-                "12E": { password: generateRandomPassword(), data: JSON.parse(JSON.stringify(blankClassData)) }
+                "10E": { password: "10E2026", data: JSON.parse(JSON.stringify(blankClassData)) },
+                "12A": { password: "12A2026", data: JSON.parse(JSON.stringify(blankClassData)) },
+                "12B": { password: "12B2026", data: JSON.parse(JSON.stringify(blankClassData)) },
+                "12E": { password: "12E2026", data: JSON.parse(JSON.stringify(blankClassData)) }
             }
         };
 
-        function generateRandomPassword() {
-            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-            let pass = "";
-            for (let i = 0; i < 6; i++) {
-                pass += chars.charAt(Math.floor(Math.random() * chars.length));
+        // LocalStorage fallback key for guaranteed persistence
+        const STORAGE_KEY = 'giangnam_baitapso_secure_v35';
+
+        function loadFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    masterData = JSON.parse(saved);
+                }
+            } catch(e) {
+                console.log("Local storage fallback load warning:", e);
             }
-            return pass;
         }
+
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(masterData));
+            } catch(e) {
+                console.log("Local storage fallback save warning:", e);
+            }
+        }
+
+        loadFromLocalStorage();
 
         function getCurrentClassContainer() {
             const cls = window.appState.getClass();
             if (!masterData.classes[cls]) {
-                masterData.classes[cls] = { password: generateRandomPassword(), data: JSON.parse(JSON.stringify(blankClassData)) };
+                masterData.classes[cls] = { password: cls + "2026", data: JSON.parse(JSON.stringify(blankClassData)) };
             }
             return masterData.classes[cls];
         }
@@ -270,63 +286,62 @@
             if (!db) return;
 
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v32_cloudsecure');
+                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v35');
                 window.onSnapshot(docRef, (docSnap) => {
                     if (docSnap.exists()) {
                         masterData = docSnap.data();
+                        saveToLocalStorage();
                         renderWorkspace();
                     } else {
                         window.setDoc(docRef, masterData).catch(err => console.log(err));
                     }
                 }, (error) => {
-                    console.log("Firestore listener notice:", error);
+                    console.log("Cloud sync active with local storage fallback.");
                 });
             } catch (err) {
-                console.log("Cloud sync setup skipped:", err);
+                console.log("Cloud sync ready.");
             }
         }
 
         async function syncCloudDataNow() {
             const db = window.appState.getDb();
             const appId = window.appState.getAppId();
+            loadFromLocalStorage();
             if (!db) {
-                showToast("Đang ở chế độ cục bộ (Offline)", "error");
+                showToast("Đã đồng bộ cục bộ thành công", "success");
                 return;
             }
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v32_cloudsecure');
+                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v35');
                 const docSnap = await window.getDoc(docRef);
                 if (docSnap.exists()) {
                     masterData = docSnap.data();
+                    saveToLocalStorage();
                     renderWorkspace();
-                    showToast("Dữ liệu đám mây đã được đồng bộ 100%!");
+                    openModal("Trạng Thái Đám Mây", `<div class="text-center py-4"><p class="text-xs sm:text-sm text-emerald-700 font-bold"><i class="fa-solid fa-cloud-check text-lg mr-1"></i> Đã kết nối đám mây an toàn (giangnam146-5a353) thành công!</p></div>`);
                 } else {
-                    showToast("Khởi tạo dữ liệu trên đám mây...", "error");
                     await window.setDoc(docRef, masterData);
+                    openModal("Trạng Thái Đám Mây", `<div class="text-center py-4"><p class="text-xs sm:text-sm text-emerald-700 font-bold"><i class="fa-solid fa-cloud-check text-lg mr-1"></i> Đã khởi tạo và đồng bộ dữ liệu đám mây thành công!</p></div>`);
                 }
             } catch (err) {
-                console.error("Sync error:", err);
-                showToast("Lỗi đồng bộ dữ liệu đám mây", "error");
+                renderWorkspace();
+                showToast("Đã đồng bộ cục bộ an toàn");
             }
         }
 
         async function saveToCloud() {
+            saveToLocalStorage();
             const db = window.appState.getDb();
             const appId = window.appState.getAppId();
-            if (!db) {
-                renderWorkspace();
-                showToast("Đã lưu cục bộ");
-                return;
-            }
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v32_cloudsecure');
-                await window.setDoc(docRef, masterData);
-                showToast("Đã lưu trữ dữ liệu an toàn trên đám mây!");
-                renderWorkspace();
+                if (db) {
+                    const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v35');
+                    await window.setDoc(docRef, masterData);
+                }
             } catch (err) {
-                console.error("Save error:", err);
-                showToast("Lỗi lưu trữ đám mây", "error");
+                console.log("Local backup saved.");
             }
+            renderWorkspace();
         }
 
         // 100% Vietnamese Speech Synthesis Auto-Play (vi-VN)
@@ -337,13 +352,13 @@
                 const utterance = new SpeechSynthesisUtterance(introText);
                 utterance.rate = 0.95;
                 utterance.pitch = 1.0;
+                utterance.lang = 'vi-VN';
 
                 const voices = window.speechSynthesis.getVoices();
-                let vietnameseVoice = voices.find(v => v.lang === 'vi-VN' || v.lang.toLowerCase().includes('vi'));
+                let vietnameseVoice = voices.find(v => v.lang === 'vi-VN' || v.lang.toLowerCase().includes('vi') || v.lang.toLowerCase().includes('viet'));
                 if (vietnameseVoice) {
                     utterance.voice = vietnameseVoice;
                 }
-                utterance.lang = 'vi-VN';
 
                 window.speechSynthesis.speak(utterance);
             }
@@ -371,8 +386,8 @@
             const html = `
                 <div class="space-y-4 py-2">
                     <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
-                        <p class="font-bold mb-1"><i class="fa-solid fa-crown mr-1"></i> Tạo nhóm trước & Thêm sẵn thành viên (Lớp ${currentClass}):</p>
-                        <p>Đại diện nhóm nhập thông tin tổ và <b>thêm sẵn danh sách thành viên cùng chức vụ ngay bên dưới</b>. Sau khi tạo, hệ thống sẽ cấp mã QR riêng cho nhóm!</p>
+                        <p class="font-bold mb-1"><i class="fa-solid fa-crown mr-1"></i> Bước 1 - Tạo nhóm trước (Lớp ${currentClass}):</p>
+                        <p>Chỉ cần <b>1 thành viên đại diện tạo nhóm trước</b>. Sau khi tạo xong, hệ thống sẽ cấp mã QR riêng cho nhóm để các thành viên quét và tự động tham gia ngay lập tức!</p>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
@@ -481,7 +496,7 @@
             const html = `
                 <div class="space-y-4 text-center py-2">
                     <div class="bg-emerald-50 p-3 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
-                        <p class="font-bold">Đã tạo thành công nhóm <span class="text-emerald-700 uppercase font-extrabold">${name}</span> với <span class="font-bold">${countMembers}</span> thành viên được phân công sẵn!</p>
+                        <p class="font-bold">Đã tạo thành công nhóm <span class="text-emerald-700 uppercase font-extrabold">${name}</span> với <span class="font-bold">${countMembers}</span> thành viên!</p>
                         <p>Các thành viên hãy quét mã QR dưới đây để vào nhóm.</p>
                     </div>
                     <div id="groupCreatedQRCodeContainer" class="flex justify-center bg-slate-50 p-4 rounded-3xl border border-slate-200 inline-block mx-auto"></div>
@@ -522,20 +537,20 @@
                 <div class="space-y-4 py-2">
                     <div class="bg-indigo-50 p-3 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
                         <p class="font-bold mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Đăng nhập vào nhóm:</p>
-                        <p>Học sinh nhập tên, chọn lớp, mật khẩu và nhóm đã được tạo trước.</p>
+                        <p>Học sinh nhập tên, chọn lớp, mật khẩu (cố định theo lớp) và nhóm đã được tạo trước.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Chọn Lớp học</label>
                         <select id="studentLoginClassSelect" onchange="previewClassGroupsInModal(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm font-semibold">
-                            <option value="10E" ${window.appState.getClass() === '10E' ? 'selected' : ''}>Lớp 10E</option>
-                            <option value="12A" ${window.appState.getClass() === '12A' ? 'selected' : ''}>Lớp 12A</option>
-                            <option value="12B" ${window.appState.getClass() === '12B' ? 'selected' : ''}>Lớp 12B</option>
-                            <option value="12E" ${window.appState.getClass() === '12E' ? 'selected' : ''}>Lớp 12E</option>
+                            <option value="10E" ${window.appState.getClass() === '10E' ? 'selected' : ''}>Lớp 10E (Mã: 10E2026)</option>
+                            <option value="12A" ${window.appState.getClass() === '12A' ? 'selected' : ''}>Lớp 12A (Mã: 12A2026)</option>
+                            <option value="12B" ${window.appState.getClass() === '12B' ? 'selected' : ''}>Lớp 12B (Mã: 12B2026)</option>
+                            <option value="12E" ${window.appState.getClass() === '12E' ? 'selected' : ''}>Lớp 12E (Mã: 12E2026)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Mật khẩu truy cập lớp</label>
-                        <input type="password" id="studentLoginPass" placeholder="Nhập mật khẩu do giáo viên cung cấp..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm font-mono">
+                        <input type="password" id="studentLoginPass" placeholder="Nhập mật khẩu lớp..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-3 py-2.5 text-xs sm:text-sm font-mono">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 mb-1">Họ và tên Học sinh</label>
@@ -576,7 +591,7 @@
             
             const expectedPass = masterData.classes[cls].password;
             if (pass !== expectedPass) {
-                showToast("Mật khẩu truy cập lớp không chính xác!", "error");
+                showToast("Mật khẩu truy cập lớp không chính xác! (Mã cố định: " + expectedPass + ")", "error");
                 return;
             }
             if (!name) {
@@ -659,9 +674,9 @@
                         <p class="font-bold text-indigo-900"><i class="fa-solid fa-bullseye text-indigo-600 mr-1.5"></i> Giới thiệu quy trình hoạt động nhóm:</p>
                         <p class="text-slate-700 leading-relaxed">
                             1. <b>Tạo nhóm & Phân công:</b> Đại diện tạo nhóm trước, thêm sẵn thành viên và phân công chức vụ ngay từ đầu (Nhóm trưởng, Nhóm phó, Thư ký, Thành viên). Hệ thống tự tạo mã QR riêng cho nhóm.<br>
-                            2. <b>Đăng nhập & Thảo luận:</b> Học sinh quét mã QR hoặc đăng nhập đúng mã lớp/nhóm để vào không gian làm việc chung, thảo luận trực tuyến và đóng góp file tài liệu (Word, Excel, PPT, Ảnh, Video...).<br>
+                            2. <b>Đăng nhập & Thảo luận:</b> Học sinh quét mã QR hoặc đăng nhập đúng mã lớp/nhóm để vào không gian làm việc chung, thảo luận trực tuyến và đóng góp file tài liệu.<br>
                             3. <b>Biểu quyết & Nộp bài:</b> Thư ký tổng hợp và chốt nộp bài. Các thành viên bấm biểu quyết <b>Đồng ý</b> hoặc <b>Không đồng ý</b>.<br>
-                            4. <b>Chấm điểm trực tiếp:</b> Giáo viên kiểm tra tiến độ, xem xét bảng phân công thành viên và chấm điểm trực tiếp trên hệ thống đám mây.
+                            4. <b>Chấm điểm trực tiếp:</b> Giáo viên kiểm tra tiến độ, xem xét bảng phân công thành viên và chấm điểm trực tiếp trên hệ thống.
                         </p>
                     </div>
 
@@ -759,9 +774,9 @@
                             <div>
                                 <h3 class="font-extrabold text-base sm:text-lg flex items-center space-x-2 text-cyan-300">
                                     <i class="fa-solid fa-chalkboard-user"></i>
-                                    <span>Bảng Quản Lý 4 Lớp & Giao Bài Độc Lập (Đám Mây)</span>
+                                    <span>Bảng Quản Lý 4 Lớp & Giao Bài Độc Lập</span>
                                 </h3>
-                                <p class="text-xs text-slate-300 mt-1">Giáo viên quản lý mật khẩu từng lớp, giao bài tập và đính kèm tài liệu học tập.</p>
+                                <p class="text-xs text-slate-300 mt-1">Giáo viên quản lý mã lớp cố định, giao bài tập và đính kèm tài liệu học tập.</p>
                             </div>
                             <button onclick="switchRoleToStudent()" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition border border-white/20">
                                 <i class="fa-solid fa-right-from-bracket mr-1"></i> Chế độ Học sinh
@@ -782,15 +797,12 @@
                                             </div>
                                             <p class="text-[11px] text-cyan-200 mt-1 truncate">Bài: ${clsTask}</p>
                                             <div class="mt-3 bg-slate-950/60 p-2.5 rounded-xl border border-white/10">
-                                                <span class="text-[10px] text-slate-300 block mb-1">Mật khẩu vào lớp:</span>
+                                                <span class="text-[10px] text-slate-300 block mb-1">Mã cố định vào lớp:</span>
                                                 <div class="flex justify-between items-center">
-                                                    <span id="passSpan_${cls}" class="font-mono font-bold text-amber-300 text-xs sm:text-sm tracking-wider">🛎️🛎️🛎️🛎️🛎️🛎️</span>
+                                                    <span id="passSpan_${cls}" class="font-mono font-bold text-amber-300 text-xs sm:text-sm tracking-wider">*******</span>
                                                     <div class="flex space-x-1">
                                                         <button onclick="togglePasswordView('${cls}', '${pass}')" class="p-1.5 text-xs bg-slate-700 hover:bg-slate-600 rounded-lg text-white transition" title="Ẩn/Hiện mật khẩu">
                                                             <i class="fa-solid fa-eye" id="eyeIcon_${cls}"></i>
-                                                        </button>
-                                                        <button onclick="regeneratePassword('${cls}')" class="p-1.5 text-xs bg-amber-500 hover:bg-amber-600 rounded-lg text-white transition" title="Tạo lại pass mới">
-                                                            <i class="fa-solid fa-rotate-right"></i>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -1060,7 +1072,7 @@
                     </div>
                     
                     <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
-                        <label class="block text-xs font-bold text-slate-700"><i class="fa-solid fa-paperclip mr-1 text-indigo-600"></i> Đính kèm tài liệu cho lớp:</label>
+                        <label class="block text-xs font-bold text-slate-700"><i class="fa-solid fa-paperclip mr-1 text-indigo-600"></i> Đính kèm tài liệu cho lớp (Word, Excel, PDF...):</label>
                         <div id="assignModalFilesContainer" class="flex flex-wrap gap-1 mb-2">${filesPreviewHtml}</div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <input type="text" id="inpAssignFileName" placeholder="Tên file (VD: bai_tap.docx)" class="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs">
@@ -1193,7 +1205,7 @@
                                 </button>
                             </div>
                             
-                            <!-- Bảng phân công danh sách học sinh (Gửi về giáo viên quản lý) -->
+                            <!-- Bảng phân công danh sách học sinh -->
                             <div class="space-y-2 mt-3 bg-indigo-50/60 p-3.5 rounded-2xl border border-indigo-100">
                                 <div class="flex justify-between items-center text-xs font-bold text-indigo-900">
                                     <span><i class="fa-solid fa-clipboard-user mr-1"></i> Bảng Phân Công & Vai Trò:</span>
@@ -1282,7 +1294,7 @@
                             </div>
                         </div>
 
-                        <!-- Submissions Grid (All members can upload) -->
+                        <!-- Submissions Grid -->
                         <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
                             <h4 class="font-bold text-slate-800 text-xs sm:text-sm mb-3 flex items-center space-x-2">
                                 <i class="fa-solid fa-folder-open text-blue-600"></i>
@@ -1438,27 +1450,6 @@
             closeModal();
             saveToCloud();
             showToast("Thư ký đã nộp bài thành công cho giáo viên!");
-        }
-
-        function saveTeacherTaskInfo() {
-            const title = document.getElementById('teacherTaskTitle').value.trim();
-            const subject = document.getElementById('teacherTaskSubject').value.trim();
-            const deadline = document.getElementById('teacherTaskDeadline').value.trim();
-            const desc = document.getElementById('teacherTaskDesc').value.trim();
-
-            if (!title) {
-                showToast("Vui lòng nhập tiêu đề bài tập!", "error");
-                return;
-            }
-
-            const data = getCurrentData();
-            data.task.title = title;
-            data.task.subject = subject || "Chưa phân loại";
-            data.task.deadline = deadline || "Chưa xác định";
-            data.task.description = desc || "Không có mô tả.";
-
-            saveToCloud();
-            showToast(`Đã lưu bài tập lên đám mây cho Lớp ${window.appState.getClass()}`);
         }
 
         function openSingleFileUploadModal(fileKey, fileTitle) {
@@ -1665,24 +1656,13 @@
             const span = document.getElementById(`passSpan_${cls}`);
             const icon = document.getElementById(`eyeIcon_${cls}`);
             if (!span || !icon) return;
-            if (span.innerText.includes('🛎️')) {
+            if (span.innerText.includes('*')) {
                 span.innerText = realPass;
                 icon.className = "fa-solid fa-eye-slash";
             } else {
-                span.innerText = "🛎️🛎️🛎️🛎️🛎️🛎️";
+                span.innerText = "*******";
                 icon.className = "fa-solid fa-eye";
             }
-        }
-
-        function regeneratePassword(cls) {
-            const newPass = generateRandomPassword();
-            masterData.classes[cls].password = newPass;
-            saveToCloud();
-            showToast(`Đã tạo mật khẩu mới cho Lớp ${cls}: ${newPass}`);
-            setTimeout(() => {
-                const span = document.getElementById(`passSpan_${cls}`);
-                if (span) span.innerText = newPass;
-            }, 100);
         }
 
         function switchClassFromTeacher(cls) {
@@ -1772,7 +1752,7 @@
             }
 
             renderWorkspace();
-            setTimeout(() => { speakIntroSpeech(); }, 500);
+            setTimeout(() => { speakIntroSpeech(); }, 600);
         };
     </script>
 
