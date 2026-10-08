@@ -51,7 +51,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'giangnam-nhom-online-v37-cloudsync';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'giangnam-nhom-online-v39-cloudsync';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
             authDomain: "giangnam146-5a353.firebaseapp.com",
@@ -110,7 +110,7 @@
     </script>
 
     <header class="bg-gradient-to-r from-blue-800 via-indigo-800 to-cyan-700 text-white shadow-xl border-b border-cyan-500/25 shrink-0 z-30 sticky top-0">
-        <div class="max-w-7xl mx-auto px-3 py-2 flex flex-wrap justify-between items-center gap-2">
+        <div class="max-w-7xl mx-auto px-3 py-2.5 flex flex-wrap justify-between items-center gap-2">
             <div class="flex items-center space-x-2">
                 <div class="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/25 shadow-inner animate-pulse-glow">
                     <i class="fa-solid fa-users-rectangle text-lg text-cyan-300"></i>
@@ -122,9 +122,9 @@
             </div>
 
             <div class="flex items-center space-x-2 flex-wrap gap-1.5">
-                <button onclick="syncCloudDataNow()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] px-2.5 py-1.5 rounded-xl transition shadow flex items-center space-x-1 border border-cyan-400/40" title="Trạng thái đám mây">
+                <button onclick="syncCloudDataNow()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-[11px] px-2.5 py-1.5 rounded-xl transition shadow flex items-center space-x-1 border border-cyan-400/40" title="Đồng bộ đám mây">
                     <i class="fa-solid fa-cloud animate-pulse"></i>
-                    <span class="hidden sm:inline">Trạng Thái Đám Mây</span>
+                    <span class="hidden sm:inline">Đồng Bộ Đám Mây</span>
                 </button>
 
                 <div class="flex bg-blue-950/60 p-0.5 rounded-xl border border-blue-400/30 items-center shadow-inner">
@@ -249,7 +249,7 @@
             }
         };
 
-        const STORAGE_KEY = 'giangnam_baitapso_secure_v37_live';
+        const STORAGE_KEY = 'giangnam_baitapso_secure_v39_cloudsync';
 
         function loadFromLocalStorage() {
             try {
@@ -275,9 +275,9 @@
         function getCurrentClassContainer() {
             const cls = window.appState.getClass();
             if (!masterData.classes[cls]) {
-                masterData.classes[cls] = { password: classPasswords[cls] || (cls + "2026"), data: JSON.parse(JSON.stringify(blankClassData)) };
+                masterData.classes[cls] = { password: classPasswords[cls], data: JSON.parse(JSON.stringify(blankClassData)) };
             }
-            masterData.classes[cls].password = classPasswords[cls] || masterData.classes[cls].password;
+            masterData.classes[cls].password = classPasswords[cls];
             return masterData.classes[cls];
         }
 
@@ -293,7 +293,7 @@
             if (!db) return;
 
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v37');
+                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v39');
                 window.onSnapshot(docRef, (docSnap) => {
                     if (docSnap.exists()) {
                         masterData = docSnap.data();
@@ -323,13 +323,12 @@
         async function syncCloudDataNow() {
             const db = window.appState.getDb();
             const appId = window.appState.getAppId();
-            loadFromLocalStorage();
             if (!db) {
                 showToast("Đã đồng bộ cục bộ thành công", "success");
                 return;
             }
             try {
-                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v37');
+                const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v39');
                 const docSnap = await window.getDoc(docRef);
                 if (docSnap.exists()) {
                     masterData = docSnap.data();
@@ -358,7 +357,7 @@
             const appId = window.appState.getAppId();
             try {
                 if (db) {
-                    const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v37');
+                    const docRef = window.doc(db, 'artifacts', appId, 'public', 'data', 'multiclass_secure_state_v39');
                     await window.setDoc(docRef, masterData);
                     isCloudSynced = true;
                 }
@@ -445,7 +444,7 @@
             `;
             const footer = `
                 <button onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-medium text-xs transition">Hủy</button>
-                <button onclick="confirmCreateGroupFirst()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Tạo Nhóm & Xuất Mã QR</button>
+                <button onclick="confirmCreateGroupFirst()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition shadow">Tạo Nhóm & Lưu Lên Đám Mây</button>
             `;
             openModal(`Tạo Nhóm Trước (Lớp ${currentClass})`, html, footer);
         }
@@ -468,7 +467,7 @@
             container.appendChild(div);
         }
 
-        function confirmCreateGroupFirst() {
+        async function confirmCreateGroupFirst() {
             const name = document.getElementById('inpNewGroupNameFirst').value.trim();
             const code = document.getElementById('inpNewGroupCodeFirst').value.trim();
 
@@ -497,11 +496,6 @@
             }
 
             const data = getCurrentData();
-            if (data.groups[name]) {
-                showToast("Tên nhóm này đã tồn tại trong lớp!", "error");
-                return;
-            }
-
             data.groups[name] = {
                 membersCount: Math.max(countMembers, 4),
                 progress: 0,
@@ -514,14 +508,14 @@
             };
 
             window.appState.setGroup(name);
-            saveToCloud();
+            await saveToCloud();
 
             const groupJoinUrl = window.location.href.split('#')[0] + `?class=${window.appState.getClass()}&group=${encodeURIComponent(name)}`;
             const html = `
                 <div class="space-y-3 text-center py-1">
                     <div class="bg-emerald-50 p-2.5 rounded-2xl border border-emerald-100 text-xs text-emerald-800">
                         <p class="font-bold">Đã tạo thành công nhóm <span class="text-emerald-700 uppercase font-extrabold">${name}</span> với <span class="font-bold">${countMembers}</span> thành viên lên đám mây!</p>
-                        <p>Các thành viên hãy quét mã QR dưới đây để vào nhóm.</p>
+                        <p>Giáo viên và các thành viên khác đã có thể thấy nhóm này ngay lập tức.</p>
                     </div>
                     <div id="groupCreatedQRCodeContainer" class="flex justify-center bg-slate-50 p-3 rounded-3xl border border-slate-200 inline-block mx-auto"></div>
                     <p class="text-[10px] text-slate-500 font-mono select-all bg-slate-100 p-2 rounded-xl">Link: ${groupJoinUrl}</p>
@@ -554,14 +548,14 @@
             const groupList = Object.keys(data.groups);
 
             let groupOptionsHtml = groupList.length === 0 
-                ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm" trước!</option>'
+                ? '<option value="">Chưa có nhóm nào. Bấm "Tự tạo nhóm" trước!</option>'
                 : groupList.map(gName => `<option value="${gName}" ${window.appState.getGroup() === gName ? 'selected' : ''}>${gName} (${data.groups[gName].code})</option>`).join('');
 
             const html = `
                 <div class="space-y-3 py-1">
                     <div class="bg-indigo-50 p-2.5 rounded-2xl border border-indigo-100 text-xs text-indigo-800">
                         <p class="font-bold mb-0.5"><i class="fa-solid fa-shield-halved mr-1"></i> Đăng nhập vào nhóm:</p>
-                        <p>Học sinh nhập tên, chọn lớp, mật khẩu cố định (ví dụ: 10E2026) và nhóm.</p>
+                        <p>Học sinh nhập tên, chọn lớp, mật khẩu lớp cố định và chọn đúng nhóm của mình.</p>
                     </div>
                     <div>
                         <label class="block text-[11px] font-bold text-slate-700 mb-1">Chọn Lớp học</label>
@@ -602,12 +596,12 @@
             const selectGroupEl = document.getElementById('studentLoginGroupSelect');
             if (selectGroupEl) {
                 selectGroupEl.innerHTML = groupList.length === 0 
-                    ? '<option value="">Chưa có nhóm nào. Bấm "Tạo nhóm" trước!</option>'
+                    ? '<option value="">Chưa có nhóm nào. Bấm "Tự tạo nhóm" trước!</option>'
                     : groupList.map(gName => `<option value="${gName}">${gName} (${data.groups[gName].code})</option>`).join('');
             }
         }
 
-        function confirmStudentLogin() {
+        async function confirmStudentLogin() {
             const cls = document.getElementById('studentLoginClassSelect').value;
             const pass = document.getElementById('studentLoginPass').value.trim();
             const name = document.getElementById('studentLoginName').value.trim();
@@ -615,7 +609,7 @@
             
             const expectedPass = classPasswords[cls];
             if (pass !== expectedPass) {
-                showToast("Mật khẩu truy cập lớp không chính xác! (Mã cố định: " + expectedPass + ")", "error");
+                showToast("Mật khẩu truy cập lớp không chính xác! (Mã lớp: " + expectedPass + ")", "error");
                 return;
             }
             if (!name) {
@@ -666,7 +660,7 @@
             }
 
             closeModal();
-            saveToCloud();
+            await saveToCloud();
             showToast(`Chào mừng ${name} (${data.groups[grp].participants[name].role}) đã vào ${grp} - Lớp ${cls}!`);
             speakIntroSpeech();
         }
@@ -800,11 +794,11 @@
                                     <i class="fa-solid fa-chalkboard-user"></i>
                                     <span>Bảng Quản Lý 4 Lớp & Giao Bài (Đám Mây)</span>
                                 </h3>
-                                <p class="text-[11px] text-slate-300">Quản lý mã lớp cố định, giao bài tập và đính kèm tài liệu.</p>
+                                <p class="text-[11px] text-slate-300">Giáo viên có thể tải dữ liệu đám mây của các nhóm học sinh mới nhất bất cứ lúc nào.</p>
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="syncCloudDataNow()" class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold transition shadow">
-                                    <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Tải lại dữ liệu Đám Mây
+                            <div class="flex gap-2 flex-wrap">
+                                <button onclick="syncCloudDataNow()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition shadow flex items-center space-x-1">
+                                    <i class="fa-solid fa-cloud-arrow-down mr-1"></i> Tải dữ liệu đám mây của các nhóm
                                 </button>
                                 <button onclick="switchRoleToStudent()" class="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition border border-white/20">
                                     <i class="fa-solid fa-right-from-bracket mr-1"></i> Chế độ HS
@@ -817,6 +811,7 @@
                                 const pass = classPasswords[cls];
                                 const isSelected = cls === currentClass;
                                 const clsTask = masterData.classes[cls].data.task.title;
+                                const clsGroupCount = Object.keys(masterData.classes[cls].data.groups).length;
                                 return `
                                     <div class="bg-white/10 p-3.5 rounded-2xl border ${isSelected ? 'border-cyan-400 bg-white/15 shadow-lg' : 'border-white/10'} flex flex-col justify-between space-y-2.5 backdrop-blur-sm">
                                         <div>
@@ -825,6 +820,7 @@
                                                 ${isSelected ? '<span class="bg-cyan-400 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow">Đang chọn</span>' : ''}
                                             </div>
                                             <p class="text-[11px] text-cyan-200 mt-0.5 truncate">Bài: ${clsTask}</p>
+                                            <p class="text-[10px] text-emerald-300 mt-0.5"><i class="fa-solid fa-users"></i> ${clsGroupCount} tổ nhóm hoạt động</p>
                                             <div class="mt-2.5 bg-slate-950/60 p-2 rounded-xl border border-white/10">
                                                 <span class="text-[10px] text-slate-300 block mb-0.5">Mã vào lớp (Cố định):</span>
                                                 <div class="flex justify-between items-center">
@@ -912,10 +908,16 @@
                                         <i class="fa-solid fa-chart-pie text-blue-600"></i>
                                         <span>Danh sách tổ & Thống kê học sinh (Lớp ${currentClass})</span>
                                     </h3>
-                                    <button onclick="openAddGroupModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center space-x-1">
-                                        <i class="fa-solid fa-plus-circle"></i>
-                                        <span>Thêm tổ</span>
-                                    </button>
+                                    <div class="flex gap-2">
+                                        <button onclick="syncCloudDataNow()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center space-x-1 shadow-sm">
+                                            <i class="fa-solid fa-cloud-arrow-down"></i>
+                                            <span>Tải dữ liệu nhóm từ Đám Mây</span>
+                                        </button>
+                                        <button onclick="openAddGroupModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold px-3 py-1.5 rounded-xl transition flex items-center space-x-1">
+                                            <i class="fa-solid fa-plus-circle"></i>
+                                            <span>Thêm tổ</span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="overflow-x-auto">
                                     <table class="w-full text-left border-collapse text-xs">
@@ -924,12 +926,12 @@
                                                 <th class="py-2.5 px-2">Tổ nhóm</th>
                                                 <th class="py-2.5 px-2">Thành viên & Phân công</th>
                                                 <th class="py-2.5 px-2">Trạng thái Nộp</th>
-                                                <th class="py-2.5 px-2 text-right">Chấm điểm</th>
+                                                <th class="py-2.5 px-2 text-right">Thao tác & Chấm điểm</th>
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-slate-100">
                                             ${groupEntries.length === 0 ? `
-                                                <tr><td colspan="4" class="py-6 text-center text-slate-400 text-xs italic">Chưa có tổ nào trong lớp này.</td></tr>
+                                                <tr><td colspan="4" class="py-6 text-center text-slate-400 text-xs italic">Chưa có tổ nào trong lớp này. (Học sinh hoặc GV có thể bấm "Tự tạo nhóm" hoặc "Tải dữ liệu đám mây").</td></tr>
                                             ` : groupEntries.map(([groupName, g]) => {
                                                 const participantsCount = Object.keys(g.participants || {}).length;
                                                 const consentsObj = g.consents || {};
@@ -951,9 +953,12 @@
                                                             </span>
                                                             <p class="text-[10px] text-slate-500 mt-0.5">Đồng thuận: ${agreeCount}/${participantsCount}</p>
                                                         </td>
-                                                        <td class="py-3 px-2 text-right">
-                                                            <button onclick="openTeacherInspectModal('${groupName}')" class="px-2.5 py-1.5 rounded-xl text-xs font-medium transition bg-emerald-50 hover:bg-emerald-100 text-emerald-700">
+                                                        <td class="py-3 px-2 text-right space-x-1">
+                                                            <button onclick="openTeacherInspectModal('${groupName}')" class="px-2.5 py-1.5 rounded-xl text-xs font-medium transition bg-emerald-50 hover:bg-emerald-100 text-emerald-700 inline-flex items-center">
                                                                 <i class="fa-solid fa-marker mr-1"></i> Chấm bài
+                                                            </button>
+                                                            <button onclick="deleteGroupAsTeacher('${groupName}')" class="px-2 py-1.5 rounded-xl text-xs font-medium transition bg-rose-50 hover:bg-rose-100 text-rose-600 inline-flex items-center" title="Xóa nhóm này">
+                                                                <i class="fa-solid fa-trash"></i>
                                                             </button>
                                                         </td>
                                                     </tr>
@@ -1006,7 +1011,7 @@
             `;
         }
 
-        function saveTeacherTaskInfo() {
+        async function saveTeacherTaskInfo() {
             const title = document.getElementById('teacherTaskTitle').value.trim();
             const subject = document.getElementById('teacherTaskSubject').value.trim();
             const deadline = document.getElementById('teacherTaskDeadline').value.trim();
@@ -1018,11 +1023,11 @@
             if (deadline) data.task.deadline = deadline;
             if (desc) data.task.description = desc;
 
-            saveToCloud();
+            await saveToCloud();
             showToast("Đã lưu & đồng bộ bài tập lên đám mây thành công!");
         }
 
-        function saveTeacherGradesAndFeedback() {
+        async function saveTeacherGradesAndFeedback() {
             const gScore = document.getElementById('inputGrGroupScore').value.trim();
             const iScore = document.getElementById('inputGrIndScore').value.trim();
             const feedback = document.getElementById('inputGrFeedback').value.trim();
@@ -1032,8 +1037,19 @@
             data.grades.individualScore = iScore || "9.0";
             data.grades.feedback = feedback || "Bài làm tốt.";
 
-            saveToCloud();
+            await saveToCloud();
             showToast("Đã xuất bản điểm lên đám mây thành công!");
+        }
+
+        async function deleteGroupAsTeacher(groupName) {
+            if (confirm(`Thầy/Cô có chắc chắn muốn xóa nhóm ${groupName} không?`)) {
+                const data = getCurrentData();
+                if (data.groups[groupName]) {
+                    delete data.groups[groupName];
+                    await saveToCloud();
+                    showToast(`Đã xóa nhóm ${groupName} thành công!`);
+                }
+            }
         }
 
         function openTeacherUploadFileModal() {
@@ -1060,7 +1076,7 @@
             openModal("Giáo Viên Đính Kèm Tài Liệu", html, footer);
         }
 
-        function confirmTeacherUploadFile() {
+        async function confirmTeacherUploadFile() {
             const name = document.getElementById('inpTeacherFileName').value.trim();
             const link = document.getElementById('inpTeacherFileLink').value.trim();
             if (!name) {
@@ -1071,15 +1087,15 @@
             if (!data.task.teacherFiles) data.task.teacherFiles = [];
             data.task.teacherFiles.push({ name: name, link: link || "#" });
             closeModal();
-            saveToCloud();
+            await saveToCloud();
             showToast(`Đã đính kèm "${name}" thành công!`);
         }
 
-        function removeTeacherFile(index) {
+        async function removeTeacherFile(index) {
             const data = getCurrentData();
             if (data.task.teacherFiles && data.task.teacherFiles[index]) {
                 data.task.teacherFiles.splice(index, 1);
-                saveToCloud();
+                await saveToCloud();
                 showToast("Đã xóa tài liệu đính kèm");
             }
         }
@@ -1151,7 +1167,7 @@
             showToast(`Đã thêm ${name}!`);
         }
 
-        function saveAssignedTaskForClass(cls) {
+        async function saveAssignedTaskForClass(cls) {
             const title = document.getElementById('assignTaskTitle').value.trim();
             const subject = document.getElementById('assignTaskSubject').value.trim();
             const deadline = document.getElementById('assignTaskDeadline').value.trim();
@@ -1168,7 +1184,7 @@
             masterData.classes[cls].data.task.description = desc || "Không có mô tả chi tiết.";
 
             closeModal();
-            saveToCloud();
+            await saveToCloud();
             showToast(`Đã giao bài thành công cho Lớp ${cls}!`);
         }
 
@@ -1252,7 +1268,7 @@
                             <div class="space-y-2 mt-2 bg-indigo-50/60 p-3 rounded-2xl border border-indigo-100">
                                 <div class="flex justify-between items-center text-xs font-bold text-indigo-900">
                                     <span><i class="fa-solid fa-clipboard-user mr-1"></i> Bảng Phân Công & Vai Trò:</span>
-                                    <span class="text-[9px] bg-indigo-600 text-white px-2 py-0.5 rounded-full">Đồng bộ GV</span>
+                                    <button onclick="syncCloudDataNow()" class="text-[9px] bg-emerald-600 text-white px-2 py-0.5 rounded-full hover:bg-emerald-500"><i class="fa-solid fa-cloud"></i> Lưu & Đồng bộ</button>
                                 </div>
                                 <div class="overflow-x-auto my-1.5 bg-white rounded-xl border border-indigo-200">
                                     <table class="w-full text-left border-collapse text-xs">
@@ -1276,12 +1292,16 @@
                             </div>
 
                             <div class="mt-3 space-y-2">
+                                <button onclick="saveToCloud(); showToast('Đã lưu dữ liệu nhóm lên đám mây thành công!');" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-2xl text-xs transition shadow-sm flex items-center justify-center space-x-1.5">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Lưu dữ liệu nhóm lên đám mây</span>
+                                </button>
                                 <button onclick="openStudentTaskGuideModal()" class="w-full bg-cyan-50 hover:bg-cyan-100 text-cyan-700 font-medium py-2 rounded-2xl text-xs transition border border-cyan-200 flex items-center justify-center space-x-1.5">
                                     <i class="fa-solid fa-book-open-reader"></i>
                                     <span>Xem hướng dẫn nhóm</span>
                                 </button>
                                 ${myInfo.role === 'Thư ký' || myInfo.role === 'Nhóm trưởng' ? `
-                                    <button onclick="openSecretarySubmitModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-2xl text-xs transition shadow-sm flex items-center justify-center space-x-2">
+                                    <button onclick="openSecretarySubmitModal()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-2xl text-xs transition shadow-sm flex items-center justify-center space-x-2">
                                         <i class="fa-solid fa-paper-plane"></i>
                                         <span>Thư ký chốt & Nộp bài</span>
                                     </button>
@@ -1407,12 +1427,12 @@
             `;
         }
 
-        function updateMemberRoleInsideGroup(pName, newRole) {
+        async function updateMemberRoleInsideGroup(pName, newRole) {
             const currentGroup = window.appState.getGroup();
             const data = getCurrentData();
             if (data.groups[currentGroup]?.participants[pName]) {
                 data.groups[currentGroup].participants[pName].role = newRole;
-                saveToCloud();
+                await saveToCloud();
                 showToast(`Đã cập nhật vai trò của ${pName} thành ${newRole}`);
             }
         }
@@ -1440,7 +1460,7 @@
             openModal("Biểu Quyết Nộp Bài", html);
         }
 
-        function submitConsentVote(vote) {
+        async function submitConsentVote(vote) {
             const currentGroup = window.appState.getGroup();
             const studentName = window.appState.getStudentName();
             const data = getCurrentData();
@@ -1449,7 +1469,7 @@
             }
             data.groups[currentGroup].consents[studentName] = vote;
             closeModal();
-            saveToCloud();
+            await saveToCloud();
             showToast(`Đã ghi nhận ý kiến: "${vote}" của bạn!`);
         }
 
@@ -1484,14 +1504,14 @@
             openModal("Thư Ký Chốt & Nộp Bài", html, footer);
         }
 
-        function confirmSecretaryFinalSubmit() {
+        async function confirmSecretaryFinalSubmit() {
             const currentGroup = window.appState.getGroup();
             const data = getCurrentData();
             data.groups[currentGroup].submittedStatus = true;
             data.groups[currentGroup].status = "Đã nộp bài";
             data.groups[currentGroup].progress = 100;
             closeModal();
-            saveToCloud();
+            await saveToCloud();
             showToast("Thư ký đã nộp bài thành công cho giáo viên!");
         }
 
@@ -1531,7 +1551,7 @@
             openModal(`Đóng Góp File: ${fileTitle}`, html, footer);
         }
 
-        function saveStudentFileSubmission(fileKey) {
+        async function saveStudentFileSubmission(fileKey) {
             const fileName = document.getElementById('inpUploadFileName').value.trim();
             const fileLink = document.getElementById('inpUploadFileLink').value.trim();
             if (!fileName) {
@@ -1554,7 +1574,7 @@
             };
 
             closeModal();
-            saveToCloud();
+            await saveToCloud();
             showToast(`Đã đóng góp file thành công bởi ${studentName}!`);
         }
 
@@ -1638,7 +1658,7 @@
             openModal(`Kiểm tra & Chấm Bài - ${groupName}`, html, footer);
         }
 
-        function stampGradeToGroup(groupName) {
+        async function stampGradeToGroup(groupName) {
             const gScore = document.getElementById('inspectGroupScore').value.trim();
             const iScore = document.getElementById('inspectIndScore').value.trim();
             const feedback = document.getElementById('inspectFeedback').value.trim();
@@ -1649,7 +1669,7 @@
             data.grades.feedback = feedback || "Bài làm xuất sắc.";
 
             closeModal();
-            saveToCloud();
+            await saveToCloud();
             showToast(`Đã đóng dấu chấm điểm cho ${groupName} thành công!`);
         }
 
@@ -1761,7 +1781,7 @@
             }, 50);
         }
 
-        function sendChatMessage() {
+        async function sendChatMessage() {
             const input = document.getElementById('chatInputText');
             if (!input) return;
             const text = input.value.trim();
@@ -1776,7 +1796,7 @@
                 text: text
             });
             input.value = "";
-            saveToCloud();
+            await saveToCloud();
         }
 
         window.onload = function() {
