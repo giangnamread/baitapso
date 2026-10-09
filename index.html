@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bài Tập hoạt động nhóm - bài tập số (Đồng bộ đám mây đầy đủ)</title>
+    <title>Bài Tập Hoạt Động Nhóm Số - Mã Nhóm Tự Động & Tùy Chỉnh</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -11,12 +11,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; touch-action: manipulation; }
         .glass-panel { background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
+        button { cursor: pointer; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between custom-scrollbar overflow-x-hidden">
@@ -30,17 +30,17 @@
                         <i class="fa-solid fa-users-rectangle text-xl"></i>
                     </div>
                     <div>
-                        <h1 class="font-bold text-base md:text-lg text-white tracking-wide">Bài Tập hoạt động nhóm</h1>
-                        <p class="text-xs text-slate-400">Phát triển bởi Thầy giáo Nguyễn Giang Nam • <span id="syncStatusBadge" class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Sẵn sàng đồng bộ</span></p>
+                        <h1 class="font-bold text-base md:text-lg text-white tracking-wide">Bài Tập Hoạt Động Nhóm Số</h1>
+                        <p class="text-xs text-slate-400">GV: Nguyễn Giang Nam • <span id="syncStatusBadge" class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Sẵn sàng đồng bộ</span></p>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-                <button onclick="manualSyncToCloud()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-medium shadow transition flex items-center space-x-1.5">
+                <button onclick="manualSyncToCloud()" ontouchstart="this.click();" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-lg font-medium shadow transition active:scale-95 flex items-center space-x-1.5">
                     <i class="fa-solid fa-cloud-arrow-up"></i><span>Lưu đám mây</span>
                 </button>
-                <button onclick="manualFetchFromCloud()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg font-medium shadow transition flex items-center space-x-1.5">
+                <button onclick="manualFetchFromCloud()" ontouchstart="this.click();" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg font-medium shadow transition active:scale-95 flex items-center space-x-1.5">
                     <i class="fa-solid fa-cloud-arrow-down"></i><span>Tải dữ liệu đám mây</span>
                 </button>
                 <div class="flex items-center space-x-1 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
@@ -53,10 +53,10 @@
                     </select>
                 </div>
                 <div class="flex bg-slate-800 p-1 rounded-lg border border-slate-700">
-                    <button onclick="switchView('student')" id="btnStudentView" class="px-3 py-1.5 rounded-md text-xs font-semibold transition bg-blue-600 text-white shadow">
+                    <button onclick="switchView('student')" ontouchstart="this.click();" id="btnStudentView" class="px-3 py-1.5 rounded-md text-xs font-semibold transition bg-blue-600 text-white shadow">
                         <i class="fa-solid fa-graduation-cap mr-1"></i> Học Sinh
                     </button>
-                    <button onclick="promptTeacherLogin()" id="btnTeacherView" class="px-3 py-1.5 rounded-md text-xs font-semibold transition text-slate-300 hover:text-white">
+                    <button onclick="promptTeacherLogin()" ontouchstart="this.click();" id="btnTeacherView" class="px-3 py-1.5 rounded-md text-xs font-semibold transition text-slate-300 hover:text-white">
                         <i class="fa-solid fa-user-shield mr-1"></i> Quản lý GV
                     </button>
                 </div>
@@ -77,14 +77,14 @@
                     </div>
                     <p id="currentAssignmentDesc" class="text-xs text-slate-300 line-clamp-2">Giáo viên chưa cập nhật yêu cầu cho lớp này.</p>
                 </div>
-                <div class="flex items-center gap-2 w-full md:w-auto">
-                    <button onclick="openStudentGuideModal()" class="flex-1 md:flex-none bg-slate-800 hover:bg-slate-700 text-blue-400 text-xs px-3.5 py-2 rounded-lg font-semibold border border-blue-500/30 transition flex items-center justify-center space-x-1.5">
+                <div class="flex items-center gap-2 w-full md:w-auto flex-wrap">
+                    <button onclick="openStudentGuideModal()" ontouchstart="this.click();" class="flex-1 md:flex-none bg-slate-800 hover:bg-slate-700 text-blue-400 text-xs px-3.5 py-2 rounded-lg font-semibold border border-blue-500/30 transition active:scale-95 flex items-center justify-center space-x-1.5">
                         <i class="fa-solid fa-book-open"></i><span>Hướng dẫn</span>
                     </button>
-                    <button onclick="openCreateGroupModal()" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition flex items-center justify-center space-x-1.5">
+                    <button onclick="openCreateGroupModal()" ontouchstart="this.click();" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition active:scale-95 flex items-center justify-center space-x-1.5">
                         <i class="fa-solid fa-users-gear"></i><span>Tạo nhóm & QR</span>
                     </button>
-                    <button onclick="openJoinGroupModal()" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition flex items-center justify-center space-x-1.5">
+                    <button onclick="openJoinGroupModal()" ontouchstart="this.click();" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition active:scale-95 flex items-center justify-center space-x-1.5">
                         <i class="fa-solid fa-qrcode"></i><span>Vào nhóm QR</span>
                     </button>
                 </div>
@@ -104,18 +104,16 @@
                                     <p class="text-xs text-slate-400">HS: <span id="currentStudentName" class="text-blue-400 font-medium">Chưa đăng nhập</span> | Vai trò: <span id="currentStudentRole" class="text-emerald-400 font-medium">Thành viên</span></p>
                                 </div>
                             </div>
-                            <button onclick="openChangeGroupModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-600 transition flex items-center justify-center space-x-1">
+                            <button onclick="openChangeGroupModal()" ontouchstart="this.click();" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3 py-1.5 rounded-lg border border-slate-600 transition active:scale-95 flex items-center justify-center space-x-1">
                                 <i class="fa-solid fa-right-left"></i><span>Đổi nhóm</span>
                             </button>
                         </div>
 
                         <!-- Member Roster Table -->
                         <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
-                                    <i class="fa-solid fa-id-card-clip text-blue-400"></i><span>Bảng Phân Công & Vai Trò:</span>
-                                </h4>
-                            </div>
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                                <i class="fa-solid fa-id-card-clip text-blue-400"></i><span>Bảng Phân Công & Vai Trò:</span>
+                            </h4>
                             <div class="overflow-x-auto rounded-lg border border-slate-700">
                                 <table class="w-full text-left text-xs text-slate-300">
                                     <thead class="bg-slate-800/80 text-slate-400 uppercase text-[10px]">
@@ -137,7 +135,7 @@
                             </div>
                         </div>
 
-                        <!-- Chat & File Selection / Contributions -->
+                        <!-- Chat & Contributions -->
                         <div class="space-y-3 pt-2 border-t border-slate-700">
                             <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
                                 <i class="fa-solid fa-comments text-emerald-400"></i><span>Trao đổi nhóm & Đóng góp bài làm:</span>
@@ -155,7 +153,7 @@
                                     <option value="Khác">Khác</option>
                                 </select>
                                 <input type="text" id="chatInputMessage" placeholder="Tên tệp hoặc nội dung đóng góp..." class="flex-grow bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500" onkeypress="if(event.key==='Enter') sendGroupContribution()">
-                                <button onclick="sendGroupContribution()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow transition flex items-center space-x-1">
+                                <button onclick="sendGroupContribution()" ontouchstart="this.click();" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow transition active:scale-95 flex items-center space-x-1">
                                     <i class="fa-solid fa-plus-circle mr-1"></i><span>Đóng Góp</span>
                                 </button>
                             </div>
@@ -168,10 +166,10 @@
                                 <strong id="groupSubmissionStatusBadge" class="text-amber-400">Chưa gửi bài</strong>
                             </div>
                             <div class="flex items-center gap-2 w-full sm:w-auto">
-                                <button onclick="toggleConsentVote()" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 text-xs px-3.5 py-2 rounded-lg font-semibold transition">
+                                <button onclick="toggleConsentVote()" ontouchstart="this.click();" class="flex-1 sm:flex-none bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/40 text-xs px-3.5 py-2 rounded-lg font-semibold transition active:scale-95">
                                     <i class="fa-solid fa-check-to-slot mr-1"></i>Biểu quyết nộp bài
                                 </button>
-                                <button onclick="secretarySubmitAssignment()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition">
+                                <button onclick="secretarySubmitAssignment()" ontouchstart="this.click();" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition active:scale-95">
                                     <i class="fa-solid fa-cloud-arrow-up mr-1"></i>Thư ký nộp bài GV
                                 </button>
                             </div>
@@ -224,10 +222,10 @@
                     <p class="text-xs text-slate-300">Bấm "Tải dữ liệu đám mây" để lấy dữ liệu mới nhất từ học sinh.</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="manualFetchFromCloud()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition flex items-center space-x-1.5">
+                    <button onclick="manualFetchFromCloud()" ontouchstart="this.click();" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition active:scale-95 flex items-center space-x-1.5">
                         <i class="fa-solid fa-cloud-arrow-down"></i><span>Tải dữ liệu đám mây</span>
                     </button>
-                    <button onclick="switchView('student')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3.5 py-2 rounded-lg font-semibold border border-slate-600 transition">
+                    <button onclick="switchView('student')" ontouchstart="this.click();" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3.5 py-2 rounded-lg font-semibold border border-slate-600 transition active:scale-95">
                         <i class="fa-solid fa-arrow-left mr-1"></i>Quay lại HS
                     </button>
                 </div>
@@ -241,7 +239,7 @@
                         <span id="teacherPanelClassBadge" class="bg-purple-600 text-white text-xs px-2.5 py-1 rounded font-bold">Lớp 10E</span>
                         <h3 class="font-bold text-sm md:text-base text-white">Soạn bài tập & Giao nhiệm vụ</h3>
                     </div>
-                    <button onclick="saveTeacherAssignment()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition">
+                    <button onclick="saveTeacherAssignment()" ontouchstart="this.click();" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition active:scale-95">
                         <i class="fa-solid fa-floppy-disk mr-1"></i>Lưu & Giao bài lên đám mây
                     </button>
                 </div>
@@ -265,7 +263,7 @@
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
                             <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Danh sách tổ & Trạng thái (<span id="teacherSelectedClassName">10E</span>):</h4>
-                            <button onclick="manualFetchFromCloud()" class="bg-blue-600 hover:bg-blue-500 text-white text-[11px] px-2 py-1 rounded font-medium"><i class="fa-solid fa-rotate mr-1"></i>Làm mới</button>
+                            <button onclick="manualFetchFromCloud()" ontouchstart="this.click();" class="bg-blue-600 hover:bg-blue-500 text-white text-[11px] px-2 py-1 rounded font-medium"><i class="fa-solid fa-rotate mr-1"></i>Làm mới</button>
                         </div>
                         <div id="teacherGroupsSummaryContainer" class="bg-slate-900/60 rounded-lg border border-slate-700 p-3 h-64 overflow-y-auto custom-scrollbar space-y-3 text-xs">
                             <div class="text-slate-500 italic text-center py-12">Chưa có tổ nào.</div>
@@ -321,7 +319,7 @@
                         <textarea id="teacherInputFeedback" rows="2" placeholder="Nhận xét chi tiết..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-white custom-scrollbar"></textarea>
                     </div>
                     <div class="flex justify-end">
-                        <button onclick="saveTeacherGrades()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition">
+                        <button onclick="saveTeacherGrades()" ontouchstart="this.click();" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow transition active:scale-95">
                             <i class="fa-solid fa-award mr-1"></i>Xuất bản điểm lên đám mây
                         </button>
                     </div>
@@ -332,7 +330,7 @@
 
     <!-- FOOTER -->
     <footer class="glass-panel py-3 px-4 text-center text-xs text-slate-400 border-t border-slate-700/60">
-        Bài Tập hoạt động nhóm • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Firebase Cloud
+        Bài Tập Hoạt Động Nhóm Số • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Firebase Cloud
     </footer>
 
     <!-- MODALS -->
@@ -344,7 +342,7 @@
             </div>
             <div class="space-y-3 text-xs">
                 <div class="bg-purple-950/40 p-3 rounded-lg border border-purple-500/30 text-purple-200">
-                    Nhập mật khẩu quản trị chung (*******) để mở bảng quản lý.
+                    Nhập mật khẩu quản trị để mở bảng quản lý.
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1">Mật khẩu quản trị:</label>
@@ -358,10 +356,11 @@
         </div>
     </div>
 
+    <!-- Modal Tạo nhóm (Mã nhóm tự sinh & có thể sửa lại) -->
     <div id="createGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
         <div class="glass-panel w-full max-w-lg rounded-2xl p-6 space-y-4 border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex items-center justify-between pb-3 border-b border-slate-700">
-                <h3 class="font-bold text-base text-white">Tạo Nhóm Trước (<span id="modalCreateClassName">10E</span>)</h3>
+                <h3 class="font-bold text-base text-white">Tạo Nhóm Trực Tuyến (<span id="modalCreateClassName">10E</span>)</h3>
                 <button onclick="closeModal('createGroupModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="space-y-3 text-xs">
@@ -370,8 +369,8 @@
                     <input type="text" id="inputGroupName" placeholder="Nhập tên tổ..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Mã nhóm (VD: 10E-T1):</label>
-                    <input type="text" id="inputGroupCode" placeholder="Nhập mã nhóm..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                    <label class="block font-semibold text-slate-300 mb-1">Mã nhóm (Tự động sinh ra - có thể bấm vào sửa lại):</label>
+                    <input type="text" id="inputGroupCode" placeholder="Mã nhóm..." class="w-full bg-slate-900 border border-blue-500/60 rounded-lg px-3 py-2 text-xs text-white font-mono font-bold focus:outline-none focus:border-blue-400">
                 </div>
                 <div class="space-y-2 pt-2 border-t border-slate-700">
                     <div class="flex items-center justify-between">
@@ -392,14 +391,35 @@
                     </div>
                 </div>
                 <div id="createdGroupQRContainer" class="hidden text-center space-y-2 pt-3 border-t border-slate-700">
-                    <p class="text-emerald-400 font-bold">Tạo nhóm thành công! Mã QR:</p>
+                    <p class="text-emerald-400 font-bold">Tạo nhóm thành công! Quét QR để vào thẳng nhóm:</p>
                     <div id="qrcodeRenderArea" class="inline-block bg-white p-3 rounded-xl shadow-lg"></div>
                     <p id="createdGroupQRText" class="text-xs text-slate-300 font-mono"></p>
                 </div>
             </div>
             <div class="flex justify-between items-center pt-2 border-t border-slate-700">
                 <button onclick="closeModal('createGroupModal')" class="bg-slate-800 text-slate-300 text-xs px-4 py-2 rounded-lg">Hủy</button>
-                <button onclick="submitCreateGroup()" class="bg-blue-600 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow">Tạo Nhóm & Xuất QR</button>
+                <button onclick="submitCreateGroup()" ontouchstart="this.click();" class="bg-blue-600 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow active:scale-95">Tạo Nhóm & Xuất QR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal tự động vào nhóm khi quét QR -->
+    <div id="autoJoinGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 space-y-4 border border-emerald-500/50 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-qrcode mr-1.5"></i>Tham Gia Nhóm Tự Động</h3>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div class="bg-emerald-950/40 p-3 rounded-lg border border-emerald-500/30 text-emerald-200">
+                    Học sinh đang vào nhóm: <strong id="autoJoinGroupNameDisplay" class="text-white"></strong> (Lớp <span id="autoJoinClassDisplay"></span>)
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Nhập họ và tên của em để vào nhóm:</label>
+                    <input type="text" id="autoJoinStudentNameInput" placeholder="Ví dụ: Nguyễn Văn A..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+            <div class="flex justify-end pt-2 border-t border-slate-700">
+                <button onclick="confirmAutoJoinGroup()" ontouchstart="this.click();" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-5 py-2.5 rounded-lg font-semibold shadow active:scale-95">Xác Nhận Vào Nhóm</button>
             </div>
         </div>
     </div>
@@ -417,12 +437,12 @@
                 </div>
                 <div>
                     <label class="block font-semibold text-slate-300 mb-1">Mã nhóm:</label>
-                    <input type="text" id="joinGroupCodeInput" placeholder="Nhập mã nhóm..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
+                    <input type="text" id="joinGroupCodeInput" placeholder="Nhập mã nhóm (vd: 10E-T1)..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
                 </div>
             </div>
             <div class="flex justify-end space-x-2 pt-2 border-t border-slate-700">
                 <button onclick="closeModal('joinGroupModal')" class="bg-slate-800 text-slate-300 text-xs px-4 py-2 rounded-lg">Hủy</button>
-                <button onclick="submitJoinGroup()" class="bg-emerald-600 text-white text-xs px-4 py-2 rounded-lg font-semibold">Tham Gia Ngay</button>
+                <button onclick="submitJoinGroup()" ontouchstart="this.click();" class="bg-emerald-600 text-white text-xs px-4 py-2 rounded-lg font-semibold active:scale-95">Tham Gia Ngay</button>
             </div>
         </div>
     </div>
@@ -447,17 +467,13 @@
     <div id="studentGuideModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
         <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 space-y-4 border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex items-center justify-between pb-3 border-b border-slate-700">
-                <h3 class="font-bold text-base text-white">Hướng Dẫn Nhiệm Vụ & Hoạt Động Nhóm</h3>
+                <h3 class="font-bold text-base text-white">Hướng Dẫn Quét QR Vào Nhóm Tự Động</h3>
                 <button onclick="closeModal('studentGuideModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="space-y-4 text-xs text-slate-300 leading-relaxed">
-                <div class="bg-blue-950/40 p-4 rounded-xl border border-blue-500/30 space-y-2">
-                    <h4 class="font-bold text-sm text-blue-300">Quy trình hoạt động nhóm:</h4>
-                    <ul class="list-disc list-inside space-y-1.5">
-                        <li><strong>Tạo nhóm trước:</strong> Đại diện tổ tạo nhóm và phân công chức vụ ngay. Hệ thống cấp mã QR.</li>
-                        <li><strong>Tham gia:</strong> Học sinh quét QR hoặc nhập mã nhóm để tham gia.</li>
-                        <li><strong>Thảo luận & Gửi bài:</strong> Thành viên thảo luận, chọn định dạng tệp đóng góp bài làm và bấm "Tải dữ liệu đám mây" để đồng bộ sang thiết bị khác.</li>
-                    </ul>
+                <div class="bg-emerald-950/40 p-4 rounded-xl border border-emerald-500/30 space-y-2">
+                    <h4 class="font-bold text-sm text-emerald-300">Cách học sinh tham gia nhóm:</h4>
+                    <p>Học sinh quét mã QR sẽ được chuyển thẳng vào trang web và tự động nhận diện nhóm để tham gia nhanh chóng!</p>
                 </div>
             </div>
             <div class="flex justify-end pt-2 border-t border-slate-700">
@@ -488,7 +504,7 @@
             console.error("Firebase init error:", e);
         }
 
-        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v47";
+        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v50";
 
         let appState = {
             currentClass: "10E",
@@ -501,6 +517,8 @@
                 "12E": { password: "12E2026", topic: "", requirement: "", attachmentName: "", groups: {}, teacherFeedback: {}, grades: {} }
             }
         };
+
+        let pendingAutoJoin = null;
 
         function loadAppData() {
             const saved = localStorage.getItem(APP_STORAGE_KEY);
@@ -515,16 +533,12 @@
         }
 
         async function pushDataToCloud() {
-            if (!db) {
-                alert("Lỗi kết nối Firebase!");
-                return;
-            }
+            if (!db) return;
             try {
                 await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("data").set(appState);
                 document.getElementById('syncStatusBadge').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Đã lưu đám mây';
             } catch (e) {
                 console.error("Push cloud error:", e);
-                alert("Lỗi lưu đám mây: " + e.message);
             }
         }
 
@@ -535,10 +549,7 @@
         }
 
         async function manualFetchFromCloud() {
-            if (!db) {
-                alert("Lỗi kết nối Firebase!");
-                return;
-            }
+            if (!db) return;
             try {
                 const docRef = await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("data").get();
                 if (docRef.exists) {
@@ -548,29 +559,63 @@
                     if (!document.getElementById('teacherView').classList.contains('hidden')) {
                         renderTeacherDashboard();
                     }
-                    alert("☁️ Đã tải dữ liệu mới nhất từ đám mây về thiết bị thành công!");
-                } else {
-                    alert("Chưa có dữ liệu nào trên đám mây.");
+                    checkUrlParametersForAutoJoin();
                 }
             } catch (e) {
                 console.error("Fetch cloud error:", e);
-                alert("Lỗi tải đám mây: " + e.message);
             }
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             loadAppData();
-            setTimeout(() => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const text = "Chào mừng thầy cô và các em đến với hệ thống Bài tập hoạt động nhóm số. Phát triển bởi thầy giáo Nguyễn Giang Nam.";
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'vi-VN';
-                    utterance.rate = 1.0;
-                    window.speechSynthesis.speak(utterance);
-                }
-            }, 800);
+            await manualFetchFromCloud();
+            checkUrlParametersForAutoJoin();
         });
+
+        function checkUrlParametersForAutoJoin() {
+            const params = new URLSearchParams(window.location.search);
+            const qClass = params.get('class');
+            const qGroup = params.get('group');
+
+            if (qClass && qGroup) {
+                if (appState.classes[qClass] && appState.classes[qClass].groups[qGroup]) {
+                    const groupObj = appState.classes[qClass].groups[qGroup];
+                    pendingAutoJoin = { class: qClass, groupCode: qGroup, groupName: groupObj.name };
+                    
+                    document.getElementById('autoJoinClassDisplay').innerText = qClass;
+                    document.getElementById('autoJoinGroupNameDisplay').innerText = groupObj.name;
+                    document.getElementById('autoJoinStudentNameInput').value = appState.currentStudentName || "";
+                    document.getElementById('autoJoinGroupModal').classList.remove('hidden');
+                }
+            }
+        }
+
+        function confirmAutoJoinGroup() {
+            const sName = document.getElementById('autoJoinStudentNameInput').value.trim();
+            if (!sName) {
+                alert("Vui lòng nhập họ và tên của em!");
+                return;
+            }
+            if (!pendingAutoJoin) return;
+
+            appState.currentClass = pendingAutoJoin.class;
+            appState.activeGroupCode = pendingAutoJoin.groupCode;
+            appState.currentStudentName = sName;
+
+            const group = appState.classes[pendingAutoJoin.class].groups[pendingAutoJoin.groupCode];
+            if (!group.members) group.members = [];
+            const existing = group.members.find(x => x.name.toLowerCase() === sName.toLowerCase());
+            if (!existing) {
+                group.members.push({ name: sName, role: 'Thành viên', consented: false });
+            }
+
+            saveAppDataLocally();
+            pushDataToCloud();
+            document.getElementById('autoJoinGroupModal').classList.add('hidden');
+            renderUI();
+            alert(`🎉 Chào mừng ${sName} đã vào thành công nhóm "${group.name}"!`);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
 
         function switchView(view) {
             const studentView = document.getElementById('studentView');
@@ -777,7 +822,9 @@
             document.getElementById('modalCreateClassName').innerText = `Lớp ${appState.currentClass}`;
             document.getElementById('createdGroupQRContainer').classList.add('hidden');
             document.getElementById('inputGroupName').value = "";
-            document.getElementById('inputGroupCode').value = `${appState.currentClass}-T${Math.floor(Math.random()*90+10)}`;
+            // TỰ ĐỘNG SINH MÃ NHÓM NGẪU NHIÊN NHƯNG VẪN CHO PHÉP SỬA LẠI TRÊN Ô INPUT
+            const autoGeneratedCode = `${appState.currentClass}-T${Math.floor(Math.random()*90 + 10)}`;
+            document.getElementById('inputGroupCode').value = autoGeneratedCode;
             document.getElementById('createGroupModal').classList.remove('hidden');
         }
 
@@ -800,7 +847,7 @@
 
         function submitCreateGroup() {
             const name = document.getElementById('inputGroupName').value.trim();
-            const code = document.getElementById('inputGroupCode').value.trim();
+            const code = document.getElementById('inputGroupCode').value.trim(); // Lấy giá trị mã nhóm (học sinh có thể đã sửa)
             if (!name || !code) {
                 alert("Vui lòng nhập đầy đủ tên và mã nhóm!");
                 return;
@@ -835,17 +882,20 @@
             saveAppDataLocally();
             pushDataToCloud();
 
+            const baseUrl = window.location.origin + window.location.pathname;
+            const targetQRUrl = `${baseUrl}?class=${cls}&group=${code}`;
+
             const qrContainer = document.getElementById('qrcodeRenderArea');
             qrContainer.innerHTML = "";
             try {
                 const qr = qrcode(0, 'L');
-                qr.addData(`GROUPJOIN:${cls}:${code}`);
+                qr.addData(targetQRUrl);
                 qr.make();
                 qrContainer.innerHTML = qr.createImgTag(4);
             } catch (e) {
                 qrContainer.innerText = `Mã: ${code}`;
             }
-            document.getElementById('createdGroupQRText').innerText = `Mã nhóm: ${code} (Lớp ${cls})`;
+            document.getElementById('createdGroupQRText').innerText = targetQRUrl;
             document.getElementById('createdGroupQRContainer').classList.remove('hidden');
             renderUI();
         }
@@ -857,23 +907,24 @@
         }
 
         function submitJoinGroup() {
-            const sName = document.getElementById('joinStudentNameInput').value.trim();
-            const gCode = document.getElementById('joinGroupCodeInput').value.trim();
-            if (!sName || !gCode) {
-                alert("Vui lòng nhập đầy đủ tên và mã nhóm!");
+            let sName = document.getElementById('joinStudentNameInput').value.trim();
+            let targetGroupCode = document.getElementById('joinGroupCodeInput').value.trim();
+            
+            if (!sName || !targetGroupCode) {
+                alert("Vui lòng nhập đầy đủ họ tên và mã nhóm!");
                 return;
             }
 
             const cls = appState.currentClass;
             const groups = appState.classes[cls].groups;
-            if (!groups[gCode]) {
-                alert(`Không tìm thấy nhóm mã "${gCode}" trong lớp ${cls}!`);
+            if (!groups[targetGroupCode]) {
+                alert(`Không tìm thấy nhóm mã "${targetGroupCode}" trong lớp ${cls}!`);
                 return;
             }
 
             appState.currentStudentName = sName;
-            appState.activeGroupCode = gCode;
-            const group = groups[gCode];
+            appState.activeGroupCode = targetGroupCode;
+            const group = groups[targetGroupCode];
             if (!group.members) group.members = [];
             const existing = group.members.find(x => x.name.toLowerCase() === sName.toLowerCase());
             if (!existing) {
@@ -884,7 +935,7 @@
             pushDataToCloud();
             closeModal('joinGroupModal');
             renderUI();
-            alert(`Tham gia nhóm "${group.name}" thành công!`);
+            alert(`🎉 Tham gia thành công nhóm "${group.name}"!`);
         }
 
         function openChangeGroupModal() {
@@ -969,7 +1020,7 @@
                             <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Mã: *******</span>
                         </div>
                         <p class="text-xs text-slate-300 truncate">Bài: ${cData.topic || "Chưa có đề bài"}</p>
-                        <button onclick="selectTeacherClass('${cls}')" class="w-full bg-slate-800 hover:bg-slate-700 text-purple-400 text-xs py-2 rounded-lg font-semibold border border-purple-500/30 transition">
+                        <button onclick="selectTeacherClass('${cls}')" ontouchstart="this.click();" class="w-full bg-slate-800 hover:bg-slate-700 text-purple-400 text-xs py-2 rounded-lg font-semibold border border-purple-500/30 transition active:scale-95">
                             Quản lý & Kiểm tra bài
                         </button>
                     </div>
