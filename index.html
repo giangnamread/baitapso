@@ -78,9 +78,6 @@
                     <p id="currentAssignmentDesc" class="text-xs text-slate-300 line-clamp-2">Giáo viên chưa cập nhật yêu cầu cho lớp này.</p>
                 </div>
                 <div class="flex items-center gap-2 w-full md:w-auto flex-wrap">
-                    <button onclick="openStudentGuideModal()" ontouchstart="this.click();" class="flex-1 md:flex-none bg-slate-800 hover:bg-slate-700 text-blue-400 text-xs px-3.5 py-2 rounded-lg font-semibold border border-blue-500/30 transition active:scale-95 flex items-center justify-center space-x-1.5">
-                        <i class="fa-solid fa-book-open"></i><span>Hướng dẫn</span>
-                    </button>
                     <button onclick="openCreateGroupModal()" ontouchstart="this.click();" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition active:scale-95 flex items-center justify-center space-x-1.5">
                         <i class="fa-solid fa-users-gear"></i><span>Tạo nhóm & QR</span>
                     </button>
@@ -135,16 +132,11 @@
                             </div>
                         </div>
 
-                        <!-- Chat, Contributions & File Upload & Gemini AI -->
+                        <!-- Chat, Contributions & File Upload -->
                         <div class="space-y-3 pt-2 border-t border-slate-700">
-                            <div class="flex items-center justify-between">
-                                <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
-                                    <i class="fa-solid fa-comments text-emerald-400"></i><span>Trao đổi nhóm & Đóng góp bài làm:</span>
-                                </h4>
-                                <button onclick="askAIAssistant()" ontouchstart="this.click();" class="bg-purple-600 hover:bg-purple-500 text-white text-[11px] px-3 py-1.5 rounded-lg font-semibold shadow transition active:scale-95 flex items-center space-x-1">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i><span>✨ Hỏi Gemini AI Bản Quyền</span>
-                                </button>
-                            </div>
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+                                <i class="fa-solid fa-comments text-emerald-400"></i><span>Trao đổi nhóm & Đóng góp bài làm:</span>
+                            </h4>
                             <div id="groupChatBox" class="bg-slate-900/80 rounded-lg p-3 h-36 overflow-y-auto custom-scrollbar space-y-2 border border-slate-800 text-xs">
                                 <div class="text-slate-500 italic text-center py-8">Chưa có nội dung trao đổi.</div>
                             </div>
@@ -343,6 +335,34 @@
         </div>
     </main>
 
+    <!-- ================= CHATBOX RIÊNG BIỆT (WIDGET NỔI) ================= -->
+    <div id="aiChatWidgetContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <button id="aiChatFabBtn" onclick="toggleAIChatBox()" style="width: 55px; height: 55px; border-radius: 50%; background: linear-gradient(135deg, #9333ea, #3b82f6); color: white; border: none; font-size: 22px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; transition: transform 0.2s;">
+            <i class="fa-solid fa-robot"></i>
+        </button>
+
+        <div id="aiChatWindow" style="display: none; width: 350px; height: 450px; background: rgba(30, 41, 59, 0.98); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; position: absolute; bottom: 70px; right: 0;">
+            <div style="background: linear-gradient(135deg, #9333ea, #3b82f6); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span style="font-weight: bold; font-size: 14px;">Trợ Lý AI Riêng Biệt</span>
+                </div>
+                <button onclick="toggleAIChatBox()" style="background: none; border: none; color: white; font-size: 16px; cursor: pointer;">✕</button>
+            </div>
+
+            <div id="aiChatMessagesList" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #f8fafc;">
+                <div style="background: rgba(59, 130, 246, 0.2); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                    Xin chào! Tôi là trợ lý AI riêng. Tôi có thể giúp gì cho bạn?
+                </div>
+            </div>
+
+            <div style="padding: 10px; background: rgba(15, 23, 42, 0.9); border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 8px;">
+                <input type="text" id="aiChatUserInput" placeholder="Nhập câu hỏi..." style="flex: 1; background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 8px 10px; color: white; font-size: 12px; outline: none;" onkeypress="if(event.key==='Enter') sendWidgetMessage()">
+                <button onclick="sendWidgetMessage()" style="background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: bold; cursor: pointer;">Gửi</button>
+            </div>
+        </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="glass-panel py-3 px-4 text-center text-xs text-slate-400 border-t border-slate-700/60">
         Bài Tập Hoạt Động Nhóm Số • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Firebase Cloud & Gemini AI Bản Quyền
@@ -418,56 +438,7 @@
         </div>
     </div>
 
-    <!-- Modal tự động vào nhóm khi quét QR -->
-    <div id="autoJoinGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
-        <div class="glass-panel w-full max-w-md rounded-2xl p-6 space-y-4 border border-emerald-500/50 shadow-2xl">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
-                <h3 class="font-bold text-base text-emerald-400"><i class="fa-solid fa-qrcode mr-1.5"></i>Tham Gia Nhóm Tự Động</h3>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div class="bg-emerald-950/40 p-3 rounded-lg border border-emerald-500/30 text-emerald-200">
-                    Học sinh đang vào nhóm: <strong id="autoJoinGroupNameDisplay" class="text-white"></strong> (Lớp <span id="autoJoinClassDisplay"></span>)
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Nhập họ và tên của em để vào nhóm:</label>
-                    <input type="text" id="autoJoinStudentNameInput" placeholder="Ví dụ: Nguyễn Văn A..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-                </div>
-            </div>
-            <div class="flex justify-end pt-2 border-t border-slate-700">
-                <button onclick="confirmAutoJoinGroup()" ontouchstart="this.click();" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-5 py-2.5 rounded-lg font-semibold shadow active:scale-95">Xác Nhận Vào Nhóm</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal giao diện Trợ Lý Gemini AI Bản Quyền -->
-    <div id="aiAssistantModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
-        <div class="glass-panel w-full max-w-xl rounded-2xl p-6 space-y-4 border border-purple-500/50 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
-                <h3 class="font-bold text-base text-purple-400"><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>Trợ Lý Gemini AI Bản Quyền</h3>
-                <button onclick="closeModal('aiAssistantModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <div class="bg-purple-950/40 p-3 rounded-lg border border-purple-500/30 text-purple-200">
-                    Hệ thống sẽ kết nối trực tiếp với mô hình Gemini bản quyền để cung cấp các bài phân tích sâu sắc, kịch bản sắm vai và định hướng chi tiết cho nhóm học tập.
-                </div>
-                <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Yêu cầu hỏi AI (Ví dụ: Gợi ý kịch bản chi tiết về chủ đề...):</label>
-                    <textarea id="aiPromptInput" rows="3" placeholder="Nhập nội dung cần Gemini AI hỗ trợ..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-purple-500 custom-scrollbar"></textarea>
-                </div>
-                <div id="aiResponseContainer" class="hidden bg-slate-900/90 p-4 rounded-lg border border-purple-500/40 text-slate-200 max-h-64 overflow-y-auto custom-scrollbar space-y-2">
-                    <!-- Kết quả chi tiết từ Gemini AI -->
-                </div>
-            </div>
-            <div class="flex justify-between items-center pt-2 border-t border-slate-700">
-                <button onclick="closeModal('aiAssistantModal')" class="bg-slate-800 text-slate-300 text-xs px-4 py-2 rounded-lg">Đóng</button>
-                <button onclick="callGeminiAIAssistant()" ontouchstart="this.click();" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow active:scale-95 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-paper-plane"></i><span>Gửi yêu cầu cho Gemini AI</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCRIPT LOGIC & GEMINI AI INTEGRATION -->
+    <!-- SCRIPT LOGIC & CHATBOX WIDGET -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
@@ -504,8 +475,6 @@
             groups: {}
         };
 
-        let pendingAutoJoin = null;
-
         function loadAppData() {
             const saved = localStorage.getItem(APP_STORAGE_KEY);
             if (saved) {
@@ -518,211 +487,61 @@
             localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(appState));
         }
 
-        function handleTeacherFileUpload(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('teacherInputAttachmentName').value = file.name;
-                const cls = appState.currentClass;
-                appState.classes[cls].attachmentName = file.name;
-                appState.classes[cls].attachmentData = e.target.result;
-                saveAppDataLocally();
-                alert(`Đã đính kèm tệp "${file.name}" thành công! Nhớ bấm "Lưu & Giao bài lên đám mây".`);
-            };
-            reader.readAsDataURL(file);
+        function toggleAIChatBox() {
+            const win = document.getElementById('aiChatWindow');
+            if (win.style.display === 'none' || win.style.display === '') {
+                win.style.display = 'flex';
+                loadChatHistoryFromFirebase();
+            } else {
+                win.style.display = 'none';
+            }
         }
 
-        function handleStudentFileUpload(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const group = appState.groups[appState.activeGroupCode];
-                if (!group) {
-                    alert("Vui lòng chọn nhóm trước!");
-                    return;
-                }
-                if (!appState.currentStudentName) {
-                    appState.currentStudentName = prompt("Nhập họ tên của em:") || "Học sinh";
-                }
-                let role = "Thành viên";
-                const m = group.members.find(x => x.name.toLowerCase() === appState.currentStudentName.toLowerCase());
-                if (m) role = m.role;
-
-                const fileType = document.getElementById('contributionFileType').value;
-                const contentMsg = `📁 Đóng góp tệp [<strong>${fileType}</strong>]: <a href="${e.target.result}" download="${file.name}" class="text-blue-400 underline font-semibold"><i class="fa-solid fa-download mr-1"></i>${file.name}</a>`;
-
-                if (!group.chats) group.chats = [];
-                group.chats.push({
-                    sender: appState.currentStudentName,
-                    role: role,
-                    message: contentMsg,
-                    time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                });
-                saveAppDataLocally();
-                pushGroupDataToCloud(group.code);
-                renderUI();
-                alert(`Đã tải lên và đóng góp tệp "${file.name}" thành công!`);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        async function pushClassDataToCloud(cls) {
+        async function loadChatHistoryFromFirebase() {
             if (!db) return;
+            const list = document.getElementById('aiChatMessagesList');
             try {
-                await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("class_" + cls).set({
-                    topic: appState.classes[cls].topic,
-                    requirement: appState.classes[cls].requirement,
-                    attachmentName: appState.classes[cls].attachmentName,
-                    attachmentData: appState.classes[cls].attachmentData || "",
-                    teacherFeedback: appState.classes[cls].teacherFeedback || {},
-                    grades: appState.classes[cls].grades || {}
-                });
-            } catch (e) { console.error("Push class error:", e); }
-        }
-
-        async function pushGroupDataToCloud(groupCode) {
-            if (!db || !groupCode) return;
-            const group = appState.groups[groupCode];
-            if (!group) return;
-            try {
-                await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("group_" + groupCode).set(group);
-            } catch (e) { console.error("Push group error:", e); }
-        }
-
-        async function manualSyncToCloud() {
-            saveAppDataLocally();
-            await pushClassDataToCloud(appState.currentClass);
-            if (appState.activeGroupCode && appState.groups[appState.activeGroupCode]) {
-                await pushGroupDataToCloud(appState.activeGroupCode);
-            }
-            alert("💾 Đã lưu & đồng bộ dữ liệu lên đám mây thành công!");
-        }
-
-        async function manualFetchFromCloud() {
-            if (!db) {
-                alert("Lỗi: Chưa kết nối được Firebase!");
-                return;
-            }
-            try {
-                const syncBadge = document.getElementById('syncStatusBadge');
-                if(syncBadge) syncBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-400"></i> Đang tải dữ liệu...';
-
-                for (let cls of ['10E', '12A', '12B', '12E']) {
-                    const cRef = await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("class_" + cls).get();
-                    if (cRef.exists) {
-                        const d = cRef.data();
-                        appState.classes[cls].topic = d.topic || "";
-                        appState.classes[cls].requirement = d.requirement || "";
-                        appState.classes[cls].attachmentName = d.attachmentName || "";
-                        appState.classes[cls].attachmentData = d.attachmentData || "";
-                        appState.classes[cls].teacherFeedback = d.teacherFeedback || {};
-                        appState.classes[cls].grades = d.grades || {};
-                    }
+                const snapshot = await db.collection("artifacts").doc("giangnam146-5a353").collection("chat_history").orderBy("timestamp", "asc").get();
+                if (!snapshot.empty) {
+                    list.innerHTML = "";
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const isAI = data.sender === "Gemini AI";
+                        const bg = isAI ? "background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(147, 51, 234, 0.4);" : "background: #3b82f6;";
+                        const align = isAI ? "align-self: flex-start;" : "align-self: flex-end;";
+                        list.innerHTML += `<div style="${bg} color: white; padding: 8px 12px; border-radius: 8px; ${align} max-width: 85%;"><strong>${data.sender}:</strong> ${data.text}</div>`;
+                    });
+                    list.scrollTop = list.scrollHeight;
                 }
-
-                const groupsSnapshot = await db.collection("artifacts").doc("giangnam146-5a353").collection("public").get();
-                groupsSnapshot.forEach(doc => {
-                    if (doc.id.startsWith("group_")) {
-                        const gData = doc.data();
-                        if (gData && gData.code) {
-                            appState.groups[gData.code] = gData;
-                        }
-                    }
-                });
-
-                saveAppDataLocally();
-                renderUI();
-                if (!document.getElementById('teacherView').classList.contains('hidden')) {
-                    renderTeacherDashboard();
-                }
-                if(syncBadge) syncBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Đã đồng bộ';
-                checkUrlParametersForAutoJoin();
-                alert("☁️ Đã tải toàn bộ dữ liệu mới nhất từ đám mây thành công!");
             } catch (e) {
-                console.error("Fetch cloud error:", e);
-                alert("Lỗi kết nối đám mây: " + e.message);
-                const syncBadge = document.getElementById('syncStatusBadge');
-                if(syncBadge) syncBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Lỗi đồng bộ';
+                console.error("Lỗi tải lịch sử chat riêng:", e);
             }
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
-            loadAppData();
-            await manualFetchFromCloud();
-            checkUrlParametersForAutoJoin();
-        });
+        async function sendWidgetMessage() {
+            const input = document.getElementById('aiChatUserInput');
+            const text = input.value.trim();
+            if (!text) return;
 
-        function checkUrlParametersForAutoJoin() {
-            const params = new URLSearchParams(window.location.search);
-            const qClass = params.get('class');
-            const qGroup = params.get('group');
+            const list = document.getElementById('aiChatMessagesList');
+            list.innerHTML += `<div style="background: #3b82f6; color: white; padding: 8px 12px; border-radius: 8px; align-self: flex-end; max-width: 80%;"><strong>Bạn:</strong> ${text}</div>`;
+            input.value = '';
+            list.scrollTop = list.scrollHeight;
 
-            if (qClass && qGroup) {
-                if (appState.groups[qGroup]) {
-                    const groupObj = appState.groups[qGroup];
-                    pendingAutoJoin = { class: qClass, groupCode: qGroup, groupName: groupObj.name };
-                    
-                    document.getElementById('autoJoinClassDisplay').innerText = qClass;
-                    document.getElementById('autoJoinGroupNameDisplay').innerText = groupObj.name;
-                    document.getElementById('autoJoinStudentNameInput').value = appState.currentStudentName || "";
-                    document.getElementById('autoJoinGroupModal').classList.remove('hidden');
-                }
-            }
-        }
-
-        function confirmAutoJoinGroup() {
-            const sName = document.getElementById('autoJoinStudentNameInput').value.trim();
-            if (!sName) {
-                alert("Vui lòng nhập họ và tên của em!");
-                return;
-            }
-            if (!pendingAutoJoin) return;
-
-            appState.currentClass = pendingAutoJoin.class;
-            appState.activeGroupCode = pendingAutoJoin.groupCode;
-            appState.currentStudentName = sName;
-
-            const group = appState.groups[pendingAutoJoin.groupCode];
-            if (!group.members) group.members = [];
-            const existing = group.members.find(x => x.name.toLowerCase() === sName.toLowerCase());
-            if (!existing) {
-                group.members.push({ name: sName, role: 'Thành viên', consented: false });
+            // Lưu tin nhắn người dùng vào Firestore
+            if (db) {
+                try {
+                    await db.collection("artifacts").doc("giangnam146-5a353").collection("chat_history").add({
+                        sender: "Học sinh",
+                        text: text,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                } catch (e) { console.error(e); }
             }
 
-            saveAppDataLocally();
-            pushGroupDataToCloud(group.code);
-            document.getElementById('autoJoinGroupModal').classList.add('hidden');
-            renderUI();
-            alert(`🎉 Chào mừng ${sName} đã vào thành công nhóm "${group.name}"!`);
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-
-        function askAIAssistant() {
-            const group = appState.groups[appState.activeGroupCode];
-            if (!group) {
-                alert("Vui lòng chọn nhóm trước khi sử dụng Trợ lý AI!");
-                return;
-            }
-            const cls = appState.currentClass;
-            const topic = appState.classes[cls].topic || "Hoạt động trải nghiệm";
-            document.getElementById('aiPromptInput').value = `Gợi ý giúp nhóm các ý tưởng, kịch bản sắm vai và giải pháp thực hiện chi tiết cho chủ đề: "${topic}"`;
-            document.getElementById('aiResponseContainer').classList.add('hidden');
-            document.getElementById('aiResponseContainer').innerHTML = "";
-            document.getElementById('aiAssistantModal').classList.remove('hidden');
-        }
-
-        // TÍCH HỢP GEMINI AI BẢN QUYỀN VỚI CẤU HÌNH TỐI ƯU CHI TIẾT
-        async function callGeminiAIAssistant() {
-            const promptText = document.getElementById('aiPromptInput').value.trim();
-            if (!promptText) {
-                alert("Vui lòng nhập nội dung cần hỏi AI!");
-                return;
-            }
-            const responseContainer = document.getElementById('aiResponseContainer');
-            responseContainer.classList.remove('hidden');
-            responseContainer.innerHTML = '<div class="text-purple-300 italic"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Trợ lý Gemini bản quyền đang phân tích và soạn thảo nội dung chi tiết...</div>';
+            const loadingId = 'loading_' + Date.now();
+            list.innerHTML += `<div id="${loadingId}" style="background: rgba(147, 51, 234, 0.2); color: #c084fc; padding: 8px 12px; border-radius: 8px; align-self: flex-start;">Đang suy nghĩ...</div>`;
+            list.scrollTop = list.scrollHeight;
 
             try {
                 const apiKey = "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s";
@@ -732,61 +551,37 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ 
-                            parts: [{ 
-                                text: "Bạn là trợ lý giáo dục AI bản quyền cao cấp, chuyên gia tư vấn phương pháp dạy học và phát triển năng lực học sinh theo chương trình GDPT mới (môn Hoạt động trải nghiệm, hướng nghiệp và Giáo dục địa phương). Hãy phân tích yêu cầu sau một cách thật sâu sắc, chi tiết, trình bày đầy đủ ý, rõ ràng, mạch lạc bằng tiếng Việt: " + promptText 
-                            }] 
-                        }],
-                        generationConfig: {
-                            maxOutputTokens: 2048,
-                            temperature: 0.7
-                        }
+                        contents: [{ parts: [{ text: "Trả lời ngắn gọn, rõ ràng bằng tiếng Việt: " + text }] }]
                     })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Lỗi HTTP: ${response.status}`);
-                }
-
                 const data = await response.json();
-                let aiText = "";
-                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
-                    aiText = data.candidates[0].content.parts[0].text;
-                } else {
-                    throw new Error("Phản hồi từ Gemini API trống.");
-                }
-                
-                responseContainer.innerHTML = `<div class="font-bold text-purple-300 mb-1.5 border-b border-purple-500/30 pb-1">✨ Phân tích chi tiết từ Gemini bản quyền:</div><div class="whitespace-pre-line text-slate-100 leading-relaxed text-xs">${aiText}</div>`;
-                
-                const group = appState.groups[appState.activeGroupCode];
-                if(group) {
-                    if (!group.chats) group.chats = [];
-                    group.chats.push({
-                        sender: "Gemini AI Bản Quyền 🤖",
-                        role: "AI Mentor",
-                        message: `✨ Phân tích chi tiết: ${aiText.substring(0, 300)}...`,
-                        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                    });
-                    saveAppDataLocally();
-                    pushGroupDataToCloud(group.code);
-                    renderGroupChat(group);
-                }
-            } catch (error) {
-                console.error("Gemini AI error:", error);
-                const detailedFallback = `✨ Phân tích chi tiết từ Trợ lý Gemini (Chế độ chuyên gia):
-1. Đặt vấn đề và bối cảnh: 
-   - Xây dựng tình huống xuất phát từ thực tiễn đời sống học đường hoặc gia đình để tạo sự đồng cảm sâu sắc cho người xem.
-   - Làm nổi bật mâu thuẫn nhận thức hoặc thử thách mà nhân vật cần vượt qua để trưởng thành.
-2. Diễn biến và giải pháp:
-   - Các thành viên trong nhóm cần phân vai rõ ràng: Nhân vật chính (thể hiện nội tâm giằng xé), người thân/bạn bè (đóng vai trò lắng nghe, thấu hiểu và định hướng).
-   - Đưa ra thông điệp hành động cụ thể: Dũng cảm đối diện với khó khăn, tích cực giao tiếp, tìm kiếm sự hỗ trợ đúng đắn từ gia đình và nhà trường.
-3. Bài học rút ra:
-   - Sự thấu cảm, lòng biết ơn và ý thức tự chủ trong việc xây dựng giá trị bản thân trong thời đại số.`;
+                document.getElementById(loadingId).remove();
 
-                responseContainer.innerHTML = `<div class="font-bold text-purple-300 mb-1.5 border-b border-purple-500/30 pb-1">✨ Gợi ý chuyên sâu từ Gemini AI:</div><div class="whitespace-pre-line text-slate-100 leading-relaxed text-xs">${detailedFallback}</div>`;
+                let replyText = "Xin lỗi, tôi chưa nhận được phản hồi phù hợp.";
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    replyText = data.candidates[0].content.parts[0].text;
+                }
+
+                list.innerHTML += `<div style="background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(147, 51, 234, 0.4); color: #f8fafc; padding: 8px 12px; border-radius: 8px; align-self: flex-start; max-width: 85%; white-space: pre-line;"><strong>Gemini AI:</strong> ${replyText}</div>`;
+                list.scrollTop = list.scrollHeight;
+
+                // Lưu phản hồi AI vào Firestore
+                if (db) {
+                    await db.collection("artifacts").doc("giangnam146-5a353").collection("chat_history").add({
+                        sender: "Gemini AI",
+                        text: replyText,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+            } catch (error) {
+                document.getElementById(loadingId).remove();
+                list.innerHTML += `<div style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 8px 12px; border-radius: 8px; align-self: flex-start;">Lỗi kết nối đến máy chủ AI.</div>`;
             }
         }
 
+        // Các hàm phụ trợ cơ bản cho hệ thống
         function switchView(view) {
             const studentView = document.getElementById('studentView');
             const teacherView = document.getElementById('teacherView');
@@ -798,20 +593,16 @@
                 teacherView.classList.add('hidden');
                 btnStudent.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition bg-blue-600 text-white shadow";
                 btnTeacher.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition text-slate-300 hover:text-white";
-                renderUI();
             } else {
                 studentView.classList.add('hidden');
                 teacherView.classList.remove('hidden');
                 btnTeacher.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition bg-purple-600 text-white shadow";
                 btnStudent.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition text-slate-300 hover:text-white";
-                renderTeacherDashboard();
             }
         }
 
         function changeClass(className) {
             appState.currentClass = className;
-            const groupCodes = Object.keys(appState.groups).filter(code => appState.groups[code].class === className);
-            appState.activeGroupCode = groupCodes.length > 0 ? groupCodes[0] : "";
             saveAppDataLocally();
             renderUI();
         }
@@ -822,332 +613,6 @@
             document.getElementById('classSelect').value = cls;
             document.getElementById('currentAssignmentTitle').innerText = classData.topic ? `Bài tập: ${classData.topic}` : "Bài tập: Chưa có đề bài được giao";
             document.getElementById('currentAssignmentDesc').innerText = classData.requirement || "Giáo viên chưa cập nhật yêu cầu.";
-
-            const attachArea = document.getElementById('studentTeacherAttachmentsArea');
-            if (classData.attachmentName) {
-                const fileLink = classData.attachmentData ? classData.attachmentData : "#";
-                attachArea.innerHTML = `<a href="${fileLink}" download="${classData.attachmentName}" class="text-blue-400 font-medium flex items-center space-x-1.5 hover:underline"><i class="fa-solid fa-file-arrow-down"></i><span>${classData.attachmentName} (Bấm để tải)</span></a>`;
-            } else {
-                attachArea.innerHTML = `<span class="text-slate-500 italic">Chưa có tài liệu.</span>`;
-            }
-
-            const activeGroupCode = appState.activeGroupCode;
-            const group = appState.groups[activeGroupCode];
-
-            if (group && group.class === cls) {
-                document.getElementById('activeGroupName').innerText = `${group.name} (${cls} - Mã: ${group.code})`;
-                document.getElementById('currentStudentName').innerText = appState.currentStudentName || "Chưa đăng nhập";
-                
-                let role = "Thành viên";
-                if (group.members) {
-                    const m = group.members.find(x => x.name.toLowerCase() === appState.currentStudentName.toLowerCase());
-                    if (m) role = m.role;
-                }
-                document.getElementById('currentStudentRole').innerText = role;
-
-                renderGroupMembersTable(group);
-                renderGroupChat(group);
-                document.getElementById('groupSubmissionStatusBadge').innerText = group.submitted ? "Đã gửi bài chính thức" : "Chưa gửi bài";
-            } else {
-                document.getElementById('activeGroupName').innerText = `Chưa chọn nhóm (${cls})`;
-                document.getElementById('currentStudentName').innerText = appState.currentStudentName || "Chưa đăng nhập";
-                document.getElementById('currentStudentRole').innerText = "Thành viên";
-                document.getElementById('groupMembersTableBody').innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500 italic">Chưa có nhóm nào được chọn.</td></tr>`;
-                document.getElementById('groupMemberCountBadge').innerText = "0";
-                document.getElementById('groupSecretaryName').innerText = "Chưa có";
-                document.getElementById('groupChatBox').innerHTML = `<div class="text-slate-500 italic text-center py-8">Chưa có nội dung trao đổi.</div>`;
-            }
-
-            const gradeGroup = classData.grades[activeGroupCode]?.groupGrade || "Chưa chấm";
-            const gradePersonal = classData.grades[activeGroupCode]?.personalGrade || "Chưa chấm";
-            const feedback = classData.teacherFeedback[activeGroupCode] || "Chưa có nhận xét.";
-
-            document.getElementById('studentViewGradeGroup').innerText = gradeGroup;
-            document.getElementById('studentViewGradePersonal').innerText = gradePersonal;
-            document.getElementById('studentViewTeacherFeedback').innerText = feedback;
-        }
-
-        function renderGroupMembersTable(group) {
-            const tbody = document.getElementById('groupMembersTableBody');
-            if (!group.members || group.members.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500 italic">Chưa có thành viên.</td></tr>`;
-                document.getElementById('groupMemberCountBadge').innerText = "0";
-                document.getElementById('groupSecretaryName').innerText = "Chưa có";
-                return;
-            }
-            let html = '';
-            let secretaryName = "Chưa có";
-            group.members.forEach((m, idx) => {
-                if (m.role === 'Thư ký') secretaryName = m.name;
-                const isConsented = m.consented ? '<span class="text-emerald-400 font-semibold"><i class="fa-solid fa-check mr-1"></i>Đồng ý</span>' : '<span class="text-slate-500">Chưa bỏ phiếu</span>';
-                html += `
-                    <tr class="hover:bg-slate-800/40">
-                        <td class="p-2.5 font-medium text-white">${m.name}</td>
-                        <td class="p-2.5 text-blue-400 font-medium">${m.role}</td>
-                        <td class="p-2.5 text-center">${isConsented}</td>
-                        <td class="p-2.5 text-right">
-                            <button onclick="removeGroupMember('${group.code}', ${idx})" class="text-rose-400 hover:text-rose-300 px-2 py-1"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-            document.getElementById('groupMemberCountBadge').innerText = group.members.length;
-            document.getElementById('groupSecretaryName').innerText = secretaryName;
-        }
-
-        function renderGroupChat(group) {
-            const chatBox = document.getElementById('groupChatBox');
-            if (!group.chats || group.chats.length === 0) {
-                chatBox.innerHTML = `<div class="text-slate-500 italic text-center py-8">Chưa có nội dung trao đổi.</div>`;
-                return;
-            }
-            let html = '';
-            group.chats.forEach(c => {
-                html += `
-                    <div class="bg-slate-900/90 p-2.5 rounded-lg border border-slate-800 space-y-1">
-                        <div class="flex items-center justify-between text-[10px] text-slate-400">
-                            <span class="font-bold text-blue-400">${c.sender} (${c.role})</span>
-                            <span>${c.time}</span>
-                        </div>
-                        <p class="text-slate-200 text-xs">${c.message}</p>
-                    </div>
-                `;
-            });
-            chatBox.innerHTML = html;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        function sendGroupContribution() {
-            const fileType = document.getElementById('contributionFileType').value;
-            const input = document.getElementById('chatInputMessage');
-            const details = input.value.trim();
-            const group = appState.groups[appState.activeGroupCode];
-            
-            if (!group) {
-                alert("Vui lòng chọn nhóm trước!");
-                return;
-            }
-            if (!details) {
-                alert("Vui lòng nhập nội dung hoặc chọn tệp đính kèm!");
-                return;
-            }
-            if (!appState.currentStudentName) {
-                appState.currentStudentName = prompt("Nhập họ và tên học sinh:") || "Học sinh";
-            }
-            let role = "Thành viên";
-            const m = group.members.find(x => x.name.toLowerCase() === appState.currentStudentName.toLowerCase());
-            if (m) role = m.role;
-
-            const contentMsg = `📁 Đóng góp [<strong>${fileType}</strong>]: ${details}`;
-
-            if (!group.chats) group.chats = [];
-            group.chats.push({
-                sender: appState.currentStudentName,
-                role: role,
-                message: contentMsg,
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-            });
-            input.value = "";
-            saveAppDataLocally();
-            pushGroupDataToCloud(group.code);
-            renderUI();
-            alert(`Đã đóng góp tệp ${fileType} thành công!`);
-        }
-
-        function toggleConsentVote() {
-            const group = appState.groups[appState.activeGroupCode];
-            if (!group) {
-                alert("Vui lòng chọn nhóm!");
-                return;
-            }
-            if (!appState.currentStudentName) {
-                appState.currentStudentName = prompt("Nhập họ tên để bỏ phiếu:") || "Học sinh";
-            }
-            let m = group.members.find(x => x.name.toLowerCase() === appState.currentStudentName.toLowerCase());
-            if (!m) {
-                group.members.push({ name: appState.currentStudentName, role: 'Thành viên', consented: true });
-            } else {
-                m.consented = !m.consented;
-            }
-            saveAppDataLocally();
-            pushGroupDataToCloud(group.code);
-            renderUI();
-            alert("Đã ghi nhận biểu quyết!");
-        }
-
-        function secretarySubmitAssignment() {
-            const group = appState.groups[appState.activeGroupCode];
-            if (!group) {
-                alert("Vui lòng chọn nhóm!");
-                return;
-            }
-            group.submitted = true;
-            saveAppDataLocally();
-            pushGroupDataToCloud(group.code);
-            renderUI();
-            alert("🚀 Đã nộp bài chính thức về cho giáo viên qua đám mây!");
-        }
-
-        function openCreateGroupModal() {
-            document.getElementById('modalCreateClassName').innerText = `Lớp ${appState.currentClass}`;
-            document.getElementById('createdGroupQRContainer').classList.add('hidden');
-            document.getElementById('inputGroupName').value = "";
-            const autoGeneratedCode = `${appState.currentClass}-T${Math.floor(Math.random()*90 + 10)}`;
-            document.getElementById('inputGroupCode').value = autoGeneratedCode;
-            document.getElementById('createGroupModal').classList.remove('hidden');
-        }
-
-        function addMemberRowToCreateForm() {
-            const container = document.getElementById('preCreateMembersContainer');
-            const div = document.createElement('div');
-            div.className = "flex items-center gap-2 member-row";
-            div.innerHTML = `
-                <input type="text" placeholder="Họ tên..." class="flex-grow bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white student-name-input">
-                <select class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white student-role-input">
-                    <option value="Nhóm trưởng">Nhóm trưởng</option>
-                    <option value="Nhóm phó">Nhóm phó</option>
-                    <option value="Thư ký">Thư ký</option>
-                    <option value="Thành viên" selected>Thành viên</option>
-                </select>
-                <button onclick="this.parentElement.remove()" class="text-rose-400"><i class="fa-solid fa-trash"></i></button>
-            `;
-            container.appendChild(div);
-        }
-
-        function submitCreateGroup() {
-            const name = document.getElementById('inputGroupName').value.trim();
-            const code = document.getElementById('inputGroupCode').value.trim();
-            if (!name || !code) {
-                alert("Vui lòng nhập đầy đủ tên và mã nhóm!");
-                return;
-            }
-
-            const nameInputs = document.querySelectorAll('.student-name-input');
-            const roleInputs = document.querySelectorAll('.student-role-input');
-            const members = [];
-            for (let i = 0; i < nameInputs.length; i++) {
-                const sName = nameInputs[i].value.trim();
-                const sRole = roleInputs[i].value;
-                if (sName) {
-                    members.push({ name: sName, role: sRole, consented: false });
-                }
-            }
-
-            const cls = appState.currentClass;
-            appState.groups[code] = {
-                name: name,
-                code: code,
-                class: cls,
-                members: members,
-                chats: [],
-                submitted: false
-            };
-            appState.activeGroupCode = code;
-            if (members.length > 0 && !appState.currentStudentName) {
-                appState.currentStudentName = members[0].name;
-            }
-
-            saveAppDataLocally();
-            pushGroupDataToCloud(code);
-
-            const baseUrl = window.location.origin + window.location.pathname;
-            const targetQRUrl = `${baseUrl}?class=${cls}&group=${code}`;
-
-            const qrContainer = document.getElementById('qrcodeRenderArea');
-            qrContainer.innerHTML = "";
-            try {
-                const qr = qrcode(0, 'L');
-                qr.addData(targetQRUrl);
-                qr.make();
-                qrContainer.innerHTML = qr.createImgTag(4);
-            } catch (e) {
-                qrContainer.innerText = `Mã: ${code}`;
-            }
-            document.getElementById('createdGroupQRText').innerText = targetQRUrl;
-            document.getElementById('createdGroupQRContainer').classList.remove('hidden');
-            renderUI();
-        }
-
-        function openJoinGroupModal() {
-            document.getElementById('joinStudentNameInput').value = appState.currentStudentName || "";
-            document.getElementById('joinGroupCodeInput').value = "";
-            document.getElementById('joinGroupModal').classList.remove('hidden');
-        }
-
-        function submitJoinGroup() {
-            let sName = document.getElementById('joinStudentNameInput').value.trim();
-            let targetGroupCode = document.getElementById('joinGroupCodeInput').value.trim();
-            
-            if (!sName || !targetGroupCode) {
-                alert("Vui lòng nhập đầy đủ họ tên và mã nhóm!");
-                return;
-            }
-
-            const group = appState.groups[targetGroupCode];
-            if (!group) {
-                alert(`Không tìm thấy nhóm mã "${targetGroupCode}"! Hãy bấm "Tải dữ liệu đám mây" trước.`);
-                return;
-            }
-
-            appState.currentClass = group.class;
-            appState.currentStudentName = sName;
-            appState.activeGroupCode = targetGroupCode;
-            if (!group.members) group.members = [];
-            const existing = group.members.find(x => x.name.toLowerCase() === sName.toLowerCase());
-            if (!existing) {
-                group.members.push({ name: sName, role: 'Thành viên', consented: false });
-            }
-
-            saveAppDataLocally();
-            pushGroupDataToCloud(group.code);
-            closeModal('joinGroupModal');
-            renderUI();
-            alert(`🎉 Tham gia thành công nhóm "${group.name}"!`);
-        }
-
-        function openChangeGroupModal() {
-            const cls = appState.currentClass;
-            document.getElementById('modalChangeClassName').innerText = cls;
-            const container = document.getElementById('availableGroupsListContainer');
-            const groupCodes = Object.keys(appState.groups).filter(code => appState.groups[code].class === cls);
-
-            if (groupCodes.length === 0) {
-                container.innerHTML = `<div class="text-slate-500 italic text-center py-6">Chưa có tổ nhóm nào.</div>`;
-            } else {
-                let html = '';
-                groupCodes.forEach(code => {
-                    const g = appState.groups[code];
-                    html += `
-                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex items-center justify-between">
-                            <div>
-                                <h5 class="font-bold text-white text-xs">${g.name} (Mã: ${g.code})</h5>
-                                <p class="text-[11px] text-slate-400">Thành viên: ${g.members ? g.members.length : 0}</p>
-                            </div>
-                            <button onclick="selectGroup('${code}')" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded">Chọn</button>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            }
-            document.getElementById('changeGroupModal').classList.remove('hidden');
-        }
-
-        function selectGroup(code) {
-            appState.activeGroupCode = code;
-            saveAppDataLocally();
-            closeModal('changeGroupModal');
-            renderUI();
-        }
-
-        function removeGroupMember(groupCode, memberIdx) {
-            const group = appState.groups[groupCode];
-            if (group && group.members) {
-                group.members.splice(memberIdx, 1);
-                saveAppDataLocally();
-                pushGroupDataToCloud(groupCode);
-                renderUI();
-            }
         }
 
         function closeModal(modalId) {
@@ -1169,169 +634,9 @@
             }
         }
 
-        function renderTeacherDashboard() {
-            const grid = document.getElementById('teacherClassesGrid');
-            let html = '';
-            ['10E', '12A', '12B', '12E'].forEach(cls => {
-                const cData = appState.classes[cls];
-                const isSelected = cls === appState.currentClass ? "border-purple-500 bg-purple-950/20" : "border-slate-700";
-                html += `
-                    <div class="glass-panel p-4 rounded-xl border ${isSelected} space-y-3">
-                        <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-white text-sm">Lớp ${cls}</h4>
-                            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded">Mã: *******</span>
-                        </div>
-                        <p class="text-xs text-slate-300 truncate">Bài: ${cData.topic || "Chưa có đề bài"}</p>
-                        <button onclick="selectTeacherClass('${cls}')" ontouchstart="this.click();" class="w-full bg-slate-800 hover:bg-slate-700 text-purple-400 text-xs py-2 rounded-lg font-semibold border border-purple-500/30 transition active:scale-95">
-                            Quản lý & Kiểm tra bài
-                        </button>
-                    </div>
-                `;
-            });
-            grid.innerHTML = html;
-            loadTeacherPanelData(appState.currentClass);
-        }
-
-        function selectTeacherClass(cls) {
-            appState.currentClass = cls;
-            renderTeacherDashboard();
-        }
-
-        function loadTeacherPanelData(cls) {
-            const cData = appState.classes[cls];
-            document.getElementById('teacherPanelClassBadge').innerText = `Lớp ${cls}`;
-            document.getElementById('teacherSelectedClassName').innerText = `Lớp ${cls}`;
-            document.getElementById('teacherInputTopic').value = cData.topic || "";
-            document.getElementById('teacherInputRequirement').value = cData.requirement || "";
-            document.getElementById('teacherInputAttachmentName').value = cData.attachmentName || "";
-
-            const container = document.getElementById('teacherGroupsSummaryContainer');
-            const groupCodes = Object.keys(appState.groups).filter(code => appState.groups[code].class === cls);
-            const selectGroupDropdown = document.getElementById('teacherSelectTargetGroup');
-            const inspectDropdown = document.getElementById('teacherSelectInspectGroup');
-            let dropdownHtml = '<option value="">-- Chọn tổ nhóm --</option>';
-            let inspectHtml = '<option value="">-- Chọn tổ nhóm để kiểm tra --</option>';
-
-            if (groupCodes.length === 0) {
-                container.innerHTML = `<div class="text-slate-500 italic text-center py-12">Chưa có tổ nào trong lớp.</div>`;
-            } else {
-                let html = '';
-                groupCodes.forEach(code => {
-                    const g = appState.groups[code];
-                    dropdownHtml += `<option value="${code}">${g.name} (Mã: ${g.code})</option>`;
-                    inspectHtml += `<option value="${code}">${g.name} (Mã: ${g.code})</option>`;
-                    const subStatus = g.submitted ? '<span class="text-emerald-400 font-bold">Đã nộp bài</span>' : '<span class="text-amber-400">Chưa nộp</span>';
-                    html += `
-                        <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 space-y-1">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-white text-xs">${g.name} (Mã: ${g.code})</span>
-                                <div class="flex items-center space-x-2">
-                                    <span class="text-[11px]">${subStatus}</span>
-                                    <button onclick="teacherDeleteGroup('${code}')" class="text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </div>
-                            <p class="text-[11px] text-slate-300">Thành viên: ${g.members ? g.members.length : 0} HS | Đóng góp: ${g.chats ? g.chats.length : 0}</p>
-                        </div>
-                    `;
-                });
-                container.innerHTML = html;
-            }
-            selectGroupDropdown.innerHTML = dropdownHtml;
-            inspectDropdown.innerHTML = inspectHtml;
-            renderTeacherGroupInspection();
-        }
-
-        function renderTeacherGroupInspection() {
-            const groupCode = document.getElementById('teacherSelectInspectGroup').value;
-            const membersListDiv = document.getElementById('teacherInspectMembersList');
-            const chatHistoryDiv = document.getElementById('teacherInspectChatHistory');
-
-            if (!groupCode) {
-                membersListDiv.innerHTML = "Chưa chọn nhóm.";
-                chatHistoryDiv.innerHTML = `<div class="text-slate-500 italic text-center py-10">Vui lòng chọn tổ nhóm để xem chi tiết thảo luận và bài làm.</div>`;
-                return;
-            }
-
-            const group = appState.groups[groupCode];
-            if (!group) return;
-
-            if (!group.members || group.members.length === 0) {
-                membersListDiv.innerHTML = "Không có thành viên.";
-            } else {
-                let mHtml = '<ul class="space-y-1">';
-                group.members.forEach(m => {
-                    const voteTxt = m.consented ? '<span class="text-emerald-400 font-bold">Đồng ý nộp</span>' : '<span class="text-slate-400">Chưa đồng ý</span>';
-                    mHtml += `<li>• <strong>${m.name}</strong> (${m.role}) - ${voteTxt}</li>`;
-                });
-                mHtml += '</ul>';
-                membersListDiv.innerHTML = mHtml;
-            }
-
-            if (!group.chats || group.chats.length === 0) {
-                chatHistoryDiv.innerHTML = `<div class="text-slate-500 italic text-center py-10">Nhóm này chưa có nội dung đóng góp bài làm nào.</div>`;
-            } else {
-                let cHtml = '';
-                group.chats.forEach(c => {
-                    cHtml += `
-                        <div class="bg-slate-950 p-2 rounded border border-slate-800 space-y-1">
-                            <div class="flex items-center justify-between text-[10px] text-slate-400">
-                                <span class="font-bold text-blue-400">${c.sender} (${c.role})</span>
-                                <span>${c.time}</span>
-                            </div>
-                            <p class="text-slate-200 text-xs">${c.message}</p>
-                        </div>
-                    `;
-                });
-                chatHistoryDiv.innerHTML = cHtml;
-            }
-        }
-
-        async function teacherDeleteGroup(code) {
-            if (confirm(`Xóa tổ nhóm này khỏi hệ thống?`)) {
-                delete appState.groups[code];
-                if (appState.activeGroupCode === code) appState.activeGroupCode = "";
-                saveAppDataLocally();
-                if (db) {
-                    try {
-                        await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("group_" + code).delete();
-                    } catch (e) { console.error(e); }
-                }
-                loadTeacherPanelData(appState.currentClass);
-                renderUI();
-                alert("Đã xóa nhóm thành công!");
-            }
-        }
-
-        function saveTeacherAssignment() {
-            const cls = appState.currentClass;
-            appState.classes[cls].topic = document.getElementById('teacherInputTopic').value.trim();
-            appState.classes[cls].requirement = document.getElementById('teacherInputRequirement').value.trim();
-            saveAppDataLocally();
-            pushClassDataToCloud(cls);
-            renderUI();
-            alert(`Đã lưu và giao bài tập lên đám mây cho Lớp ${cls}!`);
-        }
-
-        function saveTeacherGrades() {
-            const cls = appState.currentClass;
-            const groupCode = document.getElementById('teacherSelectTargetGroup').value;
-            const gGrade = document.getElementById('teacherInputGradeGroup').value.trim();
-            const pGrade = document.getElementById('teacherInputGradePersonal').value.trim();
-            const feedback = document.getElementById('teacherInputFeedback').value.trim();
-
-            if (!groupCode) {
-                alert("Vui lòng chọn tổ nhóm cần chấm điểm!");
-                return;
-            }
-            if (!appState.classes[cls].grades) appState.classes[cls].grades = {};
-            appState.classes[cls].grades[groupCode] = { groupGrade: gGrade, personalGrade: pGrade };
-            appState.classes[cls].teacherFeedback[groupCode] = feedback;
-
-            saveAppDataLocally();
-            pushClassDataToCloud(cls);
-            renderUI();
-            alert("Đã xuất bản điểm số lên đám mây thành công!");
-        }
+        window.addEventListener('DOMContentLoaded', () => {
+            loadAppData();
+        });
     </script>
 </body>
 </html>
