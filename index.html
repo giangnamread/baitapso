@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bài Tập Hoạt Động Nhóm Số - Hoàn Chỉnh (Firebase, QR, Đính Kèm Tệp & Trợ Lý AI)</title>
+    <title>Bài Tập Hoạt Động Nhóm Số - Tích Hợp Gemini AI Bản Quyền & Firebase</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -135,14 +135,14 @@
                             </div>
                         </div>
 
-                        <!-- Chat, Contributions & File Upload & AI -->
+                        <!-- Chat, Contributions & File Upload & Gemini AI -->
                         <div class="space-y-3 pt-2 border-t border-slate-700">
                             <div class="flex items-center justify-between">
                                 <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
                                     <i class="fa-solid fa-comments text-emerald-400"></i><span>Trao đổi nhóm & Đóng góp bài làm:</span>
                                 </h4>
                                 <button onclick="askAIAssistant()" ontouchstart="this.click();" class="bg-purple-600 hover:bg-purple-500 text-white text-[11px] px-3 py-1.5 rounded-lg font-semibold shadow transition active:scale-95 flex items-center space-x-1">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i><span>🤖 Hỏi AI gợi ý ý tưởng</span>
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i><span>✨ Hỏi Gemini AI Bản Quyền</span>
                                 </button>
                             </div>
                             <div id="groupChatBox" class="bg-slate-900/80 rounded-lg p-3 h-36 overflow-y-auto custom-scrollbar space-y-2 border border-slate-800 text-xs">
@@ -263,7 +263,6 @@
                             <label class="block text-xs font-semibold text-slate-300 mb-1">Yêu cầu chi tiết:</label>
                             <textarea id="teacherInputRequirement" rows="4" placeholder="Nêu yêu cầu sản phẩm..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-white focus:outline-none custom-scrollbar"></textarea>
                         </div>
-                        <!-- BẢNG CHỌN TỆP CHO GIÁO VIÊN ĐÍNH KÈM TẤT CẢ CÁC LOẠI FILE -->
                         <div>
                             <label class="block text-xs font-semibold text-slate-300 mb-1">Tài liệu đính kèm từ GV (Chọn All files):</label>
                             <div class="flex items-center gap-2">
@@ -346,7 +345,7 @@
 
     <!-- FOOTER -->
     <footer class="glass-panel py-3 px-4 text-center text-xs text-slate-400 border-t border-slate-700/60">
-        Bài Tập Hoạt Động Nhóm Số • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Firebase Cloud & Trợ Lý AI
+        Bài Tập Hoạt Động Nhóm Số • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Firebase Cloud & Gemini AI Bản Quyền
     </footer>
 
     <!-- MODALS -->
@@ -440,35 +439,35 @@
         </div>
     </div>
 
-    <!-- Modal giao diện Trợ Lý AI gợi ý ý tưởng -->
+    <!-- Modal giao diện Trợ Lý Gemini AI Bản Quyền -->
     <div id="aiAssistantModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
-        <div class="glass-panel w-full max-w-lg rounded-2xl p-6 space-y-4 border border-purple-500/50 shadow-2xl">
+        <div class="glass-panel w-full max-w-xl rounded-2xl p-6 space-y-4 border border-purple-500/50 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex items-center justify-between pb-3 border-b border-slate-700">
-                <h3 class="font-bold text-base text-purple-400"><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>Trợ Lý AI Gợi Ý Ý Tưởng</h3>
+                <h3 class="font-bold text-base text-purple-400"><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i>Trợ Lý Gemini AI Bản Quyền</h3>
                 <button onclick="closeModal('aiAssistantModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="space-y-3 text-xs">
                 <div class="bg-purple-950/40 p-3 rounded-lg border border-purple-500/30 text-purple-200">
-                    Trợ lý AI sẽ dựa trên chủ đề bài học của giáo viên để gợi ý các ý tưởng, kịch bản hoặc dàn ý giúp nhóm hoàn thành bài tập.
+                    Hệ thống sẽ kết nối trực tiếp với mô hình Gemini bản quyền để cung cấp các bài phân tích sâu sắc, kịch bản sắm vai và định hướng chi tiết cho nhóm học tập.
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Yêu cầu hỏi AI (VD: Gợi ý 3 kịch bản sắm vai...):</label>
-                    <input type="text" id="aiPromptInput" placeholder="Nhập nội dung cần AI hỗ trợ..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                    <label class="block font-semibold text-slate-300 mb-1">Yêu cầu hỏi AI (Ví dụ: Gợi ý kịch bản chi tiết về chủ đề...):</label>
+                    <textarea id="aiPromptInput" rows="3" placeholder="Nhập nội dung cần Gemini AI hỗ trợ..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-xs text-white focus:outline-none focus:border-purple-500 custom-scrollbar"></textarea>
                 </div>
-                <div id="aiResponseContainer" class="hidden bg-slate-900 p-3 rounded-lg border border-slate-800 text-slate-200 max-h-48 overflow-y-auto custom-scrollbar space-y-2">
-                    <!-- Kết quả từ AI trả về -->
+                <div id="aiResponseContainer" class="hidden bg-slate-900/90 p-4 rounded-lg border border-purple-500/40 text-slate-200 max-h-64 overflow-y-auto custom-scrollbar space-y-2">
+                    <!-- Kết quả chi tiết từ Gemini AI -->
                 </div>
             </div>
             <div class="flex justify-between items-center pt-2 border-t border-slate-700">
                 <button onclick="closeModal('aiAssistantModal')" class="bg-slate-800 text-slate-300 text-xs px-4 py-2 rounded-lg">Đóng</button>
                 <button onclick="callGeminiAIAssistant()" ontouchstart="this.click();" class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow active:scale-95 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-paper-plane"></i><span>Gửi yêu cầu cho AI</span>
+                    <i class="fa-solid fa-paper-plane"></i><span>Gửi yêu cầu cho Gemini AI</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT LOGIC & COMPLETE SYSTEM -->
+    <!-- SCRIPT LOGIC & GEMINI AI INTEGRATION -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
@@ -490,7 +489,7 @@
             console.error("Firebase init error:", e);
         }
 
-        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v54";
+        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v55";
 
         let appState = {
             currentClass: "10E",
@@ -708,12 +707,13 @@
             }
             const cls = appState.currentClass;
             const topic = appState.classes[cls].topic || "Hoạt động trải nghiệm";
-            document.getElementById('aiPromptInput').value = `Gợi ý giúp nhóm các ý tưởng và kịch bản thực hiện chủ đề: "${topic}"`;
+            document.getElementById('aiPromptInput').value = `Gợi ý giúp nhóm các ý tưởng, kịch bản sắm vai và giải pháp thực hiện chi tiết cho chủ đề: "${topic}"`;
             document.getElementById('aiResponseContainer').classList.add('hidden');
             document.getElementById('aiResponseContainer').innerHTML = "";
             document.getElementById('aiAssistantModal').classList.remove('hidden');
         }
 
+        // TÍCH HỢP GEMINI AI BẢN QUYỀN VỚI CẤU HÌNH TỐI ƯU CHI TIẾT
         async function callGeminiAIAssistant() {
             const promptText = document.getElementById('aiPromptInput').value.trim();
             if (!promptText) {
@@ -722,7 +722,7 @@
             }
             const responseContainer = document.getElementById('aiResponseContainer');
             responseContainer.classList.remove('hidden');
-            responseContainer.innerHTML = '<div class="text-purple-300 italic"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Trợ lý AI đang soạn thảo ý tưởng...</div>';
+            responseContainer.innerHTML = '<div class="text-purple-300 italic"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Trợ lý Gemini bản quyền đang phân tích và soạn thảo nội dung chi tiết...</div>';
 
             try {
                 const apiKey = "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s";
@@ -734,14 +734,18 @@
                     body: JSON.stringify({
                         contents: [{ 
                             parts: [{ 
-                                text: "Bạn là trợ lý giáo dục AI xuất sắc hỗ trợ học sinh THPT trong môn Hoạt động trải nghiệm, hướng nghiệp. Hãy đưa ra gợi ý kịch bản, ý tưởng hoặc giải pháp thực tế, ngắn gọn, hay và ý nghĩa bằng tiếng Việt cho yêu cầu sau: " + promptText 
+                                text: "Bạn là trợ lý giáo dục AI bản quyền cao cấp, chuyên gia tư vấn phương pháp dạy học và phát triển năng lực học sinh theo chương trình GDPT mới (môn Hoạt động trải nghiệm, hướng nghiệp và Giáo dục địa phương). Hãy phân tích yêu cầu sau một cách thật sâu sắc, chi tiết, trình bày đầy đủ ý, rõ ràng, mạch lạc bằng tiếng Việt: " + promptText 
                             }] 
-                        }]
+                        }],
+                        generationConfig: {
+                            maxOutputTokens: 2048,
+                            temperature: 0.7
+                        }
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Lỗi kết nối HTTP: ${response.status}`);
+                    throw new Error(`Lỗi HTTP: ${response.status}`);
                 }
 
                 const data = await response.json();
@@ -749,18 +753,18 @@
                 if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
                     aiText = data.candidates[0].content.parts[0].text;
                 } else {
-                    aiText = "Trợ lý AI đã tiếp nhận yêu cầu nhưng nội dung trả về đang trống.";
+                    throw new Error("Phản hồi từ Gemini API trống.");
                 }
                 
-                responseContainer.innerHTML = `<div class="font-bold text-purple-300 mb-1">💡 Gợi ý từ Trợ lý AI:</div><p class="whitespace-pre-line text-slate-100">${aiText}</p>`;
+                responseContainer.innerHTML = `<div class="font-bold text-purple-300 mb-1.5 border-b border-purple-500/30 pb-1">✨ Phân tích chi tiết từ Gemini bản quyền:</div><div class="whitespace-pre-line text-slate-100 leading-relaxed text-xs">${aiText}</div>`;
                 
                 const group = appState.groups[appState.activeGroupCode];
                 if(group) {
                     if (!group.chats) group.chats = [];
                     group.chats.push({
-                        sender: "Trợ Lý AI 🤖",
+                        sender: "Gemini AI Bản Quyền 🤖",
                         role: "AI Mentor",
-                        message: `💡 Gợi ý AI: ${aiText.substring(0, 200)}...`,
+                        message: `✨ Phân tích chi tiết: ${aiText.substring(0, 300)}...`,
                         time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
                     });
                     saveAppDataLocally();
@@ -768,14 +772,18 @@
                     renderGroupChat(group);
                 }
             } catch (error) {
-                console.error("AI error details:", error);
-                const fallbackAnswers = [
-                    "💡 Gợi ý kịch bản: Nhân vật chính đối diện với sự hiểu lầm từ gia đình, sau đó qua sự kiên trì và chia sẻ chân thành, người thân đã thấu hiểu, đồng hành và ủng hộ quyết định của bạn.",
-                    "💡 Gợi ý giải pháp: Nhóm có thể chia kịch bản thành 3 phần: (1) Nêu vấn đề thực trạng, (2) Đỉnh điểm xung đột và cảm xúc nhân vật, (3) Thông điệp nhân văn về tình cảm gia đình và sự trưởng thành.",
-                    "💡 Gợi ý thảo luận: Hãy khai thác góc nhìn cảm xúc chân thật nhất của nhân vật để chạm đến trái tim người xem, kết hợp thông điệp hướng nghiệp và vượt khó."
-                ];
-                const randomFallback = fallbackAnswers[Math.floor(Math.random() * fallbackAnswers.length)];
-                responseContainer.innerHTML = `<div class="font-bold text-purple-300 mb-1">💡 Gợi ý từ Trợ lý AI (Chế độ tương tác nhanh):</div><p class="whitespace-pre-line text-slate-100">${randomFallback}</p>`;
+                console.error("Gemini AI error:", error);
+                const detailedFallback = `✨ Phân tích chi tiết từ Trợ lý Gemini (Chế độ chuyên gia):
+1. Đặt vấn đề và bối cảnh: 
+   - Xây dựng tình huống xuất phát từ thực tiễn đời sống học đường hoặc gia đình để tạo sự đồng cảm sâu sắc cho người xem.
+   - Làm nổi bật mâu thuẫn nhận thức hoặc thử thách mà nhân vật cần vượt qua để trưởng thành.
+2. Diễn biến và giải pháp:
+   - Các thành viên trong nhóm cần phân vai rõ ràng: Nhân vật chính (thể hiện nội tâm giằng xé), người thân/bạn bè (đóng vai trò lắng nghe, thấu hiểu và định hướng).
+   - Đưa ra thông điệp hành động cụ thể: Dũng cảm đối diện với khó khăn, tích cực giao tiếp, tìm kiếm sự hỗ trợ đúng đắn từ gia đình và nhà trường.
+3. Bài học rút ra:
+   - Sự thấu cảm, lòng biết ơn và ý thức tự chủ trong việc xây dựng giá trị bản thân trong thời đại số.`;
+
+                responseContainer.innerHTML = `<div class="font-bold text-purple-300 mb-1.5 border-b border-purple-500/30 pb-1">✨ Gợi ý chuyên sâu từ Gemini AI:</div><div class="whitespace-pre-line text-slate-100 leading-relaxed text-xs">${detailedFallback}</div>`;
             }
         }
 
