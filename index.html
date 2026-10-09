@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bài Tập Hoạt Động Nhóm Số - Mã Nhóm Tự Động & Tùy Chỉnh</title>
+    <title>Bài Tập Hoạt Động Nhóm Số - Đồng Bộ Nhóm Độc Lập Firebase</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -31,7 +31,7 @@
                     </div>
                     <div>
                         <h1 class="font-bold text-base md:text-lg text-white tracking-wide">Bài Tập Hoạt Động Nhóm Số</h1>
-                        <p class="text-xs text-slate-400">GV: Nguyễn Giang Nam • <span id="syncStatusBadge" class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Sẵn sàng đồng bộ</span></p>
+                        <p class="text-xs text-slate-400">GV: Nguyễn Giang Nam • <span id="syncStatusBadge" class="text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Đang kết nối Firebase</span></p>
                     </div>
                 </div>
             </div>
@@ -85,7 +85,7 @@
                         <i class="fa-solid fa-users-gear"></i><span>Tạo nhóm & QR</span>
                     </button>
                     <button onclick="openJoinGroupModal()" ontouchstart="this.click();" class="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition active:scale-95 flex items-center justify-center space-x-1.5">
-                        <i class="fa-solid fa-qrcode"></i><span>Vào nhóm QR</span>
+                        <i class="fa-solid fa-qrcode"></i><span>Vào nhóm mã</span>
                     </button>
                 </div>
             </div>
@@ -356,7 +356,7 @@
         </div>
     </div>
 
-    <!-- Modal Tạo nhóm (Mã nhóm tự sinh & có thể sửa lại) -->
+    <!-- Modal Tạo nhóm -->
     <div id="createGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
         <div class="glass-panel w-full max-w-lg rounded-2xl p-6 space-y-4 border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex items-center justify-between pb-3 border-b border-slate-700">
@@ -369,7 +369,7 @@
                     <input type="text" id="inputGroupName" placeholder="Nhập tên tổ..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white">
                 </div>
                 <div>
-                    <label class="block font-semibold text-slate-300 mb-1">Mã nhóm (Tự động sinh ra - có thể bấm vào sửa lại):</label>
+                    <label class="block font-semibold text-slate-300 mb-1">Mã nhóm (Tự động sinh ra - có thể sửa lại):</label>
                     <input type="text" id="inputGroupCode" placeholder="Mã nhóm..." class="w-full bg-slate-900 border border-blue-500/60 rounded-lg px-3 py-2 text-xs text-white font-mono font-bold focus:outline-none focus:border-blue-400">
                 </div>
                 <div class="space-y-2 pt-2 border-t border-slate-700">
@@ -482,7 +482,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT LOGIC & FIREBASE SYNC -->
+    <!-- SCRIPT LOGIC & FIREBASE INDEPENDENT DOCS SYNC -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
@@ -504,18 +504,19 @@
             console.error("Firebase init error:", e);
         }
 
-        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v50";
+        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v51";
 
         let appState = {
             currentClass: "10E",
             activeGroupCode: "",
             currentStudentName: "",
             classes: {
-                "10E": { password: "10E2026", topic: "", requirement: "", attachmentName: "", groups: {}, teacherFeedback: {}, grades: {} },
-                "12A": { password: "12A2026", topic: "", requirement: "", attachmentName: "", groups: {}, teacherFeedback: {}, grades: {} },
-                "12B": { password: "12B2026", topic: "", requirement: "", attachmentName: "", groups: {}, teacherFeedback: {}, grades: {} },
-                "12E": { password: "12E2026", topic: "", requirement: "", attachmentName: "", groups: {}, teacherFeedback: {}, grades: {} }
-            }
+                "10E": { password: "10E2026", topic: "", requirement: "", attachmentName: "", teacherFeedback: {}, grades: {} },
+                "12A": { password: "12A2026", topic: "", requirement: "", attachmentName: "", teacherFeedback: {}, grades: {} },
+                "12B": { password: "12B2026", topic: "", requirement: "", attachmentName: "", teacherFeedback: {}, grades: {} },
+                "12E": { password: "12E2026", topic: "", requirement: "", attachmentName: "", teacherFeedback: {}, grades: {} }
+            },
+            groups: {} // Lưu toàn bộ nhóm theo cấu trúc code: { groupObj }
         };
 
         let pendingAutoJoin = null;
@@ -532,37 +533,85 @@
             localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(appState));
         }
 
-        async function pushDataToCloud() {
+        // Lưu thông tin bài tập chung của lớp
+        async function pushClassDataToCloud(cls) {
             if (!db) return;
             try {
-                await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("data").set(appState);
-                document.getElementById('syncStatusBadge').innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Đã lưu đám mây';
-            } catch (e) {
-                console.error("Push cloud error:", e);
-            }
+                await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("class_" + cls).set({
+                    topic: appState.classes[cls].topic,
+                    requirement: appState.classes[cls].requirement,
+                    attachmentName: appState.classes[cls].attachmentName,
+                    teacherFeedback: appState.classes[cls].teacherFeedback || {},
+                    grades: appState.classes[cls].grades || {}
+                });
+            } catch (e) { console.error("Push class error:", e); }
+        }
+
+        // Lưu/Cập nhật riêng từng nhóm độc lập lên Firestore để không bị ghi đè lẫn nhau
+        async function pushGroupDataToCloud(groupCode) {
+            if (!db || !groupCode) return;
+            const group = appState.groups[groupCode];
+            if (!group) return;
+            try {
+                await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("group_" + groupCode).set(group);
+            } catch (e) { console.error("Push group error:", e); }
         }
 
         async function manualSyncToCloud() {
             saveAppDataLocally();
-            await pushDataToCloud();
+            await pushClassDataToCloud(appState.currentClass);
+            if (appState.activeGroupCode && appState.groups[appState.activeGroupCode]) {
+                await pushGroupDataToCloud(appState.activeGroupCode);
+            }
             alert("💾 Đã lưu & đồng bộ dữ liệu lên đám mây thành công!");
         }
 
         async function manualFetchFromCloud() {
-            if (!db) return;
+            if (!db) {
+                alert("Lỗi: Chưa kết nối được Firebase!");
+                return;
+            }
             try {
-                const docRef = await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("data").get();
-                if (docRef.exists) {
-                    appState = docRef.data();
-                    saveAppDataLocally();
-                    renderUI();
-                    if (!document.getElementById('teacherView').classList.contains('hidden')) {
-                        renderTeacherDashboard();
+                const syncBadge = document.getElementById('syncStatusBadge');
+                if(syncBadge) syncBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-400"></i> Đang tải dữ liệu...';
+
+                // 1. Tải dữ liệu của 4 lớp
+                for (let cls of ['10E', '12A', '12B', '12E']) {
+                    const cRef = await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("class_" + cls).get();
+                    if (cRef.exists) {
+                        const d = cRef.data();
+                        appState.classes[cls].topic = d.topic || "";
+                        appState.classes[cls].requirement = d.requirement || "";
+                        appState.classes[cls].attachmentName = d.attachmentName || "";
+                        appState.classes[cls].teacherFeedback = d.teacherFeedback || {};
+                        appState.classes[cls].grades = d.grades || {};
                     }
-                    checkUrlParametersForAutoJoin();
                 }
+
+                // 2. Tải toàn bộ các tài liệu nhóm (group_...) từ Firestore
+                const groupsSnapshot = await db.collection("artifacts").doc("giangnam146-5a353").collection("public").get();
+                groupsSnapshot.forEach(doc => {
+                    if (doc.id.startsWith("group_")) {
+                        const gData = doc.data();
+                        if (gData && gData.code) {
+                            appState.groups[gData.code] = gData;
+                        }
+                    }
+                });
+
+                saveAppDataLocally();
+                renderUI();
+                if (!document.getElementById('teacherView').classList.contains('hidden')) {
+                    renderTeacherDashboard();
+                }
+                if(syncBadge) syncBadge.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> Đã đồng bộ';
+                checkUrlParametersForAutoJoin();
+                alert("☁️ Đã tải toàn bộ danh sách nhóm và bài làm mới nhất từ đám mây về thành công!");
             } catch (e) {
                 console.error("Fetch cloud error:", e);
+                alert("Lỗi kết nối đám mây: " + e.message);
+                const syncBadge = document.getElementById('syncStatusBadge');
+                if(syncBadge) syncBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Lỗi đồng bộ';
             }
         }
 
@@ -578,8 +627,8 @@
             const qGroup = params.get('group');
 
             if (qClass && qGroup) {
-                if (appState.classes[qClass] && appState.classes[qClass].groups[qGroup]) {
-                    const groupObj = appState.classes[qClass].groups[qGroup];
+                if (appState.groups[qGroup]) {
+                    const groupObj = appState.groups[qGroup];
                     pendingAutoJoin = { class: qClass, groupCode: qGroup, groupName: groupObj.name };
                     
                     document.getElementById('autoJoinClassDisplay').innerText = qClass;
@@ -602,7 +651,7 @@
             appState.activeGroupCode = pendingAutoJoin.groupCode;
             appState.currentStudentName = sName;
 
-            const group = appState.classes[pendingAutoJoin.class].groups[pendingAutoJoin.groupCode];
+            const group = appState.groups[pendingAutoJoin.groupCode];
             if (!group.members) group.members = [];
             const existing = group.members.find(x => x.name.toLowerCase() === sName.toLowerCase());
             if (!existing) {
@@ -610,7 +659,7 @@
             }
 
             saveAppDataLocally();
-            pushDataToCloud();
+            pushGroupDataToCloud(group.code);
             document.getElementById('autoJoinGroupModal').classList.add('hidden');
             renderUI();
             alert(`🎉 Chào mừng ${sName} đã vào thành công nhóm "${group.name}"!`);
@@ -640,8 +689,7 @@
 
         function changeClass(className) {
             appState.currentClass = className;
-            const groups = appState.classes[className].groups;
-            const groupCodes = Object.keys(groups);
+            const groupCodes = Object.keys(appState.groups).filter(code => appState.groups[code].class === className);
             appState.activeGroupCode = groupCodes.length > 0 ? groupCodes[0] : "";
             saveAppDataLocally();
             renderUI();
@@ -662,9 +710,9 @@
             }
 
             const activeGroupCode = appState.activeGroupCode;
-            const group = classData.groups[activeGroupCode];
+            const group = appState.groups[activeGroupCode];
 
-            if (group) {
+            if (group && group.class === cls) {
                 document.getElementById('activeGroupName').innerText = `${group.name} (${cls} - Mã: ${group.code})`;
                 document.getElementById('currentStudentName').innerText = appState.currentStudentName || "Chưa đăng nhập";
                 
@@ -752,8 +800,7 @@
             const fileType = document.getElementById('contributionFileType').value;
             const input = document.getElementById('chatInputMessage');
             const details = input.value.trim();
-            const cls = appState.currentClass;
-            const group = appState.classes[cls].groups[appState.activeGroupCode];
+            const group = appState.groups[appState.activeGroupCode];
             
             if (!group) {
                 alert("Vui lòng chọn nhóm trước!");
@@ -777,14 +824,13 @@
             });
             input.value = "";
             saveAppDataLocally();
-            pushDataToCloud();
+            pushGroupDataToCloud(group.code);
             renderUI();
             alert(`Đã đóng góp tệp ${fileType} thành công!`);
         }
 
         function toggleConsentVote() {
-            const cls = appState.currentClass;
-            const group = appState.classes[cls].groups[appState.activeGroupCode];
+            const group = appState.groups[appState.activeGroupCode];
             if (!group) {
                 alert("Vui lòng chọn nhóm!");
                 return;
@@ -799,21 +845,20 @@
                 m.consented = !m.consented;
             }
             saveAppDataLocally();
-            pushDataToCloud();
+            pushGroupDataToCloud(group.code);
             renderUI();
             alert("Đã ghi nhận biểu quyết!");
         }
 
         function secretarySubmitAssignment() {
-            const cls = appState.currentClass;
-            const group = appState.classes[cls].groups[appState.activeGroupCode];
+            const group = appState.groups[appState.activeGroupCode];
             if (!group) {
                 alert("Vui lòng chọn nhóm!");
                 return;
             }
             group.submitted = true;
             saveAppDataLocally();
-            pushDataToCloud();
+            pushGroupDataToCloud(group.code);
             renderUI();
             alert("🚀 Đã nộp bài chính thức về cho giáo viên qua đám mây!");
         }
@@ -822,7 +867,6 @@
             document.getElementById('modalCreateClassName').innerText = `Lớp ${appState.currentClass}`;
             document.getElementById('createdGroupQRContainer').classList.add('hidden');
             document.getElementById('inputGroupName').value = "";
-            // TỰ ĐỘNG SINH MÃ NHÓM NGẪU NHIÊN NHƯNG VẪN CHO PHÉP SỬA LẠI TRÊN Ô INPUT
             const autoGeneratedCode = `${appState.currentClass}-T${Math.floor(Math.random()*90 + 10)}`;
             document.getElementById('inputGroupCode').value = autoGeneratedCode;
             document.getElementById('createGroupModal').classList.remove('hidden');
@@ -847,7 +891,7 @@
 
         function submitCreateGroup() {
             const name = document.getElementById('inputGroupName').value.trim();
-            const code = document.getElementById('inputGroupCode').value.trim(); // Lấy giá trị mã nhóm (học sinh có thể đã sửa)
+            const code = document.getElementById('inputGroupCode').value.trim();
             if (!name || !code) {
                 alert("Vui lòng nhập đầy đủ tên và mã nhóm!");
                 return;
@@ -865,11 +909,10 @@
             }
 
             const cls = appState.currentClass;
-            if (!appState.classes[cls].groups) appState.classes[cls].groups = {};
-            
-            appState.classes[cls].groups[code] = {
+            appState.groups[code] = {
                 name: name,
                 code: code,
+                class: cls,
                 members: members,
                 chats: [],
                 submitted: false
@@ -880,7 +923,7 @@
             }
 
             saveAppDataLocally();
-            pushDataToCloud();
+            pushGroupDataToCloud(code);
 
             const baseUrl = window.location.origin + window.location.pathname;
             const targetQRUrl = `${baseUrl}?class=${cls}&group=${code}`;
@@ -915,16 +958,15 @@
                 return;
             }
 
-            const cls = appState.currentClass;
-            const groups = appState.classes[cls].groups;
-            if (!groups[targetGroupCode]) {
-                alert(`Không tìm thấy nhóm mã "${targetGroupCode}" trong lớp ${cls}!`);
+            const group = appState.groups[targetGroupCode];
+            if (!group) {
+                alert(`Không tìm thấy nhóm mã "${targetGroupCode}"! Hãy bấm "Tải dữ liệu đám mây" trước.`);
                 return;
             }
 
+            appState.currentClass = group.class;
             appState.currentStudentName = sName;
             appState.activeGroupCode = targetGroupCode;
-            const group = groups[targetGroupCode];
             if (!group.members) group.members = [];
             const existing = group.members.find(x => x.name.toLowerCase() === sName.toLowerCase());
             if (!existing) {
@@ -932,7 +974,7 @@
             }
 
             saveAppDataLocally();
-            pushDataToCloud();
+            pushGroupDataToCloud(group.code);
             closeModal('joinGroupModal');
             renderUI();
             alert(`🎉 Tham gia thành công nhóm "${group.name}"!`);
@@ -942,15 +984,14 @@
             const cls = appState.currentClass;
             document.getElementById('modalChangeClassName').innerText = cls;
             const container = document.getElementById('availableGroupsListContainer');
-            const groups = appState.classes[cls].groups;
-            const codes = Object.keys(groups);
+            const groupCodes = Object.keys(appState.groups).filter(code => appState.groups[code].class === cls);
 
-            if (codes.length === 0) {
+            if (groupCodes.length === 0) {
                 container.innerHTML = `<div class="text-slate-500 italic text-center py-6">Chưa có tổ nhóm nào.</div>`;
             } else {
                 let html = '';
-                codes.forEach(code => {
-                    const g = groups[code];
+                groupCodes.forEach(code => {
+                    const g = appState.groups[code];
                     html += `
                         <div class="bg-slate-900 p-3 rounded-lg border border-slate-700 flex items-center justify-between">
                             <div>
@@ -974,12 +1015,11 @@
         }
 
         function removeGroupMember(groupCode, memberIdx) {
-            const cls = appState.currentClass;
-            const group = appState.classes[cls].groups[groupCode];
+            const group = appState.groups[groupCode];
             if (group && group.members) {
                 group.members.splice(memberIdx, 1);
                 saveAppDataLocally();
-                pushDataToCloud();
+                pushGroupDataToCloud(groupCode);
                 renderUI();
             }
         }
@@ -1044,19 +1084,18 @@
             document.getElementById('teacherInputAttachmentName').value = cData.attachmentName || "";
 
             const container = document.getElementById('teacherGroupsSummaryContainer');
-            const groups = cData.groups;
-            const codes = Object.keys(groups);
+            const groupCodes = Object.keys(appState.groups).filter(code => appState.groups[code].class === cls);
             const selectGroupDropdown = document.getElementById('teacherSelectTargetGroup');
             const inspectDropdown = document.getElementById('teacherSelectInspectGroup');
             let dropdownHtml = '<option value="">-- Chọn tổ nhóm --</option>';
             let inspectHtml = '<option value="">-- Chọn tổ nhóm để kiểm tra --</option>';
 
-            if (codes.length === 0) {
+            if (groupCodes.length === 0) {
                 container.innerHTML = `<div class="text-slate-500 italic text-center py-12">Chưa có tổ nào trong lớp.</div>`;
             } else {
                 let html = '';
-                codes.forEach(code => {
-                    const g = groups[code];
+                groupCodes.forEach(code => {
+                    const g = appState.groups[code];
                     dropdownHtml += `<option value="${code}">${g.name} (Mã: ${g.code})</option>`;
                     inspectHtml += `<option value="${code}">${g.name} (Mã: ${g.code})</option>`;
                     const subStatus = g.submitted ? '<span class="text-emerald-400 font-bold">Đã nộp bài</span>' : '<span class="text-amber-400">Chưa nộp</span>';
@@ -1066,7 +1105,7 @@
                                 <span class="font-bold text-white text-xs">${g.name} (Mã: ${g.code})</span>
                                 <div class="flex items-center space-x-2">
                                     <span class="text-[11px]">${subStatus}</span>
-                                    <button onclick="teacherDeleteGroup('${cls}', '${code}')" class="text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+                                    <button onclick="teacherDeleteGroup('${code}')" class="text-rose-400 text-xs"><i class="fa-solid fa-trash"></i></button>
                                 </div>
                             </div>
                             <p class="text-[11px] text-slate-300">Thành viên: ${g.members ? g.members.length : 0} HS | Đóng góp: ${g.chats ? g.chats.length : 0}</p>
@@ -1081,7 +1120,6 @@
         }
 
         function renderTeacherGroupInspection() {
-            const cls = appState.currentClass;
             const groupCode = document.getElementById('teacherSelectInspectGroup').value;
             const membersListDiv = document.getElementById('teacherInspectMembersList');
             const chatHistoryDiv = document.getElementById('teacherInspectChatHistory');
@@ -1092,7 +1130,7 @@
                 return;
             }
 
-            const group = appState.classes[cls].groups[groupCode];
+            const group = appState.groups[groupCode];
             if (!group) return;
 
             if (!group.members || group.members.length === 0) {
@@ -1126,13 +1164,17 @@
             }
         }
 
-        function teacherDeleteGroup(cls, code) {
-            if (confirm(`Xóa tổ nhóm này khỏi lớp ${cls}?`)) {
-                delete appState.classes[cls].groups[code];
+        async function teacherDeleteGroup(code) {
+            if (confirm(`Xóa tổ nhóm này khỏi hệ thống?`)) {
+                delete appState.groups[code];
                 if (appState.activeGroupCode === code) appState.activeGroupCode = "";
                 saveAppDataLocally();
-                pushDataToCloud();
-                loadTeacherPanelData(cls);
+                if (db) {
+                    try {
+                        await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("group_" + code).delete();
+                    } catch (e) { console.error(e); }
+                }
+                loadTeacherPanelData(appState.currentClass);
                 renderUI();
                 alert("Đã xóa nhóm thành công!");
             }
@@ -1144,7 +1186,7 @@
             appState.classes[cls].requirement = document.getElementById('teacherInputRequirement').value.trim();
             appState.classes[cls].attachmentName = document.getElementById('teacherInputAttachmentName').value.trim();
             saveAppDataLocally();
-            pushDataToCloud();
+            pushClassDataToCloud(cls);
             renderUI();
             alert(`Đã lưu và giao bài tập lên đám mây cho Lớp ${cls}!`);
         }
@@ -1165,7 +1207,7 @@
             appState.classes[cls].teacherFeedback[groupCode] = feedback;
 
             saveAppDataLocally();
-            pushDataToCloud();
+            pushClassDataToCloud(cls);
             renderUI();
             alert("Đã xuất bản điểm số lên đám mây thành công!");
         }
