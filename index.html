@@ -218,11 +218,14 @@
                 <div class="space-y-1">
                     <div class="flex items-center space-x-2">
                         <span class="bg-purple-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">Quản trị Giáo viên</span>
-                        <h2 class="text-sm md:text-base font-bold text-purple-300">Bảng Quản Lý 4 Lớp & Giao Bài Tập Đính Kèm Tệp</h2>
+                        <h2 class="text-sm md:text-base font-bold text-purple-300">Bảng Quản Lý Lớp Học & Giao Bài Tập</h2>
                     </div>
-                    <p class="text-xs text-slate-300">Bấm "Tải dữ liệu đám mây" để lấy dữ liệu mới nhất từ học sinh.</p>
+                    <p class="text-xs text-slate-300">Quản lý các lớp, thêm lớp mới, giao đề bài và chấm điểm trực tuyến.</p>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button onclick="openAddClassModal()" ontouchstart="this.click();" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition active:scale-95 flex items-center space-x-1.5">
+                        <i class="fa-solid fa-plus-circle"></i><span>Thêm lớp mới</span>
+                    </button>
                     <button onclick="manualFetchFromCloud()" ontouchstart="this.click();" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold shadow transition active:scale-95 flex items-center space-x-1.5">
                         <i class="fa-solid fa-cloud-arrow-down"></i><span>Tải dữ liệu đám mây</span>
                     </button>
@@ -341,24 +344,50 @@
             <i class="fa-solid fa-robot"></i>
         </button>
 
-        <div id="aiChatWindow" style="display: none; width: 350px; height: 450px; background: rgba(30, 41, 59, 0.98); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; position: absolute; bottom: 70px; right: 0;">
+        <div id="aiChatWindow" style="display: none; width: 360px; height: 500px; background: rgba(30, 41, 59, 0.98); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); flex-direction: column; overflow: hidden; position: absolute; bottom: 70px; right: 0;">
             <div style="background: linear-gradient(135deg, #9333ea, #3b82f6); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
-                    <span style="font-weight: bold; font-size: 14px;">Trợ Lý AI Riêng Biệt</span>
+                    <span style="font-weight: bold; font-size: 13px;">Trợ Lý Gemini AI Bản Quyền</span>
                 </div>
-                <button onclick="toggleAIChatBox()" style="background: none; border: none; color: white; font-size: 16px; cursor: pointer;">✕</button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <button onclick="clearAIChatHistory()" title="Xóa lịch sử chat" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 3px 8px; border-radius: 6px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-trash-can"></i> Xóa chat
+                    </button>
+                    <button onclick="toggleAIChatBox()" style="background: none; border: none; color: white; font-size: 16px; cursor: pointer; padding: 0 4px;">✕</button>
+                </div>
             </div>
 
-            <div id="aiChatMessagesList" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #f8fafc;">
-                <div style="background: rgba(59, 130, 246, 0.2); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
-                    Xin chào! Tôi là trợ lý AI riêng. Tôi có thể giúp gì cho bạn?
+            <!-- Khối trắng hiển thị phản hồi động từ AI -->
+            <div id="aiChatMessagesList" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: #0f172a; background: #f8fafc;">
+                <div style="background: white; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05); color: #1e293b;">
+                    Xin chào! Hãy nhập yêu cầu hoặc câu hỏi của bạn. Tôi sẽ phân tích và trả lời trực tiếp theo đúng ý bạn.
                 </div>
             </div>
 
-            <div style="padding: 10px; background: rgba(15, 23, 42, 0.9); border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 8px;">
-                <input type="text" id="aiChatUserInput" placeholder="Nhập câu hỏi..." style="flex: 1; background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 8px 10px; color: white; font-size: 12px; outline: none;" onkeypress="if(event.key==='Enter') sendWidgetMessage()">
+            <div style="padding: 10px; background: rgba(15, 23, 42, 0.95); border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; gap: 8px;">
+                <input type="text" id="aiChatUserInput" placeholder="Nhập yêu cầu cho AI..." style="flex: 1; background: #0f172a; border: 1px solid #475569; border-radius: 8px; padding: 8px 10px; color: white; font-size: 12px; outline: none;" onkeypress="if(event.key==='Enter') sendWidgetMessage()">
                 <button onclick="sendWidgetMessage()" style="background: #3b82f6; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: bold; cursor: pointer;">Gửi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL THÊM LỚP HỌC MỚI -->
+    <div id="addClassModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 space-y-4 border border-emerald-500/30 shadow-2xl">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-700">
+                <h3 class="font-bold base text-white"><i class="fa-solid fa-plus-circle mr-1 text-emerald-400"></i> Thêm Lớp Học Mới</h3>
+                <button onclick="closeModal('addClassModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Tên lớp mới (Ví dụ: 10A1, 11B...):</label>
+                    <input type="text" id="inputNewClassName" placeholder="Nhập tên lớp..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t border-slate-700">
+                <button onclick="closeModal('addClassModal')" class="bg-slate-800 text-slate-300 text-xs px-4 py-2 rounded-lg">Hủy</button>
+                <button onclick="submitAddClass()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg font-semibold shadow">Tạo Lớp</button>
             </div>
         </div>
     </div>
@@ -368,7 +397,7 @@
         Bài Tập Hoạt Động Nhóm Số • Phát triển bởi Thầy giáo Nguyễn Giang Nam • Firebase Cloud & Gemini AI Bản Quyền
     </footer>
 
-    <!-- MODALS -->
+    <!-- MODALS KHÁC -->
     <div id="teacherLoginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
         <div class="glass-panel w-full max-w-md rounded-2xl p-6 space-y-4 border border-purple-500/30 shadow-2xl">
             <div class="flex items-center justify-between pb-3 border-b border-slate-700">
@@ -391,7 +420,6 @@
         </div>
     </div>
 
-    <!-- Modal Tạo nhóm -->
     <div id="createGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
         <div class="glass-panel w-full max-w-lg rounded-2xl p-6 space-y-4 border border-blue-500/30 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
             <div class="flex items-center justify-between pb-3 border-b border-slate-700">
@@ -438,7 +466,6 @@
         </div>
     </div>
 
-    <!-- Modal tham gia nhóm bằng mã -->
     <div id="joinGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
         <div class="glass-panel w-full max-w-md rounded-2xl p-6 space-y-4 border border-emerald-500/30 shadow-2xl">
             <div class="flex items-center justify-between pb-3 border-b border-slate-700">
@@ -462,20 +489,17 @@
         </div>
     </div>
 
-    <!-- Modal đổi nhóm -->
     <div id="changeGroupModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm hidden p-4">
         <div class="glass-panel w-full max-w-md rounded-2xl p-6 space-y-4 border border-blue-500/30 shadow-2xl max-h-[80vh] overflow-y-auto custom-scrollbar">
             <div class="flex items-center justify-between pb-3 border-b border-slate-700">
                 <h3 class="font-bold text-base text-white">Chọn Nhóm Thuộc Lớp <span id="modalChangeClassName">10E</span></h3>
                 <button onclick="closeModal('changeGroupModal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <div id="availableGroupsListContainer" class="space-y-2">
-                <!-- Danh sách nhóm sẽ hiển thị tại đây -->
-            </div>
+            <div id="availableGroupsListContainer" class="space-y-2"></div>
         </div>
     </div>
 
-    <!-- SCRIPT LOGIC & ĐẦY ĐỦ HÀM XỬ LÝ -->
+    <!-- SCRIPT LOGIC -->
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s",
@@ -497,7 +521,7 @@
             console.error("Firebase init error:", e);
         }
 
-        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v55";
+        const APP_STORAGE_KEY = "giangnam146_multiclass_app_v57";
 
         let appState = {
             currentClass: "10E",
@@ -517,11 +541,60 @@
             if (saved) {
                 try { appState = JSON.parse(saved); } catch (e) { console.error(e); }
             }
+            updateClassSelectDropdown();
             renderUI();
         }
 
         function saveAppDataLocally() {
             localStorage.setItem(APP_STORAGE_KEY, JSON.stringify(appState));
+        }
+
+        function updateClassSelectDropdown() {
+            const select = document.getElementById('classSelect');
+            const classKeys = Object.keys(appState.classes);
+            let html = '';
+            classKeys.forEach(cls => {
+                const selected = cls === appState.currentClass ? 'selected' : '';
+                html += `<option value="${cls}" class="bg-slate-900" ${selected}>Lớp ${cls}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        // --- TÍNH NĂNG THÊM LỚP MỚI ---
+        function openAddClassModal() {
+            document.getElementById('inputNewClassName').value = "";
+            document.getElementById('addClassModal').classList.remove('hidden');
+        }
+
+        function submitAddClass() {
+            const newClassName = document.getElementById('inputNewClassName').value.trim().toUpperCase();
+            if (!newClassName) {
+                alert("Vui lòng nhập tên lớp mới!");
+                return;
+            }
+            if (appState.classes[newClassName]) {
+                alert(`Lớp "${newClassName}" đã tồn tại trong hệ thống!`);
+                return;
+            }
+
+            appState.classes[newClassName] = {
+                password: newClassName + "2026",
+                topic: "",
+                requirement: "",
+                attachmentName: "",
+                attachmentData: "",
+                teacherFeedback: {},
+                grades: {}
+            };
+
+            appState.currentClass = newClassName;
+            saveAppDataLocally();
+            pushClassDataToCloud(newClassName);
+            closeModal('addClassModal');
+            updateClassSelectDropdown();
+            renderTeacherDashboard();
+            renderUI();
+            alert(`🎉 Đã tạo thành công lớp "${newClassName}"!`);
         }
 
         function handleTeacherFileUpload(input) {
@@ -578,9 +651,9 @@
             if (!db) return;
             try {
                 await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("class_" + cls).set({
-                    topic: appState.classes[cls].topic,
-                    requirement: appState.classes[cls].requirement,
-                    attachmentName: appState.classes[cls].attachmentName,
+                    topic: appState.classes[cls].topic || "",
+                    requirement: appState.classes[cls].requirement || "",
+                    attachmentName: appState.classes[cls].attachmentName || "",
                     attachmentData: appState.classes[cls].attachmentData || "",
                     teacherFeedback: appState.classes[cls].teacherFeedback || {},
                     grades: appState.classes[cls].grades || {}
@@ -615,10 +688,17 @@
                 const syncBadge = document.getElementById('syncStatusBadge');
                 if(syncBadge) syncBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-400"></i> Đang tải dữ liệu...';
 
-                for (let cls of ['10E', '12A', '12B', '12E']) {
+                const defaultClasses = ['10E', '12A', '12B', '12E'];
+                const dynamicClasses = Object.keys(appState.classes);
+                const allClassesToFetch = Array.from(new Set([...defaultClasses, ...dynamicClasses]));
+
+                for (let cls of allClassesToFetch) {
                     const cRef = await db.collection("artifacts").doc("giangnam146-5a353").collection("public").doc("class_" + cls).get();
                     if (cRef.exists) {
                         const d = cRef.data();
+                        if (!appState.classes[cls]) {
+                            appState.classes[cls] = { password: cls + "2026", teacherFeedback: {}, grades: {} };
+                        }
                         appState.classes[cls].topic = d.topic || "";
                         appState.classes[cls].requirement = d.requirement || "";
                         appState.classes[cls].attachmentName = d.attachmentName || "";
@@ -639,6 +719,7 @@
                 });
 
                 saveAppDataLocally();
+                updateClassSelectDropdown();
                 renderUI();
                 if (!document.getElementById('teacherView').classList.contains('hidden')) {
                     renderTeacherDashboard();
@@ -658,7 +739,7 @@
             await manualFetchFromCloud();
         });
 
-        // Chatbox AI Widget riêng biệt
+        // Chatbox AI Widget & Xóa lịch sử chat
         function toggleAIChatBox() {
             const win = document.getElementById('aiChatWindow');
             if (win.style.display === 'none' || win.style.display === '') {
@@ -666,6 +747,32 @@
                 loadChatHistoryFromFirebase();
             } else {
                 win.style.display = 'none';
+            }
+        }
+
+        async function clearAIChatHistory() {
+            if (!confirm("Thầy có chắc chắn muốn xóa toàn bộ lịch sử trò chuyện với AI không?")) {
+                return;
+            }
+
+            const list = document.getElementById('aiChatMessagesList');
+            list.innerHTML = `
+                <div style="background: white; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05); color: #1e293b;">
+                    Lịch sử chat đã được làm mới. Hãy nhập câu hỏi mới cho trợ lý AI!
+                </div>
+            `;
+
+            if (db) {
+                try {
+                    const snapshot = await db.collection("artifacts").doc("giangnam146-5a353").collection("chat_history").get();
+                    const batch = db.batch();
+                    snapshot.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+                } catch (e) {
+                    console.error("Lỗi khi xóa lịch sử chat trên Firebase:", e);
+                }
             }
         }
 
@@ -679,9 +786,11 @@
                     snapshot.forEach(doc => {
                         const data = doc.data();
                         const isAI = data.sender === "Gemini AI";
-                        const bg = isAI ? "background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(147, 51, 234, 0.4);" : "background: #3b82f6;";
-                        const align = isAI ? "align-self: flex-start;" : "align-self: flex-end;";
-                        list.innerHTML += `<div style="${bg} color: white; padding: 8px 12px; border-radius: 8px; ${align} max-width: 85%;"><strong>${data.sender}:</strong> ${data.text}</div>`;
+                        if (isAI) {
+                            list.innerHTML += `<div style="background: white; color: #1e293b; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05); align-self: flex-start; max-width: 90%; white-space: pre-line;"><strong>${data.sender}:</strong> ${data.text}</div>`;
+                        } else {
+                            list.innerHTML += `<div style="background: #3b82f6; color: white; padding: 8px 12px; border-radius: 8px; align-self: flex-end; max-width: 80%;"><strong>${data.sender}:</strong> ${data.text}</div>`;
+                        }
                     });
                     list.scrollTop = list.scrollHeight;
                 }
@@ -711,32 +820,36 @@
             }
 
             const loadingId = 'loading_' + Date.now();
-            list.innerHTML += `<div id="${loadingId}" style="background: rgba(147, 51, 234, 0.2); color: #c084fc; padding: 8px 12px; border-radius: 8px; align-self: flex-start;">Đang suy nghĩ...</div>`;
+            list.innerHTML += `<div id="${loadingId}" style="background: white; color: #1e293b; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; align-self: flex-start;"><i class="fa-solid fa-spinner fa-spin mr-1.5 text-blue-600"></i> Gemini AI đang phân tích và xử lý theo yêu cầu của bạn...</div>`;
             list.scrollTop = list.scrollHeight;
 
             try {
-                const apiKey = "AQ.Ab8RN6Lgck7p5lOL_XNbUJEAaR-GztznU4OEfR24gnx-J8QLyQ";
+                const apiKey = "AIzaSyD3_I7RGkE5-JEaWnagXSvrJcyx-ycAi3s";
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "Trả lời ngắn gọn, rõ ràng bằng tiếng Việt: " + text }] }]
+                        contents: [{ parts: [{ text: "Bạn là trợ lý giáo dục AI chuyên nghiệp hỗ trợ học sinh và giáo viên. Hãy trả lời trực tiếp, chính xác, chi tiết và bám sát hoàn toàn theo yêu cầu sau của người dùng: " + text }] }],
+                        generationConfig: {
+                            maxOutputTokens: 2048,
+                            temperature: 0.7
+                        }
                     })
                 });
 
                 const data = await response.json();
                 document.getElementById(loadingId).remove();
 
-                let replyText = "Xin lỗi, tôi chưa nhận được phản hồi phù hợp.";
+                let replyText = "Xin lỗi, hệ thống không nhận được phản hồi phù hợp.";
                 if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text) {
                     replyText = data.candidates[0].content.parts[0].text;
                 } else if (data.error && data.error.message) {
                     replyText = "Lỗi API: " + data.error.message;
                 }
 
-                list.innerHTML += `<div style="background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(147, 51, 234, 0.4); color: #f8fafc; padding: 8px 12px; border-radius: 8px; align-self: flex-start; max-width: 85%; white-space: pre-line;"><strong>Gemini AI:</strong> ${replyText}</div>`;
+                list.innerHTML += `<div style="background: white; color: #1e293b; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05); align-self: flex-start; max-width: 90%; white-space: pre-line;"><strong>Gemini AI:</strong> ${replyText}</div>`;
                 list.scrollTop = list.scrollHeight;
 
                 if (db) {
@@ -749,11 +862,10 @@
 
             } catch (error) {
                 document.getElementById(loadingId).remove();
-                list.innerHTML += `<div style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 8px 12px; border-radius: 8px; align-self: flex-start;">Lỗi kết nối đến máy chủ AI.</div>`;
+                list.innerHTML += `<div style="background: white; color: #dc2626; padding: 10px 14px; border-radius: 8px; border: 1px solid #fecaca; align-self: flex-start; font-weight: 600;">Lỗi kết nối đến máy chủ AI. Vui lòng thử lại sau.</div>`;
             }
         }
 
-        // Các hàm giao diện hệ thống
         function switchView(view) {
             const studentView = document.getElementById('studentView');
             const teacherView = document.getElementById('teacherView');
@@ -785,6 +897,9 @@
 
         function renderUI() {
             const cls = appState.currentClass;
+            if (!appState.classes[cls]) {
+                appState.classes[cls] = { topic: "", requirement: "", attachmentName: "", attachmentData: "", teacherFeedback: {}, grades: {} };
+            }
             const classData = appState.classes[cls];
             document.getElementById('classSelect').value = cls;
             document.getElementById('currentAssignmentTitle').innerText = classData.topic ? `Bài tập: ${classData.topic}` : "Bài tập: Chưa có đề bài được giao";
@@ -1139,7 +1254,8 @@
         function renderTeacherDashboard() {
             const grid = document.getElementById('teacherClassesGrid');
             let html = '';
-            ['10E', '12A', '12B', '12E'].forEach(cls => {
+            const classKeys = Object.keys(appState.classes);
+            classKeys.forEach(cls => {
                 const cData = appState.classes[cls];
                 const isSelected = cls === appState.currentClass ? "border-purple-500 bg-purple-950/20" : "border-slate-700";
                 html += `
@@ -1165,6 +1281,9 @@
         }
 
         function loadTeacherPanelData(cls) {
+            if (!appState.classes[cls]) {
+                appState.classes[cls] = { topic: "", requirement: "", attachmentName: "", attachmentData: "", teacherFeedback: {}, grades: {} };
+            }
             const cData = appState.classes[cls];
             document.getElementById('teacherPanelClassBadge').innerText = `Lớp ${cls}`;
             document.getElementById('teacherSelectedClassName').innerText = `Lớp ${cls}`;
@@ -1271,6 +1390,9 @@
 
         function saveTeacherAssignment() {
             const cls = appState.currentClass;
+            if (!appState.classes[cls]) {
+                appState.classes[cls] = { teacherFeedback: {}, grades: {} };
+            }
             appState.classes[cls].topic = document.getElementById('teacherInputTopic').value.trim();
             appState.classes[cls].requirement = document.getElementById('teacherInputRequirement').value.trim();
             saveAppDataLocally();
